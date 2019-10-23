@@ -1,0 +1,24 @@
+{
+	"mysqlAuth": {
+		"host": "127.0.0.1",
+		"port": "3306",
+		"dbName": "YOUR_DB_NAME",
+    	"username": "YOUR_DB_USER_NAME",
+    	"password": "YOUR_DB_PASSWORD"
+	},
+	"session":{
+		"secret": "YOUR_SESSION_SECRET"
+	},
+	"jwt":{
+		"secret": "YOUR_JWT_SECRET"
+	},
+	"elasticEmail":{
+		"apiKey":"YOUR_ELASTIC_EMAIL_API_KEY"
+	},
+	"hostname": "http://localhost",
+	"siteName": "CommuTag",
+	"desc": "一個讓社群分享、共同協作的圖片標註系統",
+	"serverPort": 8001,
+	"version": "1.0.0",
+	"defaultAdmin": "YOUR_ADMIN_EMAIL"
+}

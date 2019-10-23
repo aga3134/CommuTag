@@ -1,0 +1,9 @@
+config.json
+*.txt
+*.log
+node_modules/
+imageSrc/
+python/data/
+python/__pycache__/
+static/file/
+package-lock.json

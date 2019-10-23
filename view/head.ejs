@@ -1,0 +1,20 @@
+
+<title><%=meta.title%></title>
+<link rel="icon" href="/static/image/logo.png?v=<%=meta.version%>">
+
+<link rel="canonical" href="<%=meta.hostname%><%=meta.path%>" />
+<meta property="og:url" content="<%=meta.hostname%><%=meta.path%>" />
+
+<meta name="description" content="<%=meta.desc%>"/>
+<meta property="og:description" content="<%=meta.desc%>" />
+<meta property="og:site_name" content="<%=meta.title%>" />
+<meta property="og:title" content="<%=meta.title%>" />
+<meta property="og:image" content="<%=meta.hostname%>/static/image/banner.png?v=<%=meta.version%>" />
+<meta property="og:locale" content="zh_TW" />
+<meta property="og:type" content="website" />
+
+<meta name="csrf-token" content="<%=meta.csrfToken%>">
+<meta http-equiv="Content-Language" content="zh-tw" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="/static/scss/build/css/main.css?v=<%=meta.version%>">
