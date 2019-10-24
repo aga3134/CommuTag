@@ -1,0 +1,151 @@
+@charset "UTF-8";
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0; }
+
+* {
+  box-sizing: border-box;
+  font-family: "微軟正黑體", "Microsoft JhengHei"; }
+
+::-webkit-scrollbar {
+  height: 8px; }
+
+::-webkit-scrollbar-track {
+  border-radius: 3px; }
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background-color: #cccccc; }
+
+.scroll-x {
+  max-width: 100%;
+  overflow-x: auto; }
+
+.input-panel {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  background-color: rgba(50, 50, 50, 0.5);
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 10; }
+  .input-panel .input-area {
+    max-height: 100%;
+    overflow-y: auto;
+    position: relative;
+    background-color: #f8f8f8;
+    color: #323232;
+    border-radius: 5px;
+    width: 800px;
+    max-width: 100%;
+    margin: auto;
+    padding: 40px 20px;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%); }
+    .input-panel .input-area .close-bt {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-weight: bold;
+      cursor: pointer; }
+    .input-panel .input-area .panel-title {
+      font-size: 1.5em;
+      text-align: center;
+      padding: 10px; }
+    .input-panel .input-area .bt-container {
+      flex-direction: row; }
+
+.bt-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; }
+
+.inline-bt {
+  display: inline-block;
+  padding: 3px 10px;
+  margin: 5px;
+  border-radius: 3px;
+  cursor: pointer; }
+
+.main-app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  color: #ffffff; }
+  .main-app .top-bar {
+    height: 50px;
+    width: 100%;
+    flex-shrink: 0;
+    background-color: #85ada0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; }
+    .main-app .top-bar .logo {
+      margin: 10px;
+      width: 40px;
+      height: 40px; }
+  .main-app .main-content {
+    width: 100%;
+    flex-grow: 1;
+    overflow-y: auto; }
+    .main-app .main-content .dataset-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      flex-wrap: wrap; }
+      .main-app .main-content .dataset-container .dataset {
+        width: calc(100% - 20px);
+        margin: 10px;
+        background-color: #eeeeee;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start; }
+        @media only screen and (min-width: 640px) {
+          .main-app .main-content .dataset-container .dataset {
+            width: calc(50% - 20px); } }
+        @media only screen and (min-width: 1024px) {
+          .main-app .main-content .dataset-container .dataset {
+            width: calc(33% - 20px); } }
+        .main-app .main-content .dataset-container .dataset .pic-cover {
+          width: 100%;
+          height: 180px;
+          object-fit: cover; }
+        .main-app .main-content .dataset-container .dataset .desc {
+          width: 100%;
+          flex-grow: 1;
+          background-color: #8da4bd;
+          border-radius: 0px 0px 5px 5px;
+          padding: 5px; }
+          .main-app .main-content .dataset-container .dataset .desc .title {
+            font-size: 1.2em;
+            padding: 5px 0px; }
+          .main-app .main-content .dataset-container .dataset .desc .label {
+            padding: 5px 0px; }
+  .main-app .func-bar {
+    height: 50px;
+    width: 100%;
+    flex-shrink: 0;
+    background-color: #658279;
+    display: flex;
+    justify-content: center;
+    align-items: center; }
+    .main-app .func-bar .bt {
+      flex-grow: 1;
+      padding: 10px;
+      height: 100%;
+      border: 0.5px solid #3b6254;
+      display: flex;
+      justify-content: center;
+      align-items: center; }

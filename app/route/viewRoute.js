@@ -7,12 +7,11 @@ var meta = {};
 meta.version = Config.version;
 meta.hostname = Config.hostname;
 
-router.get('/', util.CheckLogin, util.CSRF, function(req, res) {
+router.get('/', util.CSRF, function(req, res) {
 	meta.title = Config.siteName;
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	meta.warnPassword = req.user.password?0:1;
 	res.render("index.ejs",{meta: meta, user:req.user});
 });
 

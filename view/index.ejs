@@ -4,7 +4,31 @@
 		<% include head %>
 	</head>
 	<body>
-		
+		<div class="main-app" id="mainApp">
+			<div class="top-bar">
+				<img class="logo" src="/static/image/logo.png">
+				<div class="bt-container">
+					<div class="inline-bt">登入</div>
+				</div>
+			</div>
+			<div class="main-content">
+				<div class="dataset-container">
+					<div class="dataset" v-for="arr in datasetArr">
+						<img class="pic-cover" v-bind:src="arr.picCover">
+						<div class="desc">
+							<div class="title">{{arr.name}}</div>
+							<div class="label">圖片數: {{arr.picNum}}</div>
+							<div class="label">標註數: {{arr.tagNum}}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="func-bar">
+				<div class="bt">資料集</div>
+				<div class="bt">拍照上傳</div>
+				<div class="bt">照片標註</div>
+			</div>
+		</div>
 
 		<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false&key=AIzaSyBUGDJex2sQeScb1Wxcm7oiPGwdmyoLhHM"></script>
 		<script src="https://code.jquery.com/jquery-2.2.2.min.js"   integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="   crossorigin="anonymous"></script>
