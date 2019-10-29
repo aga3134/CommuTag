@@ -66,6 +66,10 @@ html, body {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap; }
+  .bt-container .icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain; }
 
 .inline-bt {
   display: inline-block;
@@ -73,6 +77,11 @@ html, body {
   margin: 5px;
   border-radius: 3px;
   cursor: pointer; }
+  .inline-bt a {
+    color: #ffffff;
+    text-decoration: none; }
+    .inline-bt a:hover {
+      text-decoration: underline; }
 
 .main-app {
   width: 100%;
@@ -149,3 +158,59 @@ html, body {
       display: flex;
       justify-content: center;
       align-items: center; }
+
+.login-app {
+  background-color: #d7f1d7;
+  padding: 40px;
+  width: 100%;
+  height: 100%; }
+  .login-app .loginPanel {
+    width: 300px;
+    max-width: 100%;
+    margin: auto; }
+    .login-app .loginPanel .google-bt {
+      padding: 10px;
+      margin: 10px 0px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 5px;
+      color: white;
+      background-color: #dc4e41; }
+    .login-app .loginPanel .facebook-bt {
+      padding: 10px;
+      margin: 10px 0px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 5px;
+      color: white;
+      background-color: #3b579d; }
+    .login-app .loginPanel .seperator {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #a1bfa1; }
+    .login-app .loginPanel .method-title {
+      text-align: center;
+      font-size: 1.2em; }
+    .login-app .loginPanel .relative-box {
+      position: relative; }
+    .login-app .loginPanel .forget-password {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      font-size: 0.8em;
+      color: #666666;
+      cursor: pointer; }
+    .login-app .loginPanel input {
+      padding: 5px;
+      width: 100%; }
+    .login-app .loginPanel .login-bt {
+      padding: 10px;
+      margin: 10px 0px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 5px;
+      color: white;
+      background-color: #646464; }
+    .login-app .loginPanel .text-link {
+      text-align: center;
+      cursor: pointer; }

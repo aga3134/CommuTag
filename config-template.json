@@ -6,6 +6,16 @@
     	"username": "YOUR_DB_USER_NAME",
     	"password": "YOUR_DB_PASSWORD"
 	},
+	"facebookAuth": {
+		"clientID": "YOUR_FACEBOOK_CLIENT_ID",
+		"clientSecret" : "YOUR_FACEBOOK_CLIENT_SECRET",
+		"callbackURL" : "YOUR_FACEBOOK_LOGIN_CALLBACK"
+	},
+	"googleAuth": {
+		"clientID": "YOUR_GOOGLE_CLIENT_ID",
+		"clientSecret": "YOUR_GOOGLE_CLIENT_SECRET",
+		"callbackURL": "YOUR_GOOGLE_LOGIN_CALLBACK"
+	},
 	"session":{
 		"secret": "YOUR_SESSION_SECRET"
 	},
@@ -13,12 +23,17 @@
 		"secret": "YOUR_JWT_SECRET"
 	},
 	"elasticEmail":{
-		"apiKey":"YOUR_ELASTIC_EMAIL_API_KEY"
+		"apiKey":"YOUR_ELASTIC_EMAIL_API_KEY",
+		"sender":"YOUR_ELASTIC_EMAIL_SENDER",
+		"url":"https://api.elasticemail.com/v2/email/send"
 	},
 	"hostname": "http://localhost",
 	"siteName": "CommuTag",
 	"desc": "一個讓社群分享、共同協作的圖片標註系統",
 	"serverPort": 8001,
 	"version": "1.0.0",
-	"defaultAdmin": "YOUR_ADMIN_EMAIL"
+	"defaultAdmin": {
+		"provider": "google or facebook or local",
+		"email": "YOUR_ADMIN_EMAIL"
+	}
 }

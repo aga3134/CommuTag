@@ -8,7 +8,13 @@
 			<div class="top-bar">
 				<img class="logo" src="/static/image/logo.png">
 				<div class="bt-container">
-					<div class="inline-bt">登入</div>
+					<%if (user) { %>
+						<image class="icon" src="<%=user.icon%>">
+						<div class="inline-bt"><a href="/account"><%=user.name%></a></div>
+					<% } else { %>
+						<div class="inline-bt"><a href="/login">登入</a></div>
+					<% } %>
+					
 				</div>
 			</div>
 			<div class="main-content">

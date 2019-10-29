@@ -1,71 +1,45 @@
-var express = require("express");
-var router = express.Router();
-var authController = require("../controller/authController");
-var util = require("../controller/util");
-var Config = require("../../config.json");
 var passport = require("passport");
+var express = require("express");
+var ejs = require("ejs");
+var router = express.Router();
+var Config = require("../../config.json");
+var util = require("../controller/util");
+var auth = require("../controller/auth");
 
-module.exports = router;
+router.get('/login-by-facebook', util.StoreIntentUrl, passport.authenticate("facebook",{scope : 'email'}));
 
-var meta = {};
-meta.version = Config.version;
-meta.hostname = Config.hostname;
-
-router.get('/login', util.CSRF, function(req, res) {
-	meta.title = Config.siteName;
-	meta.desc = Config.desc;
-	meta.path = req.originalUrl;
-	meta.csrfToken = req.csrfToken();
-	res.render("login.ejs",{meta: meta, user:req.user});
-});
-
-router.post('/login-by-password',util.CSRF, function(req, res, next){
-	passport.authenticate("local", {
-		successRedirect : "/",
+router.get('/facebook/callback', function(req, res, next) {
+	passport.authenticate("facebook", {
+		successRedirect : util.RetrieveIntentUrl(req),
 		failureRedirect : '/auth/login?message='+encodeURIComponent('登入失敗')
 	})(req, res, next);
 });
 
-router.post('/forget-password',util.CSRF, function(req, res){
-	var param = {};
-	param.email = req.body.email;
-	param.succFunc = function(result){
-		res.status(200).json({"status":"ok","data": result});
-	};
-	param.failFunc = function(result){
-		res.status(200).json({"status": "fail","message": result.err});
-	};
-	authController.ForgetPassword(param);
+router.get('/login-by-google', util.StoreIntentUrl, passport.authenticate("google",{scope : ['profile', 'email'], "prompt": "select_account" }));
+
+router.get('/google/callback', function(req, res, next) {
+	passport.authenticate("google", {
+		successRedirect : util.RetrieveIntentUrl(req),
+		failureRedirect : '/auth/login?message='+encodeURIComponent('登入失敗')
+	})(req, res, next);
 });
 
-router.post('/update-password',util.CSRF, function(req, res){
-	var param = {};
-	param.email = req.user.email;
-	param.oriPwd = req.body.oriPwd;
-	param.newPwd = req.body.newPwd;
-	param.succFunc = function(result){
-		res.status(200).json({"status":"ok","data": result});
-	};
-	param.failFunc = function(result){
-		res.status(200).json({"status": "fail","message": result.err});
-	};
-	authController.UpdatePassword(param);
+router.post('/login-by-password', util.StoreIntentUrl, function(req, res, next){
+	passport.authenticate("local", {
+		successRedirect : util.RetrieveIntentUrl(req),
+		failureRedirect : '/auth/login?message='+encodeURIComponent('登入失敗')
+	})(req, res, next);
 });
 
-router.post('/reset-password',util.CSRF, function(req, res){
-	var param = {};
-	param.password = req.body.password;
-	param.token = req.body.token;
-	param.succFunc = function(result){
-		res.status(200).json({"status":"ok","data": result});
-	};
-	param.failFunc = function(result){
-		res.status(200).json({"status": "fail","message": result.err});
-	};
-	authController.ResetPassword(param);
-});
+router.post('/signup-by-password', util.StoreIntentUrl, auth.Signup);
 
-router.get('/logout',util.CSRF, function(req, res) {
+router.post('/forget-password', auth.ForgetPassword);
+
+router.post('/reset-password', auth.ResetPassword);
+
+router.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
 });
+
+module.exports = router;

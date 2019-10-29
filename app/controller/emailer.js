@@ -4,15 +4,15 @@ var ejs = require('ejs');
 
 var emailer = {};
 var fromName = Config.siteName;
-var sender = "service@agawork.tw";
+var sender = Config.elasticEmail.sender;
 var headers = {
 	"Content-Type": "application/x-www-form-urlencoded"
 }
-var url = "https://api.elasticemail.com/v2/email/send";
+var url = Config.elasticEmail.url;
 var method = "POST";
 
-emailer.SendCreateNotifyEmail = function(user){
-	ejs.renderFile('view/email/createNotify.ejs', {user: user, hostname: Config.hostname, siteName: Config.siteName}, {}, function(err, html){
+emailer.SendSignupConfirmEmail = function(user){
+	ejs.renderFile('view/email/signupConfirm.ejs', {user: user, hostname: Config.hostname}, {}, function(err, html){
 		var options = {
 			url: url,
 			method: method,
@@ -21,8 +21,8 @@ emailer.SendCreateNotifyEmail = function(user){
 				"apikey": Config.elasticEmail.apiKey,
 				"from": sender,
 				"fromName": fromName,
-				"to": user.email,
-				"subject": Config.siteName+"帳號啟用確認信",
+				"to": user.signupEmail,
+				"subject": Config.siteName+" 註冊確認信",
 				"bodyHtml":html,
 				"isTransactional ": true
 			}
@@ -40,7 +40,7 @@ emailer.SendCreateNotifyEmail = function(user){
 
 emailer.SendResetPasswordEmail = function(user,token){
 	var resetUrl = Config.hostname+"/auth/login?reset=1&token="+token;
-	ejs.renderFile('view/email/resetPassword.ejs', {user: user, resetUrl: resetUrl, siteName: Config.siteName}, {}, function(err, html){
+	ejs.renderFile('view/email/resetPassword.ejs', {user: user, resetUrl: resetUrl}, {}, function(err, html){
 		var options = {
 			url: url,
 			method: method,
@@ -49,7 +49,7 @@ emailer.SendResetPasswordEmail = function(user,token){
 				"apikey": Config.elasticEmail.apiKey,
 				"from": sender,
 				"fromName": fromName,
-				"to": user.email,
+				"to": user.signupEmail,
 				"subject": Config.siteName+" 密碼重設",
 				"bodyHtml":html,
 				"isTransactional ": true

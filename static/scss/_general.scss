@@ -97,6 +97,11 @@ html, body{
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    .icon{
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+    }
 }
 .inline-bt{
     display: inline-block;
@@ -104,4 +109,12 @@ html, body{
     margin: 5px;
     border-radius: 3px;
     cursor: pointer;
+    
+    a{
+        color: #ffffff;
+        text-decoration: none;
+        &:hover{
+            text-decoration: underline;
+        }
+    }
 }

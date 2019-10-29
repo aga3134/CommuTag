@@ -13,24 +13,7 @@ db.Init = function(){
 	
 	var syncOp = {};
 	syncOp.force = false;
-    db.sequelize.sync(syncOp).then(function(result){
-    	//add default admin
-	    if(Config.defaultAdmin){
-	    	db.User.findOne({where: {"email": Config.defaultAdmin}}).then(function(user) {
-				if(!user){
-					var newUser = {};
-					newUser.email = Config.defaultAdmin;
-					var hash = bcrypt.hashSync("defaultAdmin", 10);
-					newUser.password = hash;
-					newUser.authType = "admin";
-					db.User.create(newUser).then(function(user) {
-						console.log("create default admin: "+user.email);
-					});
-				}
-			});
-	    }
-    });
-    
+    db.sequelize.sync(syncOp);
 }
 
 module.exports = db;

@@ -1,0 +1,65 @@
+
+.login-app{
+	background-color: #d7f1d7;
+	padding: 40px;
+	width: 100%;
+	height: 100%;
+	.loginPanel{
+		width: 300px;
+		max-width: 100%;
+		margin: auto;
+		@mixin bt{
+			padding: 10px;
+			margin: 10px 0px;
+			text-align: center;
+			cursor: pointer;
+			border-radius: 5px;
+		}
+		.google-bt{
+			@include bt;
+			color: white;
+			background-color: rgb(220,78,65);
+		}
+		.facebook-bt{
+			@include bt;
+			color: white;
+			background-color: rgb(59,87,157);
+		}
+		.seperator{
+			padding: 10px;
+			margin-bottom: 10px;
+			border-bottom: 1px solid #a1bfa1;
+		}
+		.method-title{
+			text-align: center;
+			font-size: 1.2em;
+		}
+		.relative-box{
+			position: relative;
+		}
+		.forget-password{
+			position: absolute;
+			top: 0px;
+			right: 0px;
+			font-size: 0.8em;
+			color: #666666;
+			cursor: pointer;
+		}
+		.item-label{
+			
+		}
+		input{
+			padding: 5px;
+			width: 100%;
+		}
+		.login-bt{
+			@include bt;
+			color: white;
+			background-color: rgb(100,100,100);
+		}
+		.text-link{
+			text-align: center;
+			cursor: pointer;
+		}
+	}
+}
