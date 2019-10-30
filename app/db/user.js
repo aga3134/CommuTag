@@ -1,33 +1,20 @@
-module.exports = function(sequelize, DataTypes) {
-	return sequelize.define("user", {
-		id: {
-			type: DataTypes.UUID,
-			defaultValue: DataTypes.UUIDV4,
-			primaryKey: true
-		},
-		provider: {
-			type: DataTypes.ENUM,
-			values: ['google', 'facebook', 'local'],
-			alowNull: false
-		},
-		oauthID: DataTypes.STRING,
-		signupEmail: DataTypes.STRING,
-		signupName: DataTypes.STRING,
-		password: DataTypes.STRING,
-		status: {
-			type: DataTypes.STRING,
-			alowNull: false,
-			defaultValue: 'valid'
-		},
-		name: DataTypes.STRING,
-		contactEmail: DataTypes.STRING,
-		photo: DataTypes.STRING,
-		icon: DataTypes.STRING,
-		authType:{
-			type: DataTypes.ENUM,
-			values: ['user', 'admin'],
-			alowNull: false,
-			defaultValue: 'user'
-		},
-	});
-};
+var mongoose = require('mongoose');
+
+var UserSchema = new mongoose.Schema({
+	provider: String,
+	oauthID  : String,
+	signupEmail: String,
+	signupName: String,
+	password: String,
+	status: String,			//valid or blacklist
+	name: String,
+	contactEmail: String,
+	photo: String,
+	icon: String,
+	authType: String,		//user or admin
+},{
+	collection: "users",
+	timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } 
+});
+
+module.exports = mongoose.model('users', UserSchema);

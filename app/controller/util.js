@@ -1,6 +1,5 @@
 var Config = require('../../config');
 var URL = require('url');
-var DB = require("../db/db");
 var csrf = require('csurf');
 
 var util = {};

@@ -5,9 +5,9 @@ var LocalStrategy = require('passport-local').Strategy;
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken')
 var Config = require('../../config');
-var DB = require("../db/db");
 var emailer = require("./emailer");
 var util = require("./util");
+var User = require("../db/user");
 
 
 //==========================passport strategy============================
@@ -38,19 +38,19 @@ function CreateUser(provider, profile, done){
 	}
 	newUser.photo = "/static/image/user-default.png";
 	newUser.icon = "/static/image/user-default-icon.png";
-
-	DB.User.create(newUser).then(function(user) {
+	User.create(newUser, function(err, user){
+		if(err) return console.log(err);
 		emailer.SendSignupConfirmEmail(user);
 		if(done) return done(null,user);
 	});
 }
 
 passport.serializeUser(function(user, done) {
-	done(null,user.id);
+	done(null,user._id);
 });
 
 passport.deserializeUser(function(id, done) {
-	DB.User.findOne({where: {id:id}}).then(function(user){
+	User.findOne({_id:id},function(err, user){
 		done(null,user);
     });
 });
@@ -61,9 +61,10 @@ passport.use(new FacebookStrategy({
 	callbackURL     : Config.facebookAuth.callbackURL,
 	profileFields: ['id', 'email', 'name']},
 	function(token, refreshToken, profile, done) {
-		DB.User.findOne({where: {"provider": "facebook", "oauthID": profile.id}})
-		.then(function(user) {
-			if (user) {
+		console.log(111);
+		User.findOne({"provider": "facebook", "oauthID": profile.id},function(err, user) {
+			if(err) console.log(err);
+			if(user) {
 				return done(null,user);
 			}
 			else CreateUser("facebook",profile,done);
@@ -76,9 +77,9 @@ passport.use(new GoogleStrategy({
     clientSecret    : Config.googleAuth.clientSecret,
     callbackURL     : Config.googleAuth.callbackURL},
     function(token, refreshToken, profile, done) {
-		DB.User.findOne({where: {"provider": "google", "oauthID": profile.id}})
-		.then(function(user) {
-			if (user) {
+		User.findOne({"provider": "google", "oauthID": profile.id},function(err, user){
+			if(err) console.log(err);
+			if(user){
 				return done(null,user);
 			}
 			else CreateUser("google",profile,done);
@@ -90,8 +91,8 @@ passport.use(new LocalStrategy({
     usernameField: "email",
     passwordField: "password"},
 	function(email, password, done) {
-		DB.User.findOne({where: {"provider": "local", "signupEmail": email}})
-		.then(function(user) {
+		User.findOne({"provider": "local", "signupEmail": email},function(err, user) {
+			if(err) console.log(err);
 			if(user) {
 				bcrypt.compare(password, user.password, function(err, result) {
 					if(result) return done(null,user);
@@ -116,8 +117,9 @@ auth.Signup = function(req, res, next){
 	var password = req.body.password;
 	var name = req.body.name;
 
-	DB.User.findOne({where: {"provider": "local", "signupEmail": email}})
-	.then(function(user) {
+	User.findOne({"provider": "local", "signupEmail": email}).exec()
+	.then(function(err, user) {
+		if(err) console.log(err);
 		if(user) res.redirect('/auth/login?message='+encodeURIComponent('帳號已存在'));
 		else{
 			var profile = {};
@@ -137,8 +139,8 @@ auth.Signup = function(req, res, next){
 
 auth.ForgetPassword = function(req, res, next){
 	var email = req.body.email;
-	DB.User.findOne({where: {"provider": "local", "signupEmail": email}})
-	.then(function(user) {
+	User.findOne({"provider": "local", "signupEmail": email},function(err, user) {
+		if(err) console.log(err);
 		if(user){
 			var token = jwt.sign({id: user.id, email: user.signupEmail}, Config.jwt.secret, {
 				expiresIn: "1h"
@@ -153,12 +155,12 @@ auth.ResetPassword = function(req, res, next){
 	var password = req.body.password;
 	var token = req.body.token;
 	jwt.verify(token, Config.jwt.secret, function (err, decoded) {
-		if (err) {
+		if(err){
 			return res.json({status: "fail", message: 'invalid token'});
 		}
 		else {
-			var query = {id: decoded.id};
-			DB.User.findOne({where: query}).then(function(user){
+			User.findOne({_id: decoded.id},function(err, user){
+				if(err) console.log(err);
 				if(!user) return res.json({status: "fail", message: 'reset password fail'});
 				else{
 					var hash = bcrypt.hashSync(password, saltRounds);
