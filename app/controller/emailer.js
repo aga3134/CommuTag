@@ -18,7 +18,6 @@ emailer.SendSignupConfirmEmail = function(user){
 		siteName: Config.siteName
 	}, {}, function(err, html){
 		if(err) console.log(err);
-		console.log(html);
 		var options = {
 			url: url,
 			method: method,
@@ -45,10 +44,11 @@ emailer.SendSignupConfirmEmail = function(user){
 };
 
 emailer.SendResetPasswordEmail = function(user,token){
-	var resetUrl = Config.hostname+"/auth/login?reset=1&token="+token;
+	var resetUrl = Config.hostname+"/login?reset=1&token="+token;
 	ejs.renderFile('view/email/resetPassword.ejs', {
 		user: user, 
-		resetUrl: resetUrl
+		resetUrl: resetUrl,
+		siteName: Config.siteName
 	}, {}, function(err, html){
 		if(err) console.log(err);
 		var options = {

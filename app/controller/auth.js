@@ -117,10 +117,9 @@ auth.Signup = function(req, res, next){
 	var password = req.body.password;
 	var name = req.body.name;
 
-	User.findOne({"provider": "local", "signupEmail": email}).exec()
-	.then(function(err, user) {
+	User.findOne({"provider": "local", "signupEmail": email},function(err, user) {
 		if(err) console.log(err);
-		if(user) res.redirect('/auth/login?message='+encodeURIComponent('帳號已存在'));
+		if(user) res.redirect('/login?message='+encodeURIComponent('帳號已存在'));
 		else{
 			var profile = {};
 			profile.emails = [{value: email}];
@@ -164,7 +163,7 @@ auth.ResetPassword = function(req, res, next){
 				if(!user) return res.json({status: "fail", message: 'reset password fail'});
 				else{
 					var hash = bcrypt.hashSync(password, saltRounds);
-					DB.User.update({password: hash}, {where: query}).then(function(){
+					User.update({_id: decoded.id}, {password: hash}, function(){
 						res.json({status: "ok", message: 'reset password ok'});
 					});
 				}

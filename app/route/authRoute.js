@@ -11,7 +11,7 @@ router.get('/login-by-facebook', util.StoreIntentUrl, passport.authenticate("fac
 router.get('/facebook/callback', function(req, res, next) {
 	passport.authenticate("facebook", {
 		successRedirect : util.RetrieveIntentUrl(req),
-		failureRedirect : '/auth/login?message='+encodeURIComponent('登入失敗')
+		failureRedirect : '/login?message='+encodeURIComponent('登入失敗')
 	})(req, res, next);
 });
 
@@ -20,14 +20,14 @@ router.get('/login-by-google', util.StoreIntentUrl, passport.authenticate("googl
 router.get('/google/callback', function(req, res, next) {
 	passport.authenticate("google", {
 		successRedirect : util.RetrieveIntentUrl(req),
-		failureRedirect : '/auth/login?message='+encodeURIComponent('登入失敗')
+		failureRedirect : '/login?message='+encodeURIComponent('登入失敗')
 	})(req, res, next);
 });
 
 router.post('/login-by-password', util.StoreIntentUrl, function(req, res, next){
 	passport.authenticate("local", {
 		successRedirect : util.RetrieveIntentUrl(req),
-		failureRedirect : '/auth/login?message='+encodeURIComponent('登入失敗')
+		failureRedirect : '/login?message='+encodeURIComponent('登入失敗')
 	})(req, res, next);
 });
 

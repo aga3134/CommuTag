@@ -79,7 +79,7 @@ var g_LoginAPP = new Vue({
             default: alert("密碼更新失敗"); break;
           }
         }
-        window.location.href="/auth/login";
+        window.location.href="/login";
         
       });
     }
