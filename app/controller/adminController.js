@@ -6,9 +6,9 @@ var async = require('async');
 var dayjs = require("dayjs");
 var User = require('../db/user');
 
-var admin = {};
+var adminController = {};
 
-admin.ListUser = function(param){
+adminController.ListUser = function(param){
 	User.find({},{"_id":0,"__v":0,"password":0,"oauthID":0},function(err, user) {
 		if(err){
 			console.log(err);
@@ -18,17 +18,7 @@ admin.ListUser = function(param){
 	});
 };
 
-admin.DeleteUser = function(param){
-	User.deleteOne({_id: param.id},function(err) {
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"delete user fail"});
-		}
-		param.succFunc({"email":param.email});
-	});
-};
-
-admin.UpdateAuth = function(param){
+adminController.UpdateAuth = function(param){
 	User.updateOne({_id: param.id},{authType: param.authType},function(err, user){
 		if(err){
 			console.log(err);
@@ -38,4 +28,4 @@ admin.UpdateAuth = function(param){
 	});
 };
 
-module.exports = admin;
+module.exports = adminController;

@@ -7,20 +7,7 @@
 	align-items: flex-start;
 	flex-direction: column;
 	color: #ffffff;
-	.top-bar{
-		height: 50px;
-		width: 100%;
-		flex-shrink: 0;
-		background-color: #85ada0;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		.logo{
-			margin: 10px;
-			width: 40px;
-			height: 40px;
-		}
-	}
+	
 	.main-content{
 		width: 100%;
 		flex-grow: 1;
@@ -75,7 +62,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		.bt{
+		.func-bt{
 			flex-grow: 1;
 			padding: 10px;
 			height: 100%;

@@ -21,32 +21,6 @@ router.get('/list-user', util.CheckAdmin, function(req, res) {
 	adminController.ListUser(param);
 });
 
-router.post('/delete-user', util.CheckAdmin,util.CSRF, function(req, res) {
-	var param = {};
-	param.email = req.body.email;
-	param.succFunc = function(result){
-		res.status(200).json({"status":"ok","data": result});
-	};
-	param.failFunc = function(result){
-		res.status(200).json({"status": "fail","message": result.err});
-	};
-	adminController.DeleteUser(param);
-});
-
-router.post('/create-user', util.CheckAdmin,util.CSRF, function(req, res){
-	var param = {};
-	param.email = req.body.email;
-	param.authType = req.body.authType;
-	param.initPwd = req.body.initPwd;
-	param.succFunc = function(result){
-		res.status(200).json({"status":"ok","data": result});
-	};
-	param.failFunc = function(result){
-		res.status(200).json({"status": "fail","message": result.err});
-	};
-	adminController.CreateUser(param);
-});
-
 router.post('/update-auth', util.CheckAdmin,util.CSRF, function(req, res){
 	var param = {};
 	param.email = req.body.email;

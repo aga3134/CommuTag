@@ -1,4 +1,4 @@
-var g_APP = new Vue({
+var g_AdminAPP = new Vue({
   el: "#adminApp",
   data: {
     

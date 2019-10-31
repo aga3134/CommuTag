@@ -1,0 +1,16 @@
+$vue-transition: 0.5s;
+
+.fade-enter-active, .fade-leave-active {
+	transition: opacity $vue-transition;
+}
+
+.fade-enter, .fade-leave-to{
+	opacity: 0;
+}
+
+.create-enter-active{
+	transition: opacity $vue-transition;
+}
+.create-enter{
+	opacity: 0;
+}

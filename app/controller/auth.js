@@ -50,7 +50,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-	User.findOne({_id:id},function(err, user){
+	User.findOne({_id:id}, {"__v":0,"password":0,"oauthID":0},function(err, user){
 		done(null,user);
     });
 });

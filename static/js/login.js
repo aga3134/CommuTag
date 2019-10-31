@@ -1,4 +1,4 @@
-var g_APP = new Vue({
+var g_LoginAPP = new Vue({
   el: "#loginApp",
   data: {
     intentUrl: "",

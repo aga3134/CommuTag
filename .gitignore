@@ -6,4 +6,5 @@ imageSrc/
 python/data/
 python/__pycache__/
 static/file/
+static/upload/
 package-lock.json

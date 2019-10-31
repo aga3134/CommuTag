@@ -16,11 +16,14 @@
     "iconv-lite": "^0.5.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.7.7",
+    "multer": "^1.4.2",
     "passport": "^0.4.0",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth": "^2.0.0",
     "passport-local": "^1.0.0",
     "request": "^2.88.0",
+    "rimraf": "^3.0.0",
+    "sharp": "^0.23.2",
     "uuid": "^3.3.3"
   }
 }

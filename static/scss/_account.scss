@@ -1,0 +1,46 @@
+
+.account-app{
+	.info-container{
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		width: 800px;
+		max-width: 100%;
+		margin: auto;
+		.info-box{
+			padding: 0px 5px;
+			margin: 0px 5px;
+			max-width: 100%;
+			.user-photo{
+				width: 300px;
+				height: 300px;
+				max-width: 100%;
+				padding: 10px;
+				border-radius: 50%;
+				object-fit: cover;
+			}
+			.photo-bt{
+				@include bt;
+				margin: 5px 0px;
+				display: block;
+				width: 300px;
+				max-width: 100%;
+			}
+			.info-label{
+				padding: 5px 10px;
+			}
+			.bt-container{
+				justify-content: flex-start;
+			}
+			
+			hr{
+				border: 0.5px solid #333333;
+			}
+		}
+		.grow{
+			flex-grow: 1;
+		}
+		
+	}
+
+}

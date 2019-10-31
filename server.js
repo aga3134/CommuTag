@@ -11,6 +11,7 @@ var Config = require("./config");
 var ViewRoute = require("./app/route/viewRoute.js");
 var AuthRoute = require("./app/route/authRoute.js");
 var AdminRoute = require("./app/route/adminRoute.js");
+var UserRoute = require("./app/route/userRoute.js");
 
 mongoose.connect("mongodb://localhost:27017/commutag",{
     useNewUrlParser: true,
@@ -51,6 +52,7 @@ app.use(passport.session());
 app.use("/", ViewRoute);
 app.use("/auth", AuthRoute);
 app.use("/admin", AdminRoute);
+app.use("/user", UserRoute);
 
 
 app.listen(app.port, app.host);
