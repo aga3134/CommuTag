@@ -1,4 +1,7 @@
-var g_AccountAPP = new Vue({
+import "./util.js"
+import '../scss/main.scss';
+
+new Vue({
   el: "#accountApp",
   data: {
     user: {},
@@ -62,7 +65,7 @@ var g_AccountAPP = new Vue({
       if(!this.user.contactEmail){
         return alert("請輸入您的Email");
       }
-      else if(!g_Util.ValidateEmail(this.user.contactEmail)){
+      else if(!util.ValidateEmail(this.user.contactEmail)){
         return alert("請輸入正確的Email格式");
       }
       

@@ -1,4 +1,7 @@
-var g_LoginAPP = new Vue({
+import "./util.js"
+import '../scss/main.scss';
+
+new Vue({
   el: "#loginApp",
   data: {
     intentUrl: "",
@@ -12,7 +15,7 @@ var g_LoginAPP = new Vue({
     pwSignupAction: "/auth/signup-by-password"
   },
   created: function () {
-    var urlParam = g_Util.GetUrlParameter();
+    var urlParam = util.GetUrlParameter();
     if(urlParam.intentUrl){
       this.intentUrl = encodeURIComponent(urlParam.intentUrl);
     }
@@ -22,7 +25,7 @@ var g_LoginAPP = new Vue({
       this.token = urlParam.token;
     }
     if(urlParam.message){
-      g_Util.ShowMessage(urlParam.message);
+      util.ShowMessage(urlParam.message);
     }
   },
   methods: {
@@ -38,14 +41,14 @@ var g_LoginAPP = new Vue({
     },
     LoginByPassword: function(){
       if(this.email == "") return alert("請輸入電子信箱");
-      else if(!g_Util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
+      else if(!util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
       else if(this.password == "") return alert("請輸入密碼");
       if(this.intentUrl) this.pwLoginAction = "/auth/login-by-password?intentUrl="+this.intentUrl;
       this.$refs.loginForm.submit();
     },
     SignupByPassword: function(){
       if(this.email == "") return alert("請輸入電子信箱");
-      else if(!g_Util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
+      else if(!util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
       else if(this.password == "") return alert("請輸入密碼");
       else if(this.name == "") return alert("請輸入姓名");
       else if(this.password != this.passwordConfirm) return alert("請確認密碼一致");
@@ -54,7 +57,7 @@ var g_LoginAPP = new Vue({
     },
     ForgetPassword: function(){
       if(this.email == "") return alert("請輸入電子信箱");
-      else if(!g_Util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
+      else if(!util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
 
       $.post("/auth/forget-password", {email: this.email}, function(data){
         //console.log(data);

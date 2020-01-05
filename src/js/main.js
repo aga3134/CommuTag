@@ -1,4 +1,7 @@
-var g_APP = new Vue({
+import "./util.js"
+import '../scss/main.scss';
+
+new Vue({
   el: "#mainApp",
   data: {
     datasetArr: []

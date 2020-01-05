@@ -1,4 +1,7 @@
-var g_AdminAPP = new Vue({
+import "./util.js"
+import '../scss/main.scss';
+
+new Vue({
   el: "#adminApp",
   data: {
     
