@@ -2,6 +2,7 @@ config.json
 *.txt
 *.log
 node_modules/
+dist/
 imageSrc/
 python/data/
 python/__pycache__/

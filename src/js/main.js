@@ -8,6 +8,7 @@ new Vue({
     "topbar":topbar
   },
   data: {
+    tab: "dataset",
     datasetArr: []
   },
   created: function () {
