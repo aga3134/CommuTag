@@ -1,8 +1,12 @@
 import "./util.js"
-import '../scss/main.scss';
+import "../scss/main.scss"
+import topbar from "../vue/topbar.vue"
 
 new Vue({
   el: "#mainApp",
+  components:{
+    "topbar":topbar
+  },
   data: {
     datasetArr: []
   },
