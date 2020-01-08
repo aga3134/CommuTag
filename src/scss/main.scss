@@ -1,7 +1,9 @@
+html, body{
+	height: 100%; margin: 0; padding: 0;
+    background-color: #edffef;
+}
 
-@import "general";
-@import "vue-transition";
-@import "main-page";
-@import "account";
-@import "admin";
-@import "login";
+* {
+    box-sizing: border-box;
+    font-family: "微軟正黑體", "Microsoft JhengHei";
+}

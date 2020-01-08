@@ -4,56 +4,12 @@
 		<% include head %>
 	</head>
 	<body>
-		<div class="account-app" id="accountApp">
-			<% include topbar %>
-
-			<div class="info-container">
-				<div class="info-box">
-					<img class="user-photo" v-bind:src="user.photo">
-					<div class="photo-bt" v-on:click="ChangePhoto();">{{uploadTitle}}</div>
-					<input type="file" ref="uploadBt" v-on:change="UploadPhoto" hidden>
-				</div>
-				<div class="info-box grow">
-					<div class="info-label">姓名: {{user.name}}</div>
-					<div class="info-label">Email: {{user.contactEmail}}</span></div>
-					<div class="info-label">上傳照片數: {{userStatistic.uploadNum}}</div>
-					<div class="info-label">標註數: {{userStatistic.annotationNum}}</div>
-					<hr>
-					<div class="bt-container">
-						<div class="bt" v-on:click="openInputPanel = true;">修改資料</div>
-						<% if(user.authType == "admin"){ %>
-							<div class="bt" v-on:click="window.location.href='/admin';">站務管理</div>
-						<% } %>
-						<a href="/auth/logout"><div class="bt">登出</div></a>
-					</div>
-				</div>
-			</div>
-
-			<transition name="fade">
-				<div class="input-panel" v-show="openInputPanel">
-					<div class="input-area">
-						<div class="area-title">修改個人資料</div>
-						<div class="input-item">
-							<div class="input-label">姓名:</div>
-							<input type="text" v-model="user.name">
-						</div>
-						<div class="input-item">
-							<div class="input-label">Email:</div>
-							<input type="email" v-model="user.contactEmail">
-						</div>
-						<div class="bt-container">
-							<div class="bt" v-on:click="SubmitUserInfo();">儲存</div>
-							<div class="bt" v-on:click="openInputPanel = false;">取消</div>
-						</div>
-					</div>
-				</div>
-			</transition>
-				
-		</div>
-		<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false&key=AIzaSyBUGDJex2sQeScb1Wxcm7oiPGwdmyoLhHM"></script>
+		<account id="accountApp"></account>
+		
 		<script src="https://code.jquery.com/jquery-2.2.2.min.js"   integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="   crossorigin="anonymous"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>
+		<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>-->
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/quasar@^1.6.1/dist/quasar.umd.min.js"></script>
 		<script src="/dist/js/account.js?v=<%=meta.version%>"></script>
 	</body>
 </html>
