@@ -25,7 +25,14 @@
 					<q-chip class="col" clickable color="orange" text-color="white" icon="alarm_on" label="忘記密碼" @click="ForgetPassword();"></q-chip>
 					<q-chip class="col" clickable color="brown" text-color="white" icon="face" label="註冊新帳號" @click="ChangeMode('signup');"></q-chip>
 				</div>
-				<a class="q-ma-md text-brown text-center text-h6" href="/">回首頁</a>
+				<q-item clickable tag="a" href="/">
+					<q-item-section avatar>
+						<q-icon name="home" />
+					</q-item-section>
+					<q-item-section>
+						<q-item-label class="text-subtitle1">回首頁</q-item-label>
+					</q-item-section>
+				</q-item>
 			</div>
 			
 		</q-form>
@@ -61,8 +68,15 @@
 				</q-input>
 				<q-btn class="q-ma-sm q-pa-xs full-width" color="grey-9" label="註冊" @click="SignupByPassword();"></q-btn>
 
-				<q-chip class="col" clickable color="brown" text-color="white" icon="face" label="返回登入" @click="ChangeMode('login');"></q-chip>
-				
+				<q-item clickable @click="ChangeMode('login');">
+					<q-item-section avatar>
+						<q-icon name="keyboard_backspace" />
+					</q-item-section>
+					<q-item-section>
+						<q-item-label class="text-subtitle1">返回登入</q-item-label>
+					</q-item-section>
+				</q-item>
+
 			</div>
 		</q-form>
 

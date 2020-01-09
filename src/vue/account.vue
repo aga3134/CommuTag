@@ -11,84 +11,118 @@
 			content-class="bg-indigo-1">
 			<q-scroll-area class="fit">
 				<q-list>
-					<q-item clickable v-ripple>
+					<q-item clickable @click="tab = 'setting' " :active="tab === 'setting'" active-class="bg-secondary text-white">
 						<q-item-section avatar>
-							<q-avatar color="teal" text-color="white" icon="settings_applications" />
+							<q-icon name="settings_applications" />
 						</q-item-section>
-
-						<q-item-section>帳號設定</q-item-section>
+						<q-item-section>
+							<q-item-label class="text-subtitle1">帳號設定</q-item-label>
+						</q-item-section>
 					</q-item>
 
-					<a href="/auth/logout">
-						<q-item clickable v-ripple>
-							<q-item-section avatar>
-								<q-avatar color="teal" text-color="white" icon="exit_to_app" />
-							</q-item-section>
+					<q-item clickable @click="tab = 'favorite' " :active="tab === 'favorite'" active-class="bg-secondary text-white">
+						<q-item-section avatar>
+							<q-icon name="star_border" />
+						</q-item-section>
+						<q-item-section>
+							<q-item-label class="text-subtitle1">追蹤清單</q-item-label>
+						</q-item-section>
+					</q-item>
 
-							<q-item-section>登出</q-item-section>
-						</q-item>
-					</a>
+					<q-item clickable tag="a" href="/auth/logout">
+						<q-item-section avatar>
+							<q-icon name="keyboard_return" />
+						</q-item-section>
+						<q-item-section>
+							<q-item-label class="text-subtitle1">登出</q-item-label>
+						</q-item-section>
+					</q-item>
 				</q-list>
+				
 			</q-scroll-area>
 		</q-drawer>
 
 		<q-page-container>
-			
+			<q-tab-panels v-model="tab" animated transition-prev="slide-right" transition-next="slide-left" class="transparent">
+				<q-tab-panel name="setting">
+					<q-card flat class="q-ma-md transparent">
+						<div class="row q-pa-md justify-center">
+								<q-avatar size="200px">
+									<img :src="user.photo"/>
+								</q-avatar>
+
+								<div class="row items-end">
+									<q-markup-table class="transparent text-grey-9" flat separator="vertical">
+										<tr>
+											<td class="text-right text-subtitle1">姓名</td>
+											<td class="text-left text-subtitle1">{{user.name}}</td>
+										</tr>
+										<tr>
+											<td class="text-right text-subtitle1">Email</td>
+											<td class="text-left text-subtitle1">{{user.contactEmail}}</td>
+										</tr>
+										<tr>
+											<td class="text-right text-subtitle1">上傳照片數</td>
+											<td class="text-left text-subtitle1">{{userStatistic.uploadNum}}</td>
+										</tr>
+										<tr>
+											<td class="text-right text-subtitle1">標註數</td>
+											<td class="text-left text-subtitle1">{{userStatistic.annotationNum}}</td>
+										</tr>
+									</q-markup-table>
+								</div>
+							
+						</div>
+						<q-card-actions align="center">
+							<q-btn flat class="bg-primary text-white q-px-lg" @click="ChangePhoto();">變更圖片</q-btn>
+							<q-btn flat class="bg-primary text-white q-px-lg" @click="openInputPanel = true;">修改資料</q-btn>
+							<input type="file" ref="uploadBt" v-on:change="UploadPhoto" hidden>
+						</q-card-actions>
+					</q-card>
+
+					<q-dialog v-model="openInputPanel">
+						<q-card>
+							<q-card-section>
+							  <div class="text-h6">修改資料</div>
+							</q-card-section>
+
+							<q-card-section>
+								<q-form>
+									<q-input class="q-my-sm" outlined dense v-model="user.name" placeholder="請輸入姓名">
+										<template v-slot:before>
+											姓名
+										</template>
+									</q-input>
+									<q-input class="q-my-sm" outlined dense v-model="user.contactEmail" placeholder="請輸入Email">
+										<template v-slot:before>
+											Email
+										</template>
+									</q-input>
+								</q-form>
+							</q-card-section>
+
+							<q-card-actions align="right">
+								<q-btn flat label="儲存" color="primary" v-close-popup @click="SubmitUserInfo();" />
+								<q-btn flat label="取消" color="primary" v-close-popup />
+							</q-card-actions>
+						</q-card>
+					</q-dialog>
+					
+				</q-tab-panel>
+
+				<q-tab-panel name="favorite">
+					<div class="text-h5 q-mb-md">追蹤清單</div>
+					
+				</q-tab-panel>
+			</q-tab-panels>
 
 		</q-page-container>
-
-		<!--<div class="account-app" id="accountApp">
-			<% include topbar %>
-
-			<div class="info-container">
-				<div class="info-box">
-					<img class="user-photo" v-bind:src="user.photo">
-					<div class="photo-bt" v-on:click="ChangePhoto();">{{uploadTitle}}</div>
-					<input type="file" ref="uploadBt" v-on:change="UploadPhoto" hidden>
-				</div>
-				<div class="info-box grow">
-					<div class="info-label">姓名: {{user.name}}</div>
-					<div class="info-label">Email: {{user.contactEmail}}</span></div>
-					<div class="info-label">上傳照片數: {{userStatistic.uploadNum}}</div>
-					<div class="info-label">標註數: {{userStatistic.annotationNum}}</div>
-					<hr>
-					<div class="bt-container">
-						<div class="bt" v-on:click="openInputPanel = true;">修改資料</div>
-						<% if(user.authType == "admin"){ %>
-							<div class="bt" v-on:click="window.location.href='/admin';">站務管理</div>
-						<% } %>
-						<a href="/auth/logout"><div class="bt">登出</div></a>
-					</div>
-				</div>
-			</div>
-
-			<transition name="fade">
-				<div class="input-panel" v-show="openInputPanel">
-					<div class="input-area">
-						<div class="area-title">修改個人資料</div>
-						<div class="input-item">
-							<div class="input-label">姓名:</div>
-							<input type="text" v-model="user.name">
-						</div>
-						<div class="input-item">
-							<div class="input-label">Email:</div>
-							<input type="email" v-model="user.contactEmail">
-						</div>
-						<div class="bt-container">
-							<div class="bt" v-on:click="SubmitUserInfo();">儲存</div>
-							<div class="bt" v-on:click="openInputPanel = false;">取消</div>
-						</div>
-					</div>
-				</div>
-			</transition>
-				
-		</div>
-		-->
 	</q-layout>
 </template>
 
 <script>
 import "../scss/main.scss"
+import util from "../js/util.js"
 import topbar from "./topbar.vue"
 
 export default {
@@ -98,6 +132,7 @@ export default {
 	},
 	data: function () {
 		return {
+			tab: "setting",
 			user: {},
 		    userStatistic: {},
 		    uploadTitle: "變更圖片",
@@ -182,9 +217,5 @@ export default {
 .account{
 	width: 100%;
 	height: 100%;
-	a{
-		color: #333333;
-		text-decoration: none;
-	}
 }
 </style>
