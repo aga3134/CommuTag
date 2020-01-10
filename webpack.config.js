@@ -9,8 +9,7 @@ module.exports = {
 	entry: {
 		"js/main": ["./src/js/main.js"],
 		"js/login": ["./src/js/login.js"],
-		"js/account": ["./src/js/account.js"],
-		"js/admin": ["./src/js/admin.js"],
+		"js/account": ["./src/js/account.js"]
 	},
 	output:{
 		path: path.resolve(__dirname,'dist'),

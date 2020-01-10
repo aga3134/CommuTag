@@ -1,6 +1,6 @@
 <template lang="html">
-	<div class="topbar">
-		<q-toolbar square class="bg-primary text-white q-px-md">
+	<div class="topbar bg-grey-8 text-white">
+		<q-toolbar square class="q-px-md">
 			<q-btn flat round icon="menu" v-if="useMenu" @click="ToggleMenu();"></q-btn>
 			<a href="/">
 				<q-btn flat>
@@ -12,12 +12,21 @@
 			</a>
 
 			<q-space />
-			<q-btn v-if="user == null" dense flat icon="account_box" size="lg" color="teal-1">
-				<a href="/login">登入</a>
-			</q-btn>
-			<q-btn v-else dense flat icon="account_box" size="lg" color="teal-1">
-				<a href="/account" class="text-white">{{user.name}}</a>
-			</q-btn>
+			<q-item v-if="user == null" clickable tag="a" href="/login">
+				<q-icon size="md" name="account_box" />
+				<q-item-section>
+					<q-item-label class="text-h6">登入</q-item-label>
+				</q-item-section>
+			</q-item>
+	
+			<q-item v-else clickable tag="a" href="/account">
+				<q-avatar size="lg">
+					<img :src="user.photo">
+				</q-avatar>
+				<q-item-section class="q-px-sm">
+					<q-item-label class="text-h6">{{user.name}}</q-item-label>
+				</q-item-section>
+			</q-item>
 
 	    </q-toolbar>
 	</div>
@@ -55,7 +64,6 @@ export default {
 	width: 100%;
 	a{
 		text-decoration: none;
-		color: #ffffff;
 	}
 }
 </style>

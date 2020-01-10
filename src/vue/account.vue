@@ -1,5 +1,5 @@
 <template lang="html">
-	<q-layout view="hHh Lpr lFf" container class="account shadow-2 bg-teal-1">
+	<q-layout view="hHh Lpr lFf" container class="account shadow-2 bg-grey-1">
 		<q-header>
 			<topbar useMenu @toggleMenu="openLeftPanel = !openLeftPanel"></topbar>
 		</q-header>
@@ -8,10 +8,10 @@
 			v-model="openLeftPanel"
 			:width="200"
 			bordered
-			content-class="bg-indigo-1">
+			content-class="bg-grey-2">
 			<q-scroll-area class="fit">
 				<q-list>
-					<q-item clickable @click="tab = 'setting' " :active="tab === 'setting'" active-class="bg-secondary text-white">
+					<q-item clickable @click="tab = 'setting' " :active="tab === 'setting'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="settings_applications" />
 						</q-item-section>
@@ -20,7 +20,7 @@
 						</q-item-section>
 					</q-item>
 
-					<q-item clickable @click="tab = 'favorite' " :active="tab === 'favorite'" active-class="bg-secondary text-white">
+					<q-item clickable @click="tab = 'favorite' " :active="tab === 'favorite'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="star_border" />
 						</q-item-section>
@@ -74,8 +74,8 @@
 							
 						</div>
 						<q-card-actions align="center">
-							<q-btn flat class="bg-primary text-white q-px-lg" @click="ChangePhoto();">變更圖片</q-btn>
-							<q-btn flat class="bg-primary text-white q-px-lg" @click="openInputPanel = true;">修改資料</q-btn>
+							<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="add_photo_alternate" label="變更圖片" @click="ChangePhoto();"></q-btn>
+							<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="edit" label="修改資料" @click="openInputPanel = true;"></q-btn>
 							<input type="file" ref="uploadBt" v-on:change="UploadPhoto" hidden>
 						</q-card-actions>
 					</q-card>
@@ -135,7 +135,7 @@ export default {
 			tab: "setting",
 			user: {},
 		    userStatistic: {},
-		    uploadTitle: "變更圖片",
+		    uploadPhoto: false,
 		    openLeftPanel: false,
 		    openInputPanel: false,
 		};
@@ -148,13 +148,13 @@ export default {
 	},
 	methods: {
 		ChangePhoto: function(){
-			if(this.uploadTitle != "變更圖片") return;
+			if(this.uploadPhoto) return;
 			var elem = this.$refs.uploadBt;
 			elem.click();
 		},
 		UploadPhoto: function(){
 			if(event.target.files.length == 0) return;
-			this.uploadTitle = "上傳中...";
+			this.uploadPhoto = true;
 			var file = event.target.files[0];
 
 			var formData = new FormData();
@@ -167,21 +167,9 @@ export default {
 				data: formData,
 				processData: false,
 				contentType: false,
-				xhr: function(){
-					var xhr = $.ajaxSettings.xhr();
-					if(xhr.upload){
-						xhr.upload.addEventListener("progress",function(event){
-							if(event.lengthComputable){
-								var percent = parseInt((event.loaded*100)/event.total);
-								this.uploadTitle = "上傳中... "+percent+"%";
-							}
-						}.bind(this), false);
-					}
-					return xhr;
-				}.bind(this),
 				success: function(result) {
 					if(result.status != "ok") return alert("更新圖片失敗");
-					this.uploadTitle = "變更圖片";
+					this.uploadTitle = false;
 					window.location.reload();
 				}.bind(this),
 				error: function(jqXHR, textStatus, errorMessage) {

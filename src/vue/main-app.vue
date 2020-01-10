@@ -1,15 +1,15 @@
 <template lang="html">
-	<q-layout view="lHh lpr lFf" container class="main-app shadow-2 bg-teal-1">
+	<q-layout view="lHh lpr lFf" container class="main-app bg-grey-1 shadow-2">
 		<q-header>
 			<topbar></topbar>
 		</q-header>
 
 		<q-page-container>
-			<q-tab-panels v-model="tab" class="bg-teal-1 q-pa-md  text-black " animated>
+			<q-tab-panels v-model="tab" class="q-pa-md bg-grey-1" animated>
 				<q-tab-panel name="dataset">
 					<div class="row q-col-gutter-md">
 						<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="arr in datasetArr">
-							<q-card class="bg-secondary text-white">
+							<q-card class="bg-grey-7 text-white">
 								<q-img :src="arr.picCover" :ratio="16/9"></q-img>
 
 								<q-card-section>
@@ -42,7 +42,7 @@
 		</q-page-container>
 
 		<q-footer>
-			<q-tabs v-model="tab" inline-label align="justify" active-bg-color="blue-6" class="bg-primary text-white">
+			<q-tabs v-model="tab" inline-label align="justify" active-bg-color="grey-7" class="bg-grey-8 text-white">
 				<q-tab name="dataset" icon="folder" label="資料集"></q-tab>
 				<q-tab name="upload" icon="cloud_upload" label="拍照上傳"></q-tab>
 				<q-tab name="annotation" icon="aspect_ratio" label="照片標註"></q-tab>
