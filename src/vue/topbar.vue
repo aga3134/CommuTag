@@ -12,7 +12,7 @@
 			</a>
 
 			<q-space />
-			<q-item v-if="user == null" clickable tag="a" href="/login">
+			<q-item v-if="user._id == null" clickable tag="a" href="/login">
 				<q-icon size="md" name="account_box" />
 				<q-item-section>
 					<q-item-label class="text-h6">登入</q-item-label>
@@ -37,19 +37,16 @@
 export default {
 	name:"topbar",
 	props: {
+		user: Object,
 		"useMenu":Boolean
 	},
 	data: function () {
 		return {
 			title: "群眾標註",
-			user: null,
 		};
 	},
 	created: function(){
-		$.get("/user/info",function(result){
-			if(result.status != "ok") return;
-			this.user = result.data;
-		}.bind(this));
+		
 	},
 	methods: {
 		ToggleMenu: function(){

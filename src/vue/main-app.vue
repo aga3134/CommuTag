@@ -1,7 +1,7 @@
 <template lang="html">
 	<q-layout view="lHh lpr lFf" container class="main-app bg-grey-1 shadow-2">
 		<q-header>
-			<topbar></topbar>
+			<topbar :user="user"></topbar>
 		</q-header>
 
 		<q-page-container>
@@ -64,10 +64,16 @@ export default {
 	data: function () {
 		return {
 			tab: "dataset",
+			user: {},
     		datasetArr: []
 		};
 	},
 	created: function(){
+		$.get("/user/info",function(result){
+			if(result.status != "ok") return;
+			this.user = result.data;
+		}.bind(this));
+
 		this.datasetArr = [
 	  		{"name": "高麗菜", "picCover": "https://cdn.quasar.dev/img/parallax2.jpg","picNum": 10, "tagNum": 5},
 	  		{"name": "青江菜", "picCover": "https://cdn.quasar.dev/img/parallax2.jpg","picNum": 20, "tagNum": 20},

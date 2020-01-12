@@ -5,6 +5,9 @@ var session = require("express-session");
 var MongoDBStore = require('connect-mongodb-session')(session);
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+var fs = require("fs-extra");
+var path = require('path');
+var morgan = require('morgan');
 
 var Config = require("./config");
 
@@ -33,6 +36,9 @@ var options = {
     collection: 'user_session'
 };
 var sessionStore = new MongoDBStore(options);
+
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+app.use(morgan("short",{ stream: accessLogStream }));
 
 app.use(session({
     secret: Config.session.secret,
