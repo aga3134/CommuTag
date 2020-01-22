@@ -1,10 +1,6 @@
 var Config = require('../../config');
-var emailer = require("./emailer");
 var util = require("./util");
-var fs = require("fs-extra");
-var async = require('async');
-var dayjs = require("dayjs");
-var User = require('../db/user');
+var User = require("../db/user");
 
 var adminController = {};
 

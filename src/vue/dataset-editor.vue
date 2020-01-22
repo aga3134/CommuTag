@@ -8,22 +8,25 @@
 		<q-card-section>
 			<q-form>
 				<q-item>
-					<q-img src="https://cdn.quasar.dev/img/parallax2.jpg" style="max-width: 300px" :ratio="4/3">
-						<q-btn class="absolute-bottom full-width dimmed text-white" label="上傳封面"></q-btn>
+					<q-img class="bg-grey-7" src="/static/image/logo-16-9.png" style="max-width: 300px" :ratio="4/3">
+						<div class="absolute-bottom text-subtitle1 text-center cursor-pointer" @click="ChangeDatasetCover();">
+							上傳封面
+						</div>
+						<input type="file" ref="uploadBt" hidden>
 					</q-img>
 				</q-item>
 				<div class="row">
-					<q-input class="col-12 q-pa-sm" v-model="info.name" label="資料集名稱" :rules="[
+					<q-input class="col-12 q-pa-sm" v-model="info.name" label="資料集名稱" ref="name" :rules="[
 						val => !!val || '資料集名稱不能空白'
 					]"/>
-					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  v-model="info.maxWidth" label="最大寬度" :rules="[
+					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  ref="maxWidth" v-model="info.maxWidth" label="最大寬度" :rules="[
 						val => !!val || '最大寬度不能空白',
-						val => val > 0 || '最大寬度不能小於等於0',
+						val => val > 32 || '最大寬度不能小於等於32',
 						val => val <= 1920 || '最大寬度不能大於1920'
 					]"/>
-					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  v-model="info.maxHeight" label="最大高度" :rules="[
+					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  ref="maxHeight" v-model="info.maxHeight" label="最大高度" :rules="[
 						val => !!val || '最大高度不能空白',
-						val => val > 0 || '最大高度不能小於等於0',
+						val => val > 32 || '最大高度不能小於等於32',
 						val => val <= 1920 || '最大高度不能大於1920'
 					]"/>
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.isPublic" label="公開資料集"/>
@@ -31,9 +34,11 @@
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableDownload" label="開放下載資料集"/>
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableGPS" label="儲存位置資訊"/>
 
-					<q-select class="col-12 col-sm-6 q-pa-sm" v-model="info.annotationType" :options="annotationTypeOption" label="標註方式" />
+					<q-select class="col-12 col-sm-6 q-pa-sm" v-model="info.annotationType" :options="annotationTypeOption" option-value="value" option-label="label" emit-value map-options label="標註方式" ref="annotationType" :rules="[
+						val => !!val || '標註方式不能空白'
+					]"/>
 
-					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableAddTag" label="開放新增標籤"/>
+					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableAddTag" label="開放自訂標籤"/>
 
 					<q-input class="col-12 q-pa-sm" v-model="tagName" label="新增標籤" @keyup.enter="AddTag();">
 						<template v-slot:append>
@@ -41,7 +46,7 @@
 						</template>
 				    </q-input>
 				    <div class="full-width">
-						<q-chip removable v-for="(tag,i) in info.tagArr" @remove="RemoveTag(i);">{{tag}}</q-chip>
+						<q-chip removable v-for="(tag,i) in info.tagArr" :key="tag" @remove="RemoveTag(i);">{{tag}}</q-chip>
 					</div>
 				</div>
 			</q-form>
@@ -76,10 +81,58 @@ export default {
 	},
 	methods: {
 		CreateDataset: function(){
+			this.$refs.name.validate();
+			if (this.$refs.name.hasError){
+				return this.$q.notify({
+					color: "negative",
+					message: "資料集名稱無效"
+				});
+			}
+			this.$refs.maxWidth.validate();
+			if (this.$refs.maxWidth.hasError){
+				return this.$q.notify({
+					color: "negative",
+					message: "最大寬度無效"
+				});
+			}
+			this.$refs.maxHeight.validate();
+			if (this.$refs.maxHeight.hasError){
+				return this.$q.notify({
+					color: "negative",
+					message: "最大高度無效"
+				});
+			}
+			this.$refs.annotationType.validate();
+			if (this.$refs.annotationType.hasError){
+				return this.$q.notify({
+					color: "negative",
+					message: "標註方式無效"
+				});
+			}
+			if(this.info.tagArr.length == 0){
+				return this.$q.notify({
+					color: "negative",
+					message: "請至少新增一個標籤"
+				});
+			}
 
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.info = this.info;
+			data._csrf = csrfToken;
+			$.post("/dataset/create-dataset", data, function(data){
+				if(data.status != "ok") return alert("新增失敗");
+				alert("新增成功");
+				window.location.reload();
+			}.bind(this));
 		},
 		UpdateDataset: function(){
 
+		},
+		ChangeDatasetCover: function(){
+			if(this.uploadPhoto) return;
+			var elem = this.$refs.uploadBt;
+			elem.click();
 		},
 		AddTag: function(){
 			if(!this.info.tagArr) Vue.set(this.info,"tagArr",[]);

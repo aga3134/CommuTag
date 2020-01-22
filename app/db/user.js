@@ -14,7 +14,7 @@ var UserSchema = new mongoose.Schema({
 	authType: String,		//user or admin
 },{
 	collection: "users",
-	timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } 
+	timestamps: {createdAt:"createdAt", updatedAt:"updatedAt"} 
 });
 
 module.exports = mongoose.model('users', UserSchema);

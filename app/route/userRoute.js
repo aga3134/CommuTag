@@ -15,6 +15,17 @@ router.get('/info', util.CheckLogin, function(req, res) {
 	res.status(200).json({"status":"ok","data": req.user});
 });
 
+router.get('/list-user', util.CheckAdmin, function(req, res) {
+	var param = {};
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	adminController.ListUser(param);
+});
+
 router.post('/edit', util.CheckLogin, util.CSRF, function(req, res) {
 	var param = {};
 	param.userID = req.user.id;

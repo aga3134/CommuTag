@@ -19,7 +19,7 @@
 						密碼
 					</template>
 				</q-input>
-				<q-btn class="q-ma-sm q-pa-xs full-width" color="grey-9" label="登入" @click="LoginByPassword();"></q-btn>
+				<q-btn class="q-ma-sm q-pa-xs full-width" color="grey-9" label="信箱登入" @click="LoginByPassword();"></q-btn>
 
 				<div class="row">
 					<q-chip class="col" clickable color="orange" text-color="white" icon="alarm_on" label="忘記密碼" @click="ForgetPassword();"></q-chip>

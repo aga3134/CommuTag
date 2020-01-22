@@ -21,7 +21,9 @@
 		<div class="row q-col-gutter-md">
 			<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="arr in datasetArr">
 				<q-card class="bg-grey-7 text-white">
-					<q-img :src="arr.picCover" :ratio="16/9"></q-img>
+					<q-img :src="arr.picCover || '/static/image/logo-16-9.png' " :ratio="16/9"></q-img>
+
+					<q-separator dark></q-separator>
 
 					<q-card-section>
 						<div class="text-h6">{{arr.name}}</div>
@@ -39,6 +41,7 @@
 				</q-card>
 			</div>
 		</div>
+		<q-btn class="full-width bg-grey-4" v-show="hasMoreDataset" label="載入更多" @click="LoadMoreDataset();"></q-btn>
 
 		<q-dialog v-model="openDatasetEditor">
 			<dataset-editor :info="editInfo"></dataset-editor>
@@ -67,23 +70,45 @@ export default {
 				{label: "影像數",value:"imageNum"},
 				{label: "標註數",value:"annotationNum"},
 			],
-			datasetArr: "",
+			datasetArr: [],
+			datasetPage: 0,
+			hasMoreDataset: true,
 			editInfo: {},
 			openDatasetEditor: false
 		};
 	},
 	created: function(){
-		this.datasetArr = [
-	  		{"_id":1, "name": "高麗菜", "picCover": "https://cdn.quasar.dev/img/parallax2.jpg","picNum": 10, "tagNum": 5},
-	  		{"_id":2, "name": "青江菜", "picCover": "https://cdn.quasar.dev/img/parallax2.jpg","picNum": 20, "tagNum": 20},
-	  		{"_id":3, "name": "百香果", "picCover": "https://cdn.quasar.dev/img/parallax2.jpg","picNum": 20, "tagNum": 20},
-	  		{"_id":4, "name": "甘蔗", "picCover": "https://cdn.quasar.dev/img/parallax2.jpg","picNum": 20, "tagNum": 20},
-	  	];
+		this.LoadMoreDataset();
 	},
 	methods: {
+		LoadMoreDataset: function(){
+			var url = "/dataset/list-dataset";
+			url += "?page="+this.datasetPage;
+			$.get(url, function(result){
+				if(result.status != "ok") return;
+				this.hasMoreDataset = result.data.hasMore;
+				this.datasetArr = this.datasetArr.concat(result.data.dataset);
+				this.datasetPage++;
+			}.bind(this));
+		},
+		ClearDataset: function(){
+			this.datasetArr = [];
+			this.datasetPage = 0;
+		},
 		AddDataset: function(){
 			this.openDatasetEditor = true;
-			this.editInfo = {};
+			this.editInfo = {
+				name: "",
+				maxWidth: 640,
+				maxHeight: 480,
+				isPublic: true,
+				enableUpload: true,
+				enableDownload: true,
+				enableGPS: false,
+				annotationType: "bbox",
+				enableAddTag: false,
+				tagArr: []
+			};
 		},
 		ModifyDataset: function(data){
 			this.openDatasetEditor = true;
@@ -92,9 +117,16 @@ export default {
 		SearchDataset: function(){
 			console.log(this.searchKey);
 		},
-		DeleteDataset: function(data){
-			if(confirm("確定刪除資料集 "+data.name+"?")){
-
+		DeleteDataset: function(dataset){
+			if(confirm("確定刪除資料集 "+dataset.name+"?")){
+				var csrfToken = $("meta[name='csrf-token']").attr("content");
+				var data = {};
+				data.id = dataset._id;
+				data._csrf = csrfToken;
+				$.post("/dataset/delete-dataset",data, function(result){
+					if(result.status != "ok") return alert("刪除失敗");
+					window.location.reload();
+				});
 			}
 		}
 	}
