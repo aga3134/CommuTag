@@ -31,8 +31,8 @@
 			<q-card-actions align="center">
 				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="add_photo_alternate" label="變更圖片" @click="ChangePhoto();" :loading="uploadPhoto"></q-btn>
 				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="edit" label="修改資料" @click="EditUserInfo();"></q-btn>
-				<input type="file" ref="uploadBt" v-on:change="UploadPhoto" hidden>
 			</q-card-actions>
+			<image-upload ref="uploader"></image-upload>
 		</q-card>
 
 		<q-dialog v-model="openInputPanel">
@@ -60,12 +60,16 @@
 </template>
 
 <script>
+import imageUpload from "./image-upload.vue"
 import util from "../js/util.js"
 
 export default {
 	name:"user-setting",
 	props: {
 		user: Object
+	},
+	components:{
+		"image-upload":imageUpload
 	},
 	data: function () {
 		return {
@@ -86,33 +90,29 @@ export default {
 		},
 		ChangePhoto: function(){
 			if(this.uploadPhoto) return;
-			var elem = this.$refs.uploadBt;
-			elem.click();
-		},
-		UploadPhoto: function(){
-			if(event.target.files.length == 0) return;
-			this.uploadPhoto = true;
-			var file = event.target.files[0];
 
-			var formData = new FormData();
-			formData.append("uploadImage", file);
+			var uploader = this.$refs.uploader;
 
-			var csrfToken = $("meta[name='csrf-token']").attr("content");
-			$.ajax({
-				url: "/user/upload-image?_csrf="+csrfToken,
-				type: "POST",
-				data: formData,
-				processData: false,
-				contentType: false,
-				success: function(result) {
-					if(result.status != "ok") return alert("更新圖片失敗");
-					this.uploadTitle = false;
-					window.location.reload();
-				}.bind(this),
-				error: function(jqXHR, textStatus, errorMessage) {
-					console.log(errorMessage);
+			uploader.OnSucc = function(result){
+				if(result.status != "ok") return alert("更新圖片失敗");
+				this.uploadPhoto = false;
+				window.location.reload();
+			}.bind(this);
+
+			uploader.OnFail = function(errorMessage){
+				console.log(errorMessage);
+				switch(errorMessage){
+					case "Request Entity Too Large": return alert("影像資料過大");
 				}
-			});
+			}.bind(this);
+
+			uploader.OnChange = function(){
+				this.uploadPhoto = true;
+				uploader.UploadImage(true);
+			}.bind(this);
+
+			uploader.url = "/user/upload-image";
+			uploader.SelectFile();
 		},
 		SubmitUserInfo: function(){
 			if(!this.editInfo.name){

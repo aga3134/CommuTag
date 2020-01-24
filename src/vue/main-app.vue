@@ -10,8 +10,8 @@
 					<div class="row q-col-gutter-md">
 						<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="arr in datasetArr">
 							<q-card class="bg-grey-7 text-white">
-								<q-img :src="arr.picCover || '/static/image/logo-16-9.png' " :ratio="16/9"></q-img>
-
+								<q-img :src="arr.picCover || '/static/image/logo-4-3.png' " :ratio="4/3"></q-img>
+								<q-separator dark></q-separator>
 								<q-card-section>
 									<div class="text-h6">{{arr.name}}</div>
 									<div class="text-subtitle2">圖片數: {{arr.picNum}}</div>

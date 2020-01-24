@@ -8,12 +8,11 @@
 		<q-card-section>
 			<q-form>
 				<q-item>
-					<q-img class="bg-grey-7" src="/static/image/logo-16-9.png" style="max-width: 300px" :ratio="4/3">
-						<div class="absolute-bottom text-subtitle1 text-center cursor-pointer" @click="ChangeDatasetCover();">
-							上傳封面
-						</div>
-						<input type="file" ref="uploadBt" hidden>
-					</q-img>
+					<div class="cover-container bg-grey-7">
+						<image-upload :src="info.picCover || '/static/image/logo-4-3.png' " showPreview :maxResW="parseInt(info.maxWidth)" :maxResH="parseInt(info.maxHeight)" ref="uploader"></image-upload>
+						<q-btn class="change-bt" flat label="變更封面" @click="UploadCover();"></q-btn>
+					</div>
+					
 				</q-item>
 				<div class="row">
 					<q-input class="col-12 q-pa-sm" v-model="info.name" label="資料集名稱" ref="name" :rules="[
@@ -21,12 +20,12 @@
 					]"/>
 					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  ref="maxWidth" v-model="info.maxWidth" label="最大寬度" :rules="[
 						val => !!val || '最大寬度不能空白',
-						val => val > 32 || '最大寬度不能小於等於32',
+						val => val >= 32 || '最大寬度不能小於32',
 						val => val <= 1920 || '最大寬度不能大於1920'
 					]"/>
 					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  ref="maxHeight" v-model="info.maxHeight" label="最大高度" :rules="[
 						val => !!val || '最大高度不能空白',
-						val => val > 32 || '最大高度不能小於等於32',
+						val => val >=32 || '最大高度不能小於32',
 						val => val <= 1920 || '最大高度不能大於1920'
 					]"/>
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.isPublic" label="公開資料集"/>
@@ -61,11 +60,15 @@
 </template>
 
 <script>
+import imageUpload from "./image-upload.vue"
 
 export default {
 	name:"dataset-editor",
 	props: {
 		info: Object
+	},
+	components:{
+		"image-upload":imageUpload
 	},
 	data: function () {
 		return {
@@ -73,7 +76,8 @@ export default {
 				{"label":"框選標註","value":"bbox"},
 				{"label":"整張標註","value":"image"}
 			],
-			tagName: ""
+			tagName: "",
+			uploadCover: false
 		};
 	},
 	created: function(){
@@ -126,13 +130,13 @@ export default {
 				window.location.reload();
 			}.bind(this));
 		},
+		UploadCover: function(){
+			if(this.uploadPhoto) return;
+			var uploader = this.$refs.uploader;
+			uploader.SelectFile();
+		},
 		UpdateDataset: function(){
 
-		},
-		ChangeDatasetCover: function(){
-			if(this.uploadPhoto) return;
-			var elem = this.$refs.uploadBt;
-			elem.click();
 		},
 		AddTag: function(){
 			if(!this.info.tagArr) Vue.set(this.info,"tagArr",[]);
@@ -152,5 +156,18 @@ export default {
 <style lang="scss">
 .dataset-editor{
 	width: 100%;
+	.cover-container{
+		width: 320px;
+		height: 240px;
+		position: relative;
+		.change-bt{
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+			width: 100%;
+			background-color: rgba(0,0,0,0.5);
+			color: #ffffff;
+		}
+	}
 }
 </style>
