@@ -5,10 +5,20 @@ var Dataset = require('../db/dataset');
 var datasetController = {};
 
 datasetController.CreateDataset = function(param){
-	Dataset.create(param.info,function(err, dataset){
+	Dataset.create({},function(err, dataset){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"create dataset fail"});
+		}
+		param.succFunc(dataset);
+	});
+};
+
+datasetController.UpdateDataset = function(param){
+	Dataset.findOneAndUpdate({_id:param.info._id},param.info,function(err, dataset){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"update dataset fail"});
 		}
 		param.succFunc(dataset);
 	});
@@ -42,6 +52,20 @@ datasetController.ListDataset = function(param){
 			result.dataset = dataset;
 		}
 		param.succFunc(result);
+	});
+};
+
+datasetController.ChangeCover = function(param){
+	var randomStr = "?rand="+Math.floor(Math.random()*100);
+	var modify = {};
+	modify.picCover = param.picCover+randomStr;
+
+	Dataset.updateOne({"_id": param.id}, modify, function(err, result) {
+		if(err){
+			console.log(err);
+			return param.failFunc({"err": "change cover fail"});
+		}
+		param.succFunc(modify);
 	});
 };
 

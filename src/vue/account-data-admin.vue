@@ -19,24 +19,24 @@
 		</div>
 		
 		<div class="row q-col-gutter-md">
-			<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="arr in datasetArr">
+			<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="dataset in datasetArr">
 				<q-card class="bg-grey-7 text-white">
-					<q-img :src="arr.picCover || '/static/image/logo-4-3.png' " :ratio="4/3"></q-img>
+					<q-img :src="dataset.picCover || '/static/image/logo-4-3.png' " :ratio="4/3"></q-img>
 
 					<q-separator dark></q-separator>
 
 					<q-card-section>
-						<div class="text-h6">{{arr.name}}</div>
-						<div class="text-subtitle2">圖片數: {{arr.picNum}}</div>
-						<div class="text-subtitle2">標註數: {{arr.tagNum}}</div>
+						<div class="text-h6">{{dataset.name}}</div>
+						<div class="text-subtitle2">圖片數: {{dataset.picNum}}</div>
+						<div class="text-subtitle2">標註數: {{dataset.tagNum}}</div>
 					</q-card-section>
 
 					<q-separator dark></q-separator>
 
 					<q-card-actions align="right">
 						<q-btn flat icon="remove_red_eye" label="檢視"></q-btn>
-						<q-btn flat icon="edit" label="修改" @click="ModifyDataset(arr);"></q-btn>
-						<q-btn flat icon="delete" label="刪除" @click="DeleteDataset(arr);"></q-btn>
+						<q-btn flat icon="edit" label="修改" @click="ModifyDataset(dataset);"></q-btn>
+						<q-btn flat icon="delete" label="刪除" @click="DeleteDataset(dataset);"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</div>
@@ -44,7 +44,7 @@
 		<q-btn class="full-width bg-grey-4" v-show="hasMoreDataset" label="載入更多" @click="LoadMoreDataset();"></q-btn>
 
 		<q-dialog v-model="openDatasetEditor">
-			<dataset-editor :info="editInfo"></dataset-editor>
+			<dataset-editor :info="editInfo" @reload="ReloadDataset();"></dataset-editor>
 		</q-dialog>
 
 	</div>
@@ -95,20 +95,19 @@ export default {
 			this.datasetArr = [];
 			this.datasetPage = 0;
 		},
+		ReloadDataset: function(){
+			this.ClearDataset();
+			this.LoadMoreDataset();
+		},
 		AddDataset: function(){
-			this.openDatasetEditor = true;
-			this.editInfo = {
-				name: "",
-				maxWidth: 640,
-				maxHeight: 480,
-				isPublic: true,
-				enableUpload: true,
-				enableDownload: true,
-				enableGPS: false,
-				annotationType: "bbox",
-				enableAddTag: false,
-				tagArr: []
-			};
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data._csrf = csrfToken;
+			$.post("/dataset/create-dataset", data, function(result){
+				if(result.status != "ok") return alert("新增失敗");
+				this.openDatasetEditor = true;
+				this.editInfo = result.data;
+			}.bind(this));
 		},
 		ModifyDataset: function(data){
 			this.openDatasetEditor = true;

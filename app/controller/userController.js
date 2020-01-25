@@ -23,7 +23,6 @@ userController.ChangeUserPhoto = function(param){
 	var modify = {};
 	modify.photo = param.photo+randomStr;
 	modify.icon = param.icon+randomStr;
-	console.log(param);
 	User.updateOne({"_id": param.userID}, modify, function(err, result) {
 		if(err){
 			console.log(err);

@@ -1,8 +1,7 @@
 <template lang="html">
 	<q-card class="dataset-editor">
 		<q-card-section>
-			<div class="text-h6" v-if="info._id == null">新增資料集</div>
-			<div class="text-h6" v-else>編輯資料集</div>
+			<div class="text-h6">編輯資料集</div>
 		</q-card-section>
 
 		<q-card-section>
@@ -10,7 +9,7 @@
 				<q-item>
 					<div class="cover-container bg-grey-7">
 						<image-upload :src="info.picCover || '/static/image/logo-4-3.png' " showPreview :maxResW="parseInt(info.maxWidth)" :maxResH="parseInt(info.maxHeight)" ref="uploader"></image-upload>
-						<q-btn class="change-bt" flat label="變更封面" @click="UploadCover();"></q-btn>
+						<q-btn class="change-bt" flat label="變更封面" @click="ChangeCover();"></q-btn>
 					</div>
 					
 				</q-item>
@@ -52,8 +51,7 @@
 		</q-card-section>
 		
 		<q-card-actions align="right">
-			<q-btn flat v-if="info._id == null" label="新增" color="primary" @click="CreateDataset();" />
-			<q-btn flat v-else label="儲存" color="primary" @click="UpdateDataset();" />
+			<q-btn flat label="儲存" color="primary" @click="UpdateDataset();" />
 			<q-btn flat label="取消" color="primary" v-close-popup />
 		</q-card-actions>
 	</q-card>
@@ -84,7 +82,31 @@ export default {
 
 	},
 	methods: {
-		CreateDataset: function(){
+		ChangeCover: function(){
+			if(this.uploadCover) return;
+			var uploader = this.$refs.uploader;
+
+			uploader.OnSucc = function(result){
+				if(result.status != "ok") return alert("更新圖片失敗");
+				this.uploadCover = false;
+				this.$emit("reload");
+			}.bind(this);
+
+			uploader.OnFail = function(errorMessage){
+				console.log(errorMessage);
+				switch(errorMessage){
+					case "Request Entity Too Large": return alert("影像資料過大");
+				}
+			}.bind(this);
+
+			uploader.OnChange = function(){
+				this.uploadCover = true;
+				uploader.UploadImage();
+			}.bind(this);
+			uploader.url = "/dataset/change-cover?dataset="+this.info._id;
+			uploader.SelectFile();
+		},
+		UpdateDataset: function(){
 			this.$refs.name.validate();
 			if (this.$refs.name.hasError){
 				return this.$q.notify({
@@ -124,19 +146,11 @@ export default {
 			var data = {};
 			data.info = this.info;
 			data._csrf = csrfToken;
-			$.post("/dataset/create-dataset", data, function(data){
-				if(data.status != "ok") return alert("新增失敗");
-				alert("新增成功");
+			$.post("/dataset/update-dataset", data, function(result){
+				if(result.status != "ok") return alert("修改失敗");
+				alert("修改成功");
 				window.location.reload();
 			}.bind(this));
-		},
-		UploadCover: function(){
-			if(this.uploadPhoto) return;
-			var uploader = this.$refs.uploader;
-			uploader.SelectFile();
-		},
-		UpdateDataset: function(){
-
 		},
 		AddTag: function(){
 			if(!this.info.tagArr) Vue.set(this.info,"tagArr",[]);

@@ -49,7 +49,6 @@ router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem
 	param.thumb = {name:"icon."+ext,w:64,h:64};
 	param.succFunc = function(result){
 		var photoInfo = {};
-		console.log(req.user);
 		photoInfo.userID = req.user._id;
 		photoInfo.photo = result.newName;
 		photoInfo.icon = result.thumbName;

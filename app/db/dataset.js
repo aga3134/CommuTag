@@ -1,26 +1,43 @@
 var mongoose = require('mongoose');
 
 var DatasetSchema = new mongoose.Schema({
-	name: {
-		type: String,
-		required: true
-	},
+	name: String,
 	maxWidth: {
 		type: Number,
 		min: 32,
-		max: 1920
+		max: 1920,
+		default: 640
 	},
 	maxHeight: {
 		type: Number,
 		min: 32,
-		max: 1920
+		max: 1920,
+		default: 480
 	},
-	isPublic: Boolean,
-	enableUpload: Boolean,
-	enableDownload: Boolean,
-	enableGPS: Boolean,
-	annotationType: String,
-	enableAddTag: Boolean,
+	isPublic: {
+		type: Boolean,
+		default: true
+	},
+	enableUpload: {
+		type: Boolean,
+		default: true
+	},
+	enableDownload: {
+		type: Boolean,
+		default: true
+	},
+	enableGPS: {
+		type: Boolean,
+		default: false
+	},
+	annotationType: {
+		type: String,
+		default: "bbox"
+	},
+	enableAddTag: {
+		type: Boolean,
+		default: false
+	},
 	tagArr: [String],
 	picCover: String,
 	picNum: {
