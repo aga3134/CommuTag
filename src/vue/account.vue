@@ -71,7 +71,7 @@
 				</q-tab-panel>
 
 				<q-tab-panel name="data-admin">
-					<data-admin :user="user"></data-admin>
+					<dataset-list mode="edit"></dataset-list>
 				</q-tab-panel>
 
 				<q-tab-panel name="site-admin">
@@ -87,7 +87,7 @@ import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import userSetting from "./account-user-setting.vue"
 import userFavorite from "./account-user-favorite.vue"
-import dataAdmin from "./account-data-admin.vue"
+import datasetList from "./dataset-list.vue"
 import siteAdmin from "./account-site-admin.vue"
 
 export default {
@@ -96,7 +96,7 @@ export default {
 		"topbar":topbar,
 		"user-setting":userSetting,
 		"user-favorite":userFavorite,
-		"data-admin":dataAdmin,
+		"dataset-list":datasetList,
 		"site-admin":siteAdmin,
 	},
 	data: function () {

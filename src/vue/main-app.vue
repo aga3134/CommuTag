@@ -5,28 +5,9 @@
 		</q-header>
 
 		<q-page-container>
-			<q-tab-panels v-model="tab" class="q-pa-md bg-grey-1" animated>
+			<q-tab-panels v-model="tab" class="bg-grey-1" animated>
 				<q-tab-panel name="dataset">
-					<div class="row q-col-gutter-md">
-						<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="arr in datasetArr">
-							<q-card class="bg-grey-7 text-white">
-								<q-img :src="arr.picCover || '/static/image/logo-4-3.png' " :ratio="4/3"></q-img>
-								<q-separator dark></q-separator>
-								<q-card-section>
-									<div class="text-h6">{{arr.name}}</div>
-									<div class="text-subtitle2">圖片數: {{arr.picNum}}</div>
-									<div class="text-subtitle2">標註數: {{arr.tagNum}}</div>
-								</q-card-section>
-
-								<q-separator dark></q-separator>
-
-								<q-card-actions align="right">
-									<q-btn flat>Action 1</q-btn>
-									<q-btn flat>Action 2</q-btn>
-								</q-card-actions>
-							</q-card>
-						</div>
-					</div>
+					<dataset-list mode="view"></dataset-list>
 					
 				</q-tab-panel>
 
@@ -55,11 +36,13 @@
 <script>
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
+import datasetList from "./dataset-list.vue"
 
 export default {
 	name:"main-app",
 	components:{
-		"topbar":topbar
+		"topbar":topbar,
+		"dataset-list":datasetList,
 	},
 	data: function () {
 		return {

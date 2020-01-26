@@ -36,8 +36,19 @@ datasetController.DeleteDataset = function(param){
 
 datasetController.ListDataset = function(param){
 	var limit = 8;
-	var skip = param.page*limit;
-	Dataset.find({},{"__v":0},{limit:limit+1, skip:skip},function(err, dataset) {
+	var skip = (param.page||0)*limit;
+	var queryOption = {};
+	if(param.keyword){
+		queryOption.name = {"$regex": param.keyword,"$options": "i"};
+	}
+	var sortOption = {};
+	if(param.sort){
+		sortOption[param.sort] = param.orderType=="desc"?-1:1;
+	}
+
+	Dataset.find(queryOption,{"__v":0},{limit:limit+1, skip:skip})
+	.sort(sortOption)
+	.exec(function(err, dataset){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"list dataset fail"});

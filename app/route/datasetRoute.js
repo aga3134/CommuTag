@@ -38,7 +38,9 @@ router.post('/delete-dataset', util.CheckAdmin,util.CSRF, function(req, res){
 	var param = {};
 	param.id = req.body.id;
 	param.succFunc = function(result){
-		res.status(200).json({"status":"ok","data": result});
+		upload.DeletePath("static/upload/dataset/"+param.id+"/", function(){
+			res.status(200).json({"status":"ok","data": result});
+		});
 	};
 	param.failFunc = function(result){
 		res.status(200).json({"status": "fail","message": result.err});
@@ -49,6 +51,9 @@ router.post('/delete-dataset', util.CheckAdmin,util.CSRF, function(req, res){
 router.get('/list-dataset', function(req, res) {
 	var param = {};
 	param.page = req.query.page;
+	param.sort = req.query.sort;
+	param.orderType = req.query.orderType;
+	param.keyword = req.query.keyword;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};

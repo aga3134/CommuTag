@@ -1,20 +1,23 @@
 <template lang="html">
-	<div class="data-admin">
-		<div class="row q-px-md">
+	<div class="dataset-list">
+		<div class="row q-px-md" v-if="mode == 'edit' ">
 			<q-btn class="bg-grey-8 text-white" icon="add" label="新增資料集" @click="AddDataset();"></q-btn>
 		</div>
 
 		<div class="row">
 			<div class="col-12 col-sm-6 col-md-3 q-pa-md">
-				<q-input v-model="searchKey" label="搜尋資料集" @keyup.enter="SearchDataset();">
+				<q-input v-model="searchKey" label="搜尋資料集" @keyup.enter="ReloadDataset();">
 					<template v-slot:append>
-						<q-btn class="bg-grey-8 text-white" icon="search" @click="SearchDataset();"></q-btn>
+						<q-btn class="bg-grey-8 text-white" icon="search" @click="ReloadDataset();"></q-btn>
 					</template>
 				</q-input>
 			</div>
 
 			<div class="col-12 col-sm-6 col-md-3 q-pa-md">
-				<q-select v-model="sortKey" :options="sortOption" label="排序"></q-select>
+				<q-select v-model="sortKey" :options="sortOption" option-value="value" option-label="label" emit-value map-options label="排序" @input="ReloadDataset();"></q-select>
+			</div>
+			<div class="col-6 col-sm-4 col-md-2 q-pa-md">
+				<q-select v-model="orderType" :options="orderTypeOption" option-value="value" option-label="label" emit-value map-options @input="ReloadDataset();"></q-select>
 			</div>
 		</div>
 		
@@ -33,10 +36,16 @@
 
 					<q-separator dark></q-separator>
 
-					<q-card-actions align="right">
+					<q-card-actions align="right" v-if="mode == 'edit' ">
 						<q-btn flat icon="remove_red_eye" label="檢視"></q-btn>
 						<q-btn flat icon="edit" label="修改" @click="ModifyDataset(dataset);"></q-btn>
 						<q-btn flat icon="delete" label="刪除" @click="DeleteDataset(dataset);"></q-btn>
+					</q-card-actions>
+
+					<q-card-actions align="right" v-if="mode == 'view' ">
+						<q-btn flat icon="remove_red_eye" label="檢視"></q-btn>
+						<q-btn flat icon="star" label="取消追蹤" v-if="dataset.follow" @click="UnfollowDataset(dataset);"></q-btn>
+						<q-btn flat icon="star_border" v-else label="追蹤" @click="FollowDataset(dataset);"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</div>
@@ -54,9 +63,9 @@
 import datasetEditor from "./dataset-editor.vue"
 
 export default {
-	name:"data-admin",
+	name:"dataset-list",
 	props: {
-		user: Object
+		mode: String
 	},
 	components:{
 		"dataset-editor":datasetEditor
@@ -64,11 +73,16 @@ export default {
 	data: function () {
 		return {
 			searchKey:"",
-			sortKey: "更新時間",
+			sortKey: "updatedAt",
 			sortOption: [
-				{label: "更新時間",value:"updated"},
-				{label: "影像數",value:"imageNum"},
-				{label: "標註數",value:"annotationNum"},
+				{label: "更新時間",value:"updatedAt"},
+				{label: "影像數",value:"picNum"},
+				{label: "標註數",value:"tagNum"},
+			],
+			orderType: "desc",
+			orderTypeOption: [
+				{label: "遞減",value:"desc"},
+				{label: "遞增",value:"asc"},			
 			],
 			datasetArr: [],
 			datasetPage: 0,
@@ -84,6 +98,9 @@ export default {
 		LoadMoreDataset: function(){
 			var url = "/dataset/list-dataset";
 			url += "?page="+this.datasetPage;
+			url += "&sort="+this.sortKey;
+			url += "&orderType="+this.orderType;
+			url += "&keyword="+this.searchKey;
 			$.get(url, function(result){
 				if(result.status != "ok") return;
 				this.hasMoreDataset = result.data.hasMore;
@@ -113,11 +130,8 @@ export default {
 			this.openDatasetEditor = true;
 			this.editInfo = Object.assign({}, data);
 		},
-		SearchDataset: function(){
-			console.log(this.searchKey);
-		},
 		DeleteDataset: function(dataset){
-			if(confirm("確定刪除資料集 "+dataset.name+"?")){
+			if(confirm("刪除資料集將一併刪除所有影像與標註資料，並且無法復原。確定刪除資料集 "+dataset.name+"?")){
 				var csrfToken = $("meta[name='csrf-token']").attr("content");
 				var data = {};
 				data.id = dataset._id;
@@ -127,13 +141,19 @@ export default {
 					window.location.reload();
 				});
 			}
+		},
+		FollowDataset: function(data){
+			
+		},
+		UnfollowDataset: function(data){
+			
 		}
 	}
 }
 </script>
 
 <style lang="scss">
-.data-admin{
+.dataset-list{
 	width: 100%;
 }
 </style>
