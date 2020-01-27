@@ -149,7 +149,7 @@ export default {
 			$.post("/dataset/update-dataset", data, function(result){
 				if(result.status != "ok") return alert("修改失敗");
 				alert("修改成功");
-				window.location.reload();
+				this.$emit("reload",true);
 			}.bind(this));
 		},
 		AddTag: function(){

@@ -66,6 +66,17 @@ datasetController.ListDataset = function(param){
 	});
 };
 
+datasetController.ViewDataset = function(param){
+	Dataset.findOne({_id:param.id},{"__v":0})
+	.exec(function(err, result){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"find dataset fail"});
+		}
+		param.succFunc(result);
+	});
+};
+
 datasetController.ChangeCover = function(param){
 	var randomStr = "?rand="+Math.floor(Math.random()*100);
 	var modify = {};

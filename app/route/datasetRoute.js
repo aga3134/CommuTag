@@ -63,6 +63,18 @@ router.get('/list-dataset', function(req, res) {
 	datasetController.ListDataset(param);
 });
 
+router.get('/view-dataset', function(req, res) {
+	var param = {};
+	param.id = req.query.id;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.ViewDataset(param);
+});
+
 router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
 	param.newPath = "/static/upload/dataset/"+req.query.dataset+"/";

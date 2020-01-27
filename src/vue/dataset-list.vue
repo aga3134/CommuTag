@@ -24,7 +24,7 @@
 		<div class="row q-col-gutter-md">
 			<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="dataset in datasetArr">
 				<q-card class="bg-grey-7 text-white">
-					<q-img :src="dataset.picCover || '/static/image/logo-4-3.png' " :ratio="4/3"></q-img>
+					<q-img :src="dataset.picCover || '/static/image/logo-16-9.png' " :ratio="16/9"></q-img>
 
 					<q-separator dark></q-separator>
 
@@ -43,9 +43,10 @@
 					</q-card-actions>
 
 					<q-card-actions align="right" v-if="mode == 'view' ">
-						<q-btn flat icon="remove_red_eye" label="檢視"></q-btn>
-						<q-btn flat icon="star" label="取消追蹤" v-if="dataset.follow" @click="UnfollowDataset(dataset);"></q-btn>
-						<q-btn flat icon="star_border" v-else label="追蹤" @click="FollowDataset(dataset);"></q-btn>
+						
+						<q-btn flat icon="remove_red_eye" label="檢視" @click="GoToDataset(dataset);"></q-btn>
+						
+						<q-btn flat icon="cloud_download" label="下載" @click="DownloadDataset(dataset);"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</div>
@@ -53,7 +54,7 @@
 		<q-btn class="full-width bg-grey-4" v-show="hasMoreDataset" label="載入更多" @click="LoadMoreDataset();"></q-btn>
 
 		<q-dialog v-model="openDatasetEditor">
-			<dataset-editor :info="editInfo" @reload="ReloadDataset();"></dataset-editor>
+			<dataset-editor :info="editInfo" @reload="ReloadDataset"></dataset-editor>
 		</q-dialog>
 
 	</div>
@@ -112,9 +113,10 @@ export default {
 			this.datasetArr = [];
 			this.datasetPage = 0;
 		},
-		ReloadDataset: function(){
+		ReloadDataset: function(closeDialog){
 			this.ClearDataset();
 			this.LoadMoreDataset();
+			if(closeDialog) this.openDatasetEditor = false;
 		},
 		AddDataset: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -122,6 +124,7 @@ export default {
 			data._csrf = csrfToken;
 			$.post("/dataset/create-dataset", data, function(result){
 				if(result.status != "ok") return alert("新增失敗");
+				this.ReloadDataset();
 				this.openDatasetEditor = true;
 				this.editInfo = result.data;
 			}.bind(this));
@@ -138,15 +141,15 @@ export default {
 				data._csrf = csrfToken;
 				$.post("/dataset/delete-dataset",data, function(result){
 					if(result.status != "ok") return alert("刪除失敗");
-					window.location.reload();
-				});
+					this.ReloadDataset();
+				}.bind(this));
 			}
 		},
-		FollowDataset: function(data){
+		DownloadDataset: function(dataset){
 			
 		},
-		UnfollowDataset: function(data){
-			
+		GoToDataset: function(dataset){
+			window.location.href="/view?id="+dataset._id;
 		}
 	}
 }

@@ -25,7 +25,7 @@
 		<q-footer>
 			<q-tabs v-model="tab" inline-label align="justify" active-bg-color="grey-7" class="bg-grey-8 text-white">
 				<q-tab name="dataset" icon="folder" label="資料集"></q-tab>
-				<q-tab name="upload" icon="cloud_upload" label="拍照上傳"></q-tab>
+				<q-tab name="upload" icon="add_photo_alternate" label="拍照上傳"></q-tab>
 				<q-tab name="annotation" icon="aspect_ratio" label="照片標註"></q-tab>
 			</q-tabs>
 		</q-footer>
@@ -48,18 +48,12 @@ export default {
 		return {
 			tab: "dataset",
 			user: {},
-    		datasetArr: []
 		};
 	},
 	created: function(){
 		$.get("/user/info",function(result){
 			if(result.status != "ok") return;
 			this.user = result.data;
-		}.bind(this));
-
-		$.get("/dataset/list-dataset", function(result){
-			if(result.status != "ok") return;
-			this.datasetArr = result.data;
 		}.bind(this));
 
 	},

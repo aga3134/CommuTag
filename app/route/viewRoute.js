@@ -39,4 +39,12 @@ router.get('/account', util.CheckLogin, util.CSRF, function(req, res) {
 	res.render("account.ejs",{meta: meta, user:req.user});
 });
 
+router.get('/view', util.CSRF, function(req, res) {
+	meta.title = Config.siteName;
+	meta.desc = Config.desc;
+	meta.path = req.originalUrl;
+	meta.csrfToken = req.csrfToken();
+	res.render("view.ejs",{meta: meta, user:req.user});
+});
+
 module.exports = router;
