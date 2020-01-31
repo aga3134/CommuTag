@@ -8,7 +8,7 @@
 			<q-form>
 				<q-item>
 					<div class="cover-container bg-grey-7">
-						<image-upload :src="info.picCover || '/static/image/logo-4-3.png' " showPreview :maxResW="parseInt(info.maxWidth)" :maxResH="parseInt(info.maxHeight)" ref="uploader"></image-upload>
+						<image-upload :src="info.picCover || '/static/image/logo-16-9.png' " showPreview :maxResW="parseInt(info.maxWidth)" :maxResH="parseInt(info.maxHeight)" ref="uploader"></image-upload>
 						<q-btn class="change-bt" flat label="變更封面" @click="ChangeCover();"></q-btn>
 					</div>
 					

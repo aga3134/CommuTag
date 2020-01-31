@@ -8,11 +8,10 @@
 			<q-tab-panels v-model="tab" class="bg-grey-1" animated>
 				<q-tab-panel name="dataset">
 					<dataset-list mode="view"></dataset-list>
-					
 				</q-tab-panel>
 
-				<q-tab-panel name="upload">
-					<div class="text-h6">拍照上傳</div>
+				<q-tab-panel class="q-pa-none" name="upload">
+					<uploader></uploader>
 				</q-tab-panel>
 
 				<q-tab-panel name="annotation">
@@ -37,12 +36,14 @@
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import datasetList from "./dataset-list.vue"
+import uploader from "./uploader.vue"
 
 export default {
 	name:"main-app",
 	components:{
 		"topbar":topbar,
 		"dataset-list":datasetList,
+		"uploader":uploader
 	},
 	data: function () {
 		return {
