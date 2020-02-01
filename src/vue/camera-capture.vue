@@ -42,6 +42,9 @@ export default {
 	created: function(){
 		
 	},
+	beforeDestroy: function(){
+		this.StopCamera();
+	},
 	methods: {
 		OpenCameraSelect: function(){
 			//list device
