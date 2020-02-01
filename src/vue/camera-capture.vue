@@ -1,15 +1,7 @@
 <template lang="html">
 	<div class="camera-capture bg-grey-9">
-		<video autoplay playsinline muted :srcObject.prop="camStream"></video>
-		<div class="overlay-top">
-			<div v-if="camStatus != 'ok' " class="text-subtitle2 text-yellow">{{camStatus}}</div>
-			<div v-if="gpsStatus != 'ok' " class="text-subtitle2 text-yellow">{{gpsStatus}}</div>
-			<div v-else class="text-subtitle2 text-yellow">{{"GPS: "+curGPS.latitude.toFixed(6)+" "+curGPS.longitude.toFixed(6)}}</div>
-		</div>
-		<div class="overlay-bottom">
-			<q-btn round push color="white" size="lg"></q-btn>
-		</div>
-
+		<video autoplay playsinline muted :srcObject.prop="camStream" ref="video"></video>
+		
 		<q-dialog v-model="openCameraSelect">
 			<q-card class="full-width">
 				
@@ -39,11 +31,16 @@ export default {
 			camStream: null,
 			openCameraSelect: false,
 			gpsStatus: "",
-			curGPS: null
+			curGPS: null,
+			OnCamSelect: null,
+			OnCamStart: null,
+			OnGPSReady: null,
+			OnCamCapture: null,
+			imageData: null
 		};
 	},
 	created: function(){
-		this.OpenCameraSelect();
+		
 	},
 	methods: {
 		OpenCameraSelect: function(){
@@ -66,9 +63,10 @@ export default {
 		},
 		SelectCamera(id){
 			this.selectCamera = id;
-			this.StartCamera(this.GetGPS);
+			this.StartCamera();
+			if(this.OnCamSelect) this.OnCamSelect();
 		},
-		StartCamera: function(callback){
+		StartCamera: function(){
 			this.camStatus = "無相機";
 			var option = {};
 			option.video = {};
@@ -84,7 +82,7 @@ export default {
 					function(stream){
 						this.camStream = stream;
 						this.camStatus = "ok";
-						if(callback) callback();
+						if(this.OnCamStart) this.OnCamStart();
 					}.bind(this),
 					function(error){
 						this.camStatus = "讀取相機失敗";
@@ -101,14 +99,14 @@ export default {
 				this.camStream = null;
 			}
 		},
-		GetGPS: function(callback){
+		GetGPS: function(){
 			this.gpsStatus = "無GPS";
 			//取得gps權限
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(function(position){
 						this.curGPS = position.coords;
 						this.gpsStatus = "ok";
-						if(callback) callback(position);
+						if(this.OnGPSReady) this.OnGPSReady();
 					}.bind(this), function(err){
 						this.gpsStatus = "讀取GPS失敗";
 					}.bind(this));
@@ -118,7 +116,16 @@ export default {
 			}
 		},
 		CaptureImage: function(){
-			
+			var video = this.$refs.video;
+			var dstCanvas = document.createElement("canvas");
+			dstCanvas.width = video.videoWidth;
+			dstCanvas.height = video.videoHeight;
+			var dstCtx = dstCanvas.getContext('2d');	
+			dstCtx.save();
+			dstCtx.drawImage(video,0,0);
+			dstCtx.restore();
+			this.imageData = dstCanvas.toDataURL('image/jpeg', 0.9);
+			if(this.OnCamCapture) this.OnCamCapture();
 		},
 	}
 }
@@ -135,21 +142,6 @@ export default {
 		width: auto;
 		height: 100%;
 	}
-	.overlay-top{
-		display: flex;
-		justify-content: flex-start;
-		position: absolute;
-		padding: 10px;
-		width: 100%;
-		top: 0px;
-	}
-	.overlay-bottom{
-		display: flex;
-		justify-content: center;
-		position: absolute;
-		padding: 10px;
-		width: 100%;
-		bottom: 0px;
-	}
+	
 }
 </style>

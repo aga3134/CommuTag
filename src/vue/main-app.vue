@@ -5,19 +5,21 @@
 		</q-header>
 
 		<q-page-container>
-			<q-tab-panels v-model="tab" class="bg-grey-1" animated>
-				<q-tab-panel name="dataset">
-					<dataset-list mode="view"></dataset-list>
-				</q-tab-panel>
+			<q-page class="bg-grey-1">
+				<q-tab-panels v-model="tab" class="absolute full-width full-height" animated>
+					<q-tab-panel name="dataset">
+						<dataset-list mode="view"></dataset-list>
+					</q-tab-panel>
 
-				<q-tab-panel class="q-pa-none" name="upload">
-					<uploader></uploader>
-				</q-tab-panel>
+					<q-tab-panel class="q-pa-none" name="upload">
+						<uploader></uploader>
+					</q-tab-panel>
 
-				<q-tab-panel name="annotation">
-					<div class="text-h6">照片標註</div>
-				</q-tab-panel>
-			</q-tab-panels>
+					<q-tab-panel name="annotation">
+						<div class="text-h6">照片標註</div>
+					</q-tab-panel>
+				</q-tab-panels>
+			</q-page>
 
 		</q-page-container>
 

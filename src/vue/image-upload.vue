@@ -11,7 +11,7 @@ export default {
 	name:"image-upload",
 	props: {
 		"maxResW":{type: Number,default: 1024},
-		"maxResH":{type: Number,default: 768},
+		"maxResH":{type: Number,default: 1024},
 		"showPreview": Boolean,
 		"src": String
 	},
