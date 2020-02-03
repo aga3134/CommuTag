@@ -1,20 +1,26 @@
 <template lang="html">
 	<div class="image-edit bg-grey-9">
+		
+		<img ref="image" :src="imageData"></img>
+
 		<div class="absolute-top row justify-center q-gutter-sm q-pa-sm">
-			<q-btn dense color="primary" icon="rotate_left" @click="RotateImage(-90);">
+			<q-btn dense color="primary" icon="rotate_left" @click="cropper.rotate(-90);">
 				<q-tooltip content-class="bg-primary">逆時針旋轉90°</q-tooltip>
 			</q-btn>
-			<q-btn dense color="primary" icon="rotate_right" @click="RotateImage(90);">
+			<q-btn dense color="primary" icon="rotate_right" @click="cropper.rotate(90);">
 				<q-tooltip content-class="bg-primary">順時針旋轉90°</q-tooltip>
 			</q-btn>
-			<q-btn dense color="primary" icon="crop">
-				<q-tooltip content-class="bg-primary">裁切影像</q-tooltip>
+			<q-btn v-show="mode=='move' " dense color="primary" icon="crop" @click="ChangeMode('crop');">
+				<q-tooltip content-class="bg-primary">框選裁切</q-tooltip>
 			</q-btn>
-			<q-btn dense color="primary" icon="clear" @click="ResetImage();">
+			<q-btn v-show="mode=='crop' " dense color="primary" icon="gamepad" @click="ChangeMode('move');">
+				<q-tooltip content-class="bg-primary">移動影像</q-tooltip>
+			</q-btn>
+			<q-btn dense color="primary" icon="clear" @click="ClearEdit();">
 				<q-tooltip content-class="bg-primary">重設影像</q-tooltip>
 			</q-btn>
 		</div>
-		<canvas ref="canvas"></canvas>
+
 	</div>
 </template>
 
@@ -28,82 +34,40 @@ export default {
 	},
 	data: function () {
 		return {
-			image: null,
-			imageControl: null,
-			scale:1,
-			offsetX:0,
-			offsetY:0,
-			rotate:0,
-			wheelFactor: 0.001,
-			offsetFactor: 1,
+			imageData: null,
+			cropper: null,
+			mode: "move"
 		};
 	},
 	mounted: function(){
-		var canvas = this.$refs.canvas;
-		this.imageControl = new Hammer(canvas);
-		this.imageControl.get('pinch').set({enable:true});
-		this.imageControl.get('pan').set({direction:Hammer.DIRECTION_ALL,threshold:0});
-
-		this.imageControl.on('pinch', function(event) {
-			
-		}.bind(this));
-
-		this.imageControl.on('pinchend', function(event) {
-			
-		}.bind(this));
-
-		this.imageControl.on("panmove",function(event){
-			this.offsetX += event.velocityX*this.offsetFactor;
-			this.offsetY += event.velocityY*this.offsetFactor;
-			this.UpdateTransform();
-		}.bind(this));
-
-		canvas.addEventListener("wheel",function(event){
-			this.scale += event.deltaY*this.wheelFactor;
-			this.UpdateTransform();
-		}.bind(this));
+		
 		
 	},
 	methods: {
 		SetImage: function(imageData){
-			this.image = new Image(); 
-			this.image.onload = function(){
-				var canvas = this.$refs.canvas;
-				canvas.width = this.image.width;
-				canvas.height = this.image.height;
-				this.UpdateTransform();
-			}.bind(this);
-			this.image.src = imageData; 
-		},
-		RotateImage: function(deg){
-			this.rotate += Math.PI*deg/180;
-			this.UpdateTransform();
-		},
-		ResetImage: function(){
-			if(confirm("確定重設影像?")){
-				this.rotate = 0;
-				this.offsetX = 0;
-				this.offsetY = 0;
-				this.scale = 1;
-				this.UpdateTransform();
+			if(this.cropper){
+				this.cropper.destroy();
 			}
+			var image = this.$refs.image;
+			image.onload = function(){
+				this.cropper = new Cropper(image, {
+					viewMode: 2,
+					dragMode: this.mode,
+					autoCrop: false
+				});
+			}.bind(this);
+			this.imageData = imageData;
 		},
-		UpdateTransform: function(){
-			var canvas = this.$refs.canvas;
-			var ctx = canvas.getContext('2d');
-			ctx.clearRect(0,0,canvas.width,canvas.height);
-			ctx.save();
-			//rotate scale about the center pivot
-			ctx.translate(canvas.width*0.5,canvas.height*0.5);
-			ctx.scale(this.scale,this.scale);
-			ctx.rotate(this.rotate);
-			ctx.translate(-canvas.width*0.5,-canvas.height*0.5);
-			//apply offset
-			ctx.translate(this.offsetX,this.offsetY);
-			
-			ctx.drawImage(this.image,0,0);
-			ctx.restore();
-		}		
+		ChangeMode: function(mode){
+			this.mode = mode;
+			this.cropper.setDragMode(mode);
+		},
+		ClearEdit: function(){
+			if(confirm("確定清除所有編輯動作?")){
+				this.cropper.clear();
+				this.cropper.reset();
+			}
+		}
 	}
 }
 </script>

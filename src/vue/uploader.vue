@@ -28,9 +28,18 @@
 			</q-page-sticky>
 		</div>
 
-		<image-edit ref="imageEdit" v-show="state == 'edit' "></image-edit>
+		<div class="full-width" v-show="state == 'edit' ">
+			<image-edit ref="imageEdit" ></image-edit>
+			
+			<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
+				<q-btn color="primary" label="確定上傳">
+				</q-btn>
+				<q-btn color="primary" label="取消上傳" @click="state='capture' ">
+				</q-btn>
+			</div>
 
-		<image-upload ref="uploader" v-show="false"></image-upload>
+			<image-upload ref="uploader" v-show="false"></image-upload>
+		</div>
 	</div>
 </template>
 
