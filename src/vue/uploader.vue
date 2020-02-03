@@ -32,13 +32,25 @@
 			<image-edit ref="imageEdit" ></image-edit>
 			
 			<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
-				<q-btn color="primary" label="確定上傳">
+				<q-btn color="primary" label="確定上傳" @click="openDatasetSelect = true;">
 				</q-btn>
 				<q-btn color="primary" label="取消上傳" @click="state='capture' ">
 				</q-btn>
 			</div>
 
 			<image-upload ref="uploader" v-show="false"></image-upload>
+
+			<q-dialog v-model="openDatasetSelect">
+				<q-card class="full-width q-pa-sm">
+					<q-card-section>
+						<dataset-select ref="datasetSelect"></dataset-select>
+					</q-card-section>
+					<q-card-actions class="justify-center">
+						<q-btn flat label="確定" @click="UploadImageToDataset();"></q-btn>
+						<q-btn flat label="取消" v-close-popup></q-btn>
+					</q-card-actions>
+				</q-card>
+			</q-dialog>
 		</div>
 	</div>
 </template>
@@ -47,13 +59,15 @@
 import cameraCapture from "./camera-capture.vue"
 import imageUpload from "./image-upload.vue"
 import imageEdit from "./image-edit.vue"
+import datasetSelect from "./dataset-select.vue"
 
 export default {
 	name:"uploader",
 	components:{
 		"camera-capture":cameraCapture,
 		"image-upload":imageUpload,
-		"image-edit":imageEdit
+		"image-edit":imageEdit,
+		"dataset-select":datasetSelect
 	},
 	props: {
 		
@@ -63,7 +77,10 @@ export default {
 			camStatus:"",
 			gpsStatus:"",
 			curGPS:null,
-			state: "capture"
+			state: "capture",
+			datasetArr: [],
+			filterArr:[],
+			openDatasetSelect: false
 		};
 	},
 	mounted: function(){
@@ -97,6 +114,14 @@ export default {
 				this.state = "edit";
 			}.bind(this);
 			uploader.SelectFile();
+		},
+		UploadImageToDataset: function(){
+			var dataset = this.$refs.datasetSelect.GetSelectDataset();
+			if(!dataset) return alert("請點選要上傳到哪個資料集");
+
+			this.state = "capture";
+			this.openDatasetSelect = false;
+			this.$q.notify("已將影像上傳至"+dataset.name);
 		}
 	}
 }

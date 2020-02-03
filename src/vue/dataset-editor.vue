@@ -148,7 +148,7 @@ export default {
 			data._csrf = csrfToken;
 			$.post("/dataset/update-dataset", data, function(result){
 				if(result.status != "ok") return alert("修改失敗");
-				alert("修改成功");
+				this.$q.notify("修改成功");
 				this.$emit("reload",true);
 			}.bind(this));
 		},

@@ -51,7 +51,7 @@
 				</q-card>
 			</div>
 		</div>
-		<q-btn class="full-width bg-grey-4" v-show="hasMoreDataset" label="載入更多" @click="LoadMoreDataset();"></q-btn>
+		<q-btn class="full-width bg-grey-4 q-ma-sm" v-show="hasMoreDataset" label="載入更多" @click="LoadMoreDataset();"></q-btn>
 
 		<q-dialog v-model="openDatasetEditor">
 			<dataset-editor :info="editInfo" @reload="ReloadDataset"></dataset-editor>
