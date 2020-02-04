@@ -103,7 +103,10 @@ export default {
 				this.uploadCover = true;
 				uploader.UploadImage();
 			}.bind(this);
-			uploader.url = "/dataset/change-cover?dataset="+this.info._id;
+			uploader.url = "/dataset/change-cover";
+			uploader.additionData = {
+				"dataset":this.info._id
+			};
 			uploader.SelectFile();
 		},
 		UpdateDataset: function(){

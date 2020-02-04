@@ -77,25 +77,76 @@ router.get('/view-dataset', function(req, res) {
 
 router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
-	param.newPath = "/static/upload/dataset/"+req.query.dataset+"/";
-	param.newName = "cover.jpg";
-	param.encode = "base64";
-	param.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
+	param.id = req.body.dataset;
+	param.picCover = param.newPath+param.newName;
 	param.succFunc = function(result){
-		//update dataset info
-		var coverInfo = {};
-		coverInfo.id = req.query.dataset;
-		coverInfo.picCover = param.newPath+param.newName;
-		coverInfo.succFunc = function(result){
+		var imageParam = {};
+		imageParam.newPath = "/static/upload/dataset/"+req.query.dataset+"/";
+		imageParam.newName = "cover.jpg";
+		imageParam.encode = "base64";
+		imageParam.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
+		imageParam.succFunc = function(result){
+			res.status(200).json({status: "ok", "data": result});
+		};
+		imageParam.failFunc = function(result){
+			res.status(200).json({status: "fail", message: result.err});
+		};
+		upload.SaveFile(imageParam);
+	}
+	param.failFunc = function(result){
+		res.status(200).json({status: "fail", message: result.err});
+	}
+	datasetController.ChangeCover(param);
+
+});
+
+router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem, function(req, res){	
+	var param = {};
+	param.dataset = req.body.dataset;
+	param.succFunc = function(result){
+		var imageParam = {};
+		imageParam.newPath = "/static/upload/dataset/"+req.body.dataset+"/image/";
+		imageParam.newName = result._id+".jpg";
+		imageParam.encode = "base64";
+		imageParam.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
+		imageParam.succFunc = function(result){
 			res.status(200).json({status: "ok", "data": result});
 		}
-		coverInfo.failFunc = function(result){
+		imageParam.failFunc = function(result){
 			res.status(200).json({status: "fail", message: result.err});
 		}
-		datasetController.ChangeCover(coverInfo);
+		upload.SaveFile(imageParam);
 	};
 	param.failFunc = function(result){
 		res.status(200).json({status: "fail", message: result.err});
 	};
-	upload.SaveFile(param);
+	datasetController.UploadImage(param);
+});
+
+router.get('/list-image', function(req, res) {
+	var param = {};
+	param.dataset = req.query.dataset;
+	param.page = req.query.page;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.ListImage(param);
+});
+
+router.post('/delete-image', function(req, res) {
+	var param = {};
+	param.dataset = req.body.data.dataset;
+	param.image = req.body.data.image;
+	param.succFunc = function(result){
+		upload.DeletePath("static/upload/dataset/"+param.dataset+"/image/"+param.image+".jpg", function(){
+			res.status(200).json({"status":"ok","data": result});
+		});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.DeleteImage(param);
 });

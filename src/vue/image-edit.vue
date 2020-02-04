@@ -67,6 +67,9 @@ export default {
 				this.cropper.clear();
 				this.cropper.reset();
 			}
+		},
+		GetCanvasData: function(){
+			return this.cropper.getCroppedCanvas();
 		}
 	}
 }

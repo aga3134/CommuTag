@@ -20,6 +20,7 @@ export default {
 			file: null,
 			imageData: null,
 			url: "",
+			additionData: {},
 			OnSucc: null,
 			OnFail: null,
 			OnProgress: null,
@@ -43,7 +44,7 @@ export default {
 				reader.onload = function(){		//read file ready
 					var img = new Image();
 					img.onload = function(){	//image load ready
-						this.FitCanvas(img);
+						this.FitCanvasFromImage(img);
 						if(this.OnChange){
 							this.OnChange();
 						}
@@ -54,7 +55,7 @@ export default {
 				reader.readAsDataURL(files[0]);
 			}
 		},
-		FitCanvas: function(image){
+		FitCanvasFromImage: function(image){
 			var srcCanvas = document.createElement("canvas");
 			srcCanvas.width = image.width;
 			srcCanvas.height = image.height;
@@ -69,6 +70,16 @@ export default {
 			var w = image.width*scale;
 			var h = image.height*scale;
 			var dstCanvas = this.ResizeImage(srcCanvas,w,h);
+
+			this.imageData = dstCanvas.toDataURL('image/jpeg', 0.9);
+		},
+		FitCanvasFromCanvas: function(canvas){
+			var scaleW = this.maxResW/canvas.width;
+			var scaleH = this.maxResH/canvas.height;
+			var scale = Math.min(scaleW,scaleH);
+			var w = canvas.width*scale;
+			var h = canvas.height*scale;
+			var dstCanvas = this.ResizeImage(canvas,w,h);
 
 			this.imageData = dstCanvas.toDataURL('image/jpeg', 0.9);
 		},
@@ -108,6 +119,9 @@ export default {
 		UploadImage: function(useFile){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var formData = new FormData();
+			for(var key in this.additionData){
+				formData.append(key,this.additionData[key]);
+			}
 			formData.append("uploadImage",useFile?this.file:this.imageData);
 			$.ajax({
 				url: this.url,

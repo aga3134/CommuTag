@@ -9,7 +9,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "async": "^3.1.0",
     "bcrypt": "^3.0.6",
     "bcryptjs": "^2.4.3",
     "connect-mongodb-session": "^2.2.0",

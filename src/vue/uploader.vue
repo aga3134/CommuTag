@@ -32,7 +32,7 @@
 			<image-edit ref="imageEdit" ></image-edit>
 			
 			<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
-				<q-btn color="primary" label="確定上傳" @click="openDatasetSelect = true;">
+				<q-btn color="primary" label="確定上傳" @click="CheckUpload();">
 				</q-btn>
 				<q-btn color="primary" label="取消上傳" @click="state='capture' ">
 				</q-btn>
@@ -70,7 +70,7 @@ export default {
 		"dataset-select":datasetSelect
 	},
 	props: {
-		
+		dataset: Object,
 	},
 	data: function () {
 		return {
@@ -115,13 +115,42 @@ export default {
 			}.bind(this);
 			uploader.SelectFile();
 		},
+		CheckUpload: function(){
+			if(this.dataset){
+				this.UploadImageToDataset();
+			}
+			else{
+				this.openDatasetSelect = true;
+			}
+		},
 		UploadImageToDataset: function(){
-			var dataset = this.$refs.datasetSelect.GetSelectDataset();
+			var dataset = this.dataset || this.$refs.datasetSelect.GetSelectDataset();
 			if(!dataset) return alert("請點選要上傳到哪個資料集");
 
-			this.state = "capture";
-			this.openDatasetSelect = false;
-			this.$q.notify("已將影像上傳至"+dataset.name);
+			var uploader = this.$refs.uploader;
+
+			uploader.OnSucc = function(result){
+				if(result.status != "ok") return alert("上傳圖片失敗");
+				this.state = "capture";
+				this.openDatasetSelect = false;
+				this.$q.notify("已將影像上傳至"+dataset.name);
+				this.$emit("uploaded");
+			}.bind(this);
+
+			uploader.OnFail = function(errorMessage){
+				console.log(errorMessage);
+				switch(errorMessage){
+					case "Request Entity Too Large": return alert("影像資料過大");
+				}
+			}.bind(this);
+
+			uploader.url = "/dataset/upload-image";
+			uploader.additionData = {
+				"dataset":dataset._id
+			};
+			var canvas = this.$refs.imageEdit.GetCanvasData();
+			uploader.FitCanvasFromCanvas(canvas);
+			uploader.UploadImage();
 		}
 	}
 }
