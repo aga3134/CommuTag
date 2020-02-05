@@ -25,7 +25,7 @@
 							<q-icon name="star_border" />
 						</q-item-section>
 						<q-item-section>
-							<q-item-label class="text-subtitle1">追蹤清單</q-item-label>
+							<q-item-label class="text-subtitle1">收藏清單</q-item-label>
 						</q-item-section>
 					</q-item>
 

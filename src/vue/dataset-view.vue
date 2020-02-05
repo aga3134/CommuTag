@@ -16,7 +16,7 @@
 				<q-select dense class="col-1" v-model="filterKey" :options="filterOption" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
 				<q-btn icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
 				<q-btn icon="cloud_download" label="整包下載" flat></q-btn>
-				<q-btn icon="star_border" label="追蹤" flat></q-btn>
+				<q-btn icon="star_border" label="收藏" flat></q-btn>
 			</div>
 
 			
@@ -54,7 +54,7 @@
 			</q-dialog>
 
 			<q-page-sticky position="bottom-left" :offset="[18, 18]">
-				<q-btn round class="bg-teal text-white" icon="add_photo_alternate">
+				<q-btn round class="bg-teal text-white" icon="add_photo_alternate" @click="openUploader = true;">
 					<q-tooltip content-class="bg-grey-8" @click="openUploader = true">拍照上傳</q-tooltip>
 				</q-btn>
 			</q-page-sticky>

@@ -1,16 +1,10 @@
 <template lang="html">
-	<div class="camera-capture">
-		<div class="full-width" v-show="state =='capture' ">
+	<div class="camera-capture bg-grey-8">
+		<div class="full-width" v-show="stepArr[step] && stepArr[step].id == 'capture' ">
 			<camera-capture ref="cam"></camera-capture>
 
-			<div class="absolute-top q-pa-sm">
-				<div v-if="camStatus != 'ok' " class="text-subtitle2 text-yellow">{{camStatus}}</div>
-				<div v-if="gpsStatus != 'ok' " class="text-subtitle2 text-yellow">{{gpsStatus}}</div>
-				<div v-else class="text-subtitle2 text-yellow">{{"GPS: "+curGPS.latitude.toFixed(6)+" "+curGPS.longitude.toFixed(6)}}</div>
-			</div>
-
 			<q-page-sticky position="bottom" :offset="[18, 18]">
-				<q-btn round push class="bg-white text-grey-8" size="lg" icon="camera_alt" @click="CaptureCameraImage();">
+				<q-btn round push :disable="camStatus!='ok' " class="bg-white text-grey-8" size="lg" icon="camera_alt" @click="CaptureCameraImage();">
 					<q-tooltip content-class="bg-primary">拍照上傳</q-tooltip>
 				</q-btn>
 			</q-page-sticky>
@@ -28,29 +22,47 @@
 			</q-page-sticky>
 		</div>
 
-		<div class="full-width" v-show="state == 'edit' ">
+		<div class="full-width" v-show="stepArr[step] && stepArr[step].id == 'crop' ">
 			<image-edit ref="imageEdit" ></image-edit>
 			
 			<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
-				<q-btn color="primary" label="確定上傳" @click="CheckUpload();">
+				<q-btn color="primary" label="確定" @click="NextStep();">
 				</q-btn>
-				<q-btn color="primary" label="取消上傳" @click="state='capture' ">
+				<q-btn color="primary" label="取消" @click="PrevStep();">
 				</q-btn>
 			</div>
+		</div>
 
-			<image-upload ref="uploader" v-show="false"></image-upload>
+		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'dataset'">
+			<q-card class="full-width q-pa-sm">
+				<q-card-section>
+					<dataset-select ref="datasetSelect"></dataset-select>
+				</q-card-section>
+				<q-card-actions class="justify-center">
+					<q-btn flat label="確定" @click="NextStep();"></q-btn>
+					<q-btn flat label="取消" @click="PrevStep();"></q-btn>
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
 
-			<q-dialog v-model="openDatasetSelect">
-				<q-card class="full-width q-pa-sm">
-					<q-card-section>
-						<dataset-select ref="datasetSelect"></dataset-select>
-					</q-card-section>
-					<q-card-actions class="justify-center">
-						<q-btn flat label="確定" @click="UploadImageToDataset();"></q-btn>
-						<q-btn flat label="取消" v-close-popup></q-btn>
-					</q-card-actions>
-				</q-card>
-			</q-dialog>
+		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'location'">
+			<q-card class="full-width q-pa-sm">
+				<q-card-section>
+					<location-select ref="locationSelect"></location-select>
+				</q-card-section>
+				<q-card-actions class="justify-center">
+					<q-btn flat label="確定" @click="NextStep();"></q-btn>
+					<q-btn flat label="取消" @click="PrevStep();"></q-btn>
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
+
+		<image-upload ref="uploader" v-show="false"></image-upload>
+
+		<div class="absolute-top q-pa-sm" v-if="stepArr[step]">
+			<q-badge color="secondary q-pa-sm">
+				{{stepArr[step].name+" ("+(step+1)+"/"+stepArr.length+")"}}
+			</q-badge>
 		</div>
 	</div>
 </template>
@@ -60,6 +72,7 @@ import cameraCapture from "./camera-capture.vue"
 import imageUpload from "./image-upload.vue"
 import imageEdit from "./image-edit.vue"
 import datasetSelect from "./dataset-select.vue"
+import locationSelect from "./location-select.vue"
 
 export default {
 	name:"uploader",
@@ -67,7 +80,8 @@ export default {
 		"camera-capture":cameraCapture,
 		"image-upload":imageUpload,
 		"image-edit":imageEdit,
-		"dataset-select":datasetSelect
+		"dataset-select":datasetSelect,
+		"location-select":locationSelect
 	},
 	props: {
 		dataset: Object,
@@ -77,13 +91,19 @@ export default {
 			camStatus:"",
 			gpsStatus:"",
 			curGPS:null,
-			state: "capture",
 			datasetArr: [],
 			filterArr:[],
-			openDatasetSelect: false
+			openDatasetSelect: false,
+			stepArr:[],
+			step:0
 		};
 	},
 	mounted: function(){
+		this.stepArr = [];
+		this.stepArr.push({"id":"capture",name:"拍照選檔"});
+		this.stepArr.push({"id":"crop",name:"旋轉裁切"});
+		this.stepArr.push({"id":"dataset",name:"選擇資料集"});
+		this.stepArr.push({"id":"location",name:"確認位置"});
 		this.ChangeCamera();
 	},
 	methods: {
@@ -91,11 +111,6 @@ export default {
 			var cam = this.$refs.cam;
 			cam.OnCamStart = function(){
 				this.camStatus = cam.camStatus;
-				cam.GetGPS();
-			}.bind(this);
-			cam.OnGPSReady = function(){
-				this.curGPS = cam.curGPS;
-				this.gpsStatus = cam.gpsStatus;
 			}.bind(this);
 			cam.OpenCameraSelect();
 		},
@@ -103,7 +118,7 @@ export default {
 			var cam = this.$refs.cam;
 			cam.OnCamCapture = function(){
 				this.$refs.imageEdit.SetImage(cam.imageData);
-				this.state = "edit";
+				this.NextStep();
 			}.bind(this);
 			cam.CaptureImage();
 		},
@@ -111,17 +126,20 @@ export default {
 			var uploader = this.$refs.uploader;
 			uploader.OnChange = function(){
 				this.$refs.imageEdit.SetImage(uploader.imageData);
-				this.state = "edit";
+				this.NextStep();
 			}.bind(this);
 			uploader.SelectFile();
 		},
-		CheckUpload: function(){
-			if(this.dataset){
+		NextStep: function(){
+			this.step++;
+			if(this.step >= this.stepArr.length){
 				this.UploadImageToDataset();
+				this.step = 0;
 			}
-			else{
-				this.openDatasetSelect = true;
-			}
+		},
+		PrevStep: function(){
+			this.step--;
+			if(this.step < 0) this.step = 0;
 		},
 		UploadImageToDataset: function(){
 			var dataset = this.dataset || this.$refs.datasetSelect.GetSelectDataset();

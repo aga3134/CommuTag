@@ -1,6 +1,8 @@
 <template lang="html">
 	<div class="camera-capture bg-grey-9">
 		<video autoplay playsinline muted :srcObject.prop="camStream" ref="video"></video>
+
+		<div class="fixed-center text-white text-h5" v-show="camStatus !='ok' ">{{camStatus}}</div>
 		
 		<q-dialog v-model="openCameraSelect">
 			<q-card class="full-width">
@@ -27,14 +29,11 @@ export default {
 		return {
 			selectCamerea: null,
 			cameraList:[],
-			camStatus: "",
+			camStatus: "無相機",
 			camStream: null,
 			openCameraSelect: false,
-			gpsStatus: "",
-			curGPS: null,
 			OnCamSelect: null,
 			OnCamStart: null,
-			OnGPSReady: null,
 			OnCamCapture: null,
 			imageData: null
 		};
@@ -100,22 +99,6 @@ export default {
 			if(this.camStream){
 				this.camStream.getTracks()[0].stop();
 				this.camStream = null;
-			}
-		},
-		GetGPS: function(){
-			this.gpsStatus = "無GPS";
-			//取得gps權限
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(function(position){
-						this.curGPS = position.coords;
-						this.gpsStatus = "ok";
-						if(this.OnGPSReady) this.OnGPSReady();
-					}.bind(this), function(err){
-						this.gpsStatus = "讀取GPS失敗";
-					}.bind(this));
-			}
-			else {
-				this.gpsStatus = "瀏覽器不支援GPS";
 			}
 		},
 		CaptureImage: function(){
