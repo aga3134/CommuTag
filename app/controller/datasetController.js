@@ -97,7 +97,10 @@ datasetController.ChangeCover = function(param){
 
 datasetController.UploadImage = function(param){
 	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	Image.create({},function(err, result){
+	var newImage = {};
+	newImage.lat = param.lat;
+	newImage.lng = param.lng;
+	Image.create(newImage,function(err, result){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"create image fail"});

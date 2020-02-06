@@ -36,7 +36,7 @@
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'dataset'">
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>
-					<dataset-select ref="datasetSelect"></dataset-select>
+					<dataset-select ref="datasetSelect" @change="DatasetChange();"></dataset-select>
 				</q-card-section>
 				<q-card-actions class="justify-center">
 					<q-btn flat label="確定" @click="NextStep();"></q-btn>
@@ -48,7 +48,7 @@
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'location'">
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>
-					<location-select ref="locationSelect"></location-select>
+					<location-select ref="locationSelect" @change="LocationChange();"></location-select>
 				</q-card-section>
 				<q-card-actions class="justify-center">
 					<q-btn flat label="確定" @click="NextStep();"></q-btn>
@@ -89,21 +89,28 @@ export default {
 	data: function () {
 		return {
 			camStatus:"",
-			gpsStatus:"",
-			curGPS:null,
 			datasetArr: [],
 			filterArr:[],
-			openDatasetSelect: false,
 			stepArr:[],
-			step:0
+			step:0,
+			locationIndex:-1,
+			datasetSelect:null,
+			locationSelect:null
 		};
 	},
 	mounted: function(){
 		this.stepArr = [];
 		this.stepArr.push({"id":"capture",name:"拍照選檔"});
 		this.stepArr.push({"id":"crop",name:"旋轉裁切"});
-		this.stepArr.push({"id":"dataset",name:"選擇資料集"});
-		this.stepArr.push({"id":"location",name:"確認位置"});
+		if(!this.dataset){
+			this.stepArr.push({"id":"dataset",name:"選擇資料集"});
+		}
+		else{
+			if(this.dataset.enableGPS){
+				this.locationIndex = this.stepArr.length;
+				this.stepArr.push({"id":"location",name:"確認位置"});
+			}
+		}
 		this.ChangeCamera();
 	},
 	methods: {
@@ -134,23 +141,40 @@ export default {
 			this.step++;
 			if(this.step >= this.stepArr.length){
 				this.UploadImageToDataset();
-				this.step = 0;
 			}
 		},
 		PrevStep: function(){
 			this.step--;
 			if(this.step < 0) this.step = 0;
 		},
+		DatasetChange: function(){
+			if(this.dataset) return;
+			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
+			if(this.datasetSelect.enableGPS){
+				if(this.locationIndex == -1){
+					this.locationIndex = this.stepArr.length;
+					this.stepArr.push({"id":"location",name:"確認位置"});
+				}
+			}
+			else{
+				if(this.locationIndex != -1){
+					this.stepArr.splice(this.locationIndex,1);
+					this.locationIndex = -1;
+				}
+			}
+		},
+		LocationChange: function(){
+			this.locationSelect = this.$refs.locationSelect.loc;
+		},
 		UploadImageToDataset: function(){
-			var dataset = this.dataset || this.$refs.datasetSelect.GetSelectDataset();
-			if(!dataset) return alert("請點選要上傳到哪個資料集");
+			var dataset = this.dataset || this.datasetSelect;
+			var loc = this.locationSelect;
 
 			var uploader = this.$refs.uploader;
 
 			uploader.OnSucc = function(result){
 				if(result.status != "ok") return alert("上傳圖片失敗");
-				this.state = "capture";
-				this.openDatasetSelect = false;
+				this.step = 0;
 				this.$q.notify("已將影像上傳至"+dataset.name);
 				this.$emit("uploaded");
 			}.bind(this);
@@ -163,9 +187,13 @@ export default {
 			}.bind(this);
 
 			uploader.url = "/dataset/upload-image";
-			uploader.additionData = {
-				"dataset":dataset._id
-			};
+			var data = {};
+			data.dataset = dataset._id
+			if(loc){
+				data.lat = loc.lat;
+				data.lng = loc.lng;
+			}
+			uploader.additionData = data;
 			var canvas = this.$refs.imageEdit.GetCanvasData();
 			uploader.FitCanvasFromCanvas(canvas);
 			uploader.UploadImage();

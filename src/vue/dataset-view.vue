@@ -44,7 +44,7 @@
 					<q-card-section>
 						<q-breadcrumbs separator=" " class="text-black" active-color="black">
 							<q-breadcrumbs-el :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>
-							<q-breadcrumbs-el :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-show="targetImage.lat && targetImage.lng" :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
 						</q-breadcrumbs>
 					</q-card-section>
 					<q-card-actions>

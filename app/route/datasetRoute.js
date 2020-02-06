@@ -103,6 +103,8 @@ router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem
 router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
 	param.dataset = req.body.dataset;
+	param.lat = req.body.lat;
+	param.lng = req.body.lng;
 	param.succFunc = function(result){
 		var imageParam = {};
 		imageParam.newPath = "/static/upload/dataset/"+req.body.dataset+"/image/";

@@ -2,6 +2,7 @@
 	<div class="location-select">
 		<div class="text-h6">選擇地點</div>
 		<div class="map" ref="map"></div>
+		<div class="text-center">{{status}}</div>
 	</div>
 </template>
 
@@ -17,9 +18,11 @@ export default {
 	},
 	data: function () {
 		return {
-			gpsStatus: "無GPS",
-			curGPS: null,
+			loc: null,
+			status:"",
 			OnGPSReady: null,
+			map: null,
+			marker: null
 		};
 	},
 	mounted: function(){
@@ -28,28 +31,52 @@ export default {
 	},
 	methods: {
 		InitMap: function(){
-			var map = L.map(this.$refs.map).setView([23.682094, 120.7764642], 7);
+			this.map = L.map(this.$refs.map).setView([23.682094, 120.7764642], 7);
 			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '<a href="https://www.openstreetmap.org/">OSM</a>',
 				maxZoom: 18,
-			}).addTo(map);
-			var marker = L.marker([23.682094, 120.7764642]);
-			marker.addTo(map);
+			}).addTo(this.map);
+
+			this.map.on('click', function(event){
+				var pos = event.latlng;
+				this.SetPosition(pos.lat,pos.lng);
+			}.bind(this));
+			
+		},
+		SetPosition: function(lat,lng){
+			this.loc = {"lat":lat,"lng":lng};
+			this.status = lat.toFixed(5)+" "+lng.toFixed(5);
+			if(this.marker){
+				this.marker.setLatLng(this.loc, {
+					draggable: 'true'
+				}).bindPopup(this.status).update();
+			}
+			else{
+				this.marker = L.marker(this.loc,{
+					draggable: 'true'
+				});
+				this.marker.on('dragend', function(event) {
+					var pos = this.marker.getLatLng();
+					this.SetPosition(pos.lat,pos.lng);
+				}.bind(this));
+
+				this.marker.addTo(this.map);
+			}
+			this.$emit("change");
 		},
 		GetGPS: function(){
-			this.gpsStatus = "無GPS";
+			this.status = "無GPS-請點選位置";
 			//取得gps權限
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(function(position){
-						this.curGPS = position.coords;
-						this.gpsStatus = "ok";
+						this.SetPosition(position.coords.latitude,position.coords.longitude);
 						if(this.OnGPSReady) this.OnGPSReady();
 					}.bind(this), function(err){
-						this.gpsStatus = "讀取GPS失敗";
+						this.status = "讀取GPS失敗-請點選位置";
 					}.bind(this));
 			}
 			else {
-				this.gpsStatus = "瀏覽器不支援GPS";
+				this.status = "瀏覽器不支援GPS-請點選位置";
 			}
 		},
 	}
