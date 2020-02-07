@@ -1,13 +1,18 @@
 <template lang="html">
 	<div class="dataset-select">
 		<div class="text-h6">選擇資料集</div>
-		<div>
-			<q-input placeholder="輸入篩選文字" outlined dense square v-model="searchKey" @change="ReloadDataset();"></q-input>
-			<q-list bordered separator>
-				<q-item clickable v-for="(dataset,i) in datasetArr" :key="dataset._id" :active="selectIndex == i" active-class="bg-green-2" @click="SelectItem(i);">{{dataset.name}}</q-item>
-			</q-list>
-			<q-btn class="full-width bg-grey-4 q-ma-sm" v-show="hasMoreDataset" label="載入更多" @click="LoadMoreDataset();"></q-btn>
-		</div>
+		
+		<q-scroll-area style="height: 300px;">
+			<q-infinite-scroll @load="LoadMoreDataset" ref="datasetScroll">
+				<q-input placeholder="輸入篩選文字" outlined dense square v-model="searchKey" @change="ReloadDataset();"></q-input>
+				<q-list bordered separator>
+					<q-item clickable v-for="(dataset,i) in datasetArr" :key="i" :active="selectIndex == i" active-class="bg-green-2" @click="SelectItem(i);">
+						{{dataset.name}}
+					</q-item>
+				</q-list>
+			</q-infinite-scroll>
+		</q-scroll-area>
+		
 	</div>
 </template>
 
@@ -25,36 +30,35 @@ export default {
 		return {
 			searchKey:"",
 			datasetArr: [],
-			datasetPage: 0,
-			hasMoreDataset: true,
+			hasMore: true,
 			selectIndex: -1
 		};
 	},
 	created: function(){
-		this.LoadMoreDataset();
+		
 	},
 	methods: {
-		LoadMoreDataset: function(){
+		LoadMoreDataset: function(index,done){
 			var url = "/dataset/list-dataset";
-			url += "?page="+this.datasetPage;
+			url += "?page="+(index-1);
 			url += "&sort=updatedAt";
 			url += "&orderType=desc";
 			url += "&keyword="+this.searchKey;
-			$.get(url, function(result){
+			$.get(url,function(result){
 				if(result.status != "ok") return;
-				this.hasMoreDataset = result.data.hasMore;
+				this.hasMore = result.data.hasMore;
+				if(!this.hasMore){
+					this.$refs.datasetScroll.stop();
+				}
 				this.datasetArr = this.datasetArr.concat(result.data.dataset);
-				this.datasetPage++;
+				done();
 			}.bind(this));
 		},
-		ClearDataset: function(){
-			this.datasetArr = [];
-			this.datasetPage = 0;
-			this.selectIndex = -1;
-		},
 		ReloadDataset: function(){
-			this.ClearDataset();
-			this.LoadMoreDataset();
+			this.datasetArr = [];
+			this.$refs.datasetScroll.reset();
+			this.$refs.datasetScroll.resume();
+			this.selectIndex = -1;
 		},
 		GetSelectDataset: function(){
 			if(this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return null;

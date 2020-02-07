@@ -59,11 +59,11 @@
 
 		<image-upload ref="uploader" v-show="false"></image-upload>
 
-		<div class="absolute-top q-pa-sm" v-if="stepArr[step]">
+		<q-page-sticky position="bottom-left" :offset="[9,9]" v-if="stepArr[step]">
 			<q-badge color="secondary q-pa-sm">
 				{{stepArr[step].name+" ("+(step+1)+"/"+stepArr.length+")"}}
 			</q-badge>
-		</div>
+		</q-page-sticky>
 	</div>
 </template>
 
