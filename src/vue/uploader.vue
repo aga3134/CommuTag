@@ -89,8 +89,6 @@ export default {
 	data: function () {
 		return {
 			camStatus:"",
-			datasetArr: [],
-			filterArr:[],
 			stepArr:[],
 			step:0,
 			locationIndex:-1,

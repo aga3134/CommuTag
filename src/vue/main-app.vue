@@ -15,8 +15,8 @@
 						<uploader></uploader>
 					</q-tab-panel>
 
-					<q-tab-panel name="annotation">
-						<div class="text-h6">照片標註</div>
+					<q-tab-panel class="q-pa-none" name="annotation">
+						<annotator></annotator>
 					</q-tab-panel>
 				</q-tab-panels>
 			</q-page>
@@ -39,13 +39,15 @@ import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import datasetList from "./dataset-list.vue"
 import uploader from "./uploader.vue"
+import annotator from "./annotator.vue"
 
 export default {
 	name:"main-app",
 	components:{
 		"topbar":topbar,
 		"dataset-list":datasetList,
-		"uploader":uploader
+		"uploader":uploader,
+		"annotator":annotator
 	},
 	data: function () {
 		return {
