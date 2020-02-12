@@ -10,6 +10,12 @@
 						{{dataset.name}}
 					</q-item>
 				</q-list>
+
+				<template v-slot:loading>
+					<div class="row justify-center q-my-md">
+						<q-spinner-dots color="primary" size="40px" />
+					</div>
+				</template>
 			</q-infinite-scroll>
 		</q-scroll-area>
 		

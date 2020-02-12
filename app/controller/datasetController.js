@@ -19,7 +19,7 @@ datasetController.CreateDataset = function(param){
 };
 
 datasetController.UpdateDataset = function(param){
-	Dataset.findOneAndUpdate({_id:param.info._id},param.info,function(err, dataset){
+	Dataset.updateOne({_id:param.info._id},param.info,function(err, dataset){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"update dataset fail"});
@@ -143,6 +143,46 @@ datasetController.DeleteImage = function(param){
 			return param.failFunc({err:"delete image fail"});
 		}
 		param.succFunc({_id:param.image});
+	});
+};
+
+datasetController.SetAnnotation = function(param){
+	var Image = mongoose.model("image"+param.dataset, ImageSchema);
+	var data = null;
+	if(param.user && param.annotation){
+		data = {};
+		data.user = param.user._id;
+		data.annotation = param.annotation;
+	}
+	var update = {};
+	update["$set"] = {
+		annotation: data,
+		verifyNum: 0,
+		agreeNum: 0
+	};
+	Image.updateOne({_id:param.image},update,function(err, image){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"update annotation fail"});
+		}
+		param.succFunc(image);
+	});
+};
+
+datasetController.AddVerification = function(param){
+	var Image = mongoose.model("image"+param.dataset, ImageSchema);
+	var data = {};
+	data.user = param.user._id;
+	data.agree = param.agree;
+	var update = {};
+	update["$push"] = {verification:data};
+	update["$inc"] = {verifyNum:1,agreeNum:param.agree=="true"?1:0};
+	Image.updateOne({_id:param.image},update,function(err, image){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"update annotation fail"});
+		}
+		param.succFunc(image);
 	});
 };
 

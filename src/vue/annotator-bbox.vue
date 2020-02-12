@@ -1,5 +1,5 @@
 <template lang="html">
-	<div class="annotate-bbox bg-grey-9">
+	<div class="annotator-bbox bg-grey-9">
 		<div class="text-h6 text-white q-pa-md">請框選出影像中的物件並給予標籤</div>
 		<q-dialog v-model="openHelp">
 			<q-card class="full-width q-pa-sm">
@@ -25,7 +25,7 @@
 <script>
 
 export default {
-	name:"annotate-bbox",
+	name:"annotator-bbox",
 	props: {
 		image: Object,
 		task: String
@@ -45,7 +45,7 @@ export default {
 </script>
 
 <style lang="scss">
-.annotate-bbox{
+.annotator-bbox{
 	width: 100%;
 	height: 100%;
 }

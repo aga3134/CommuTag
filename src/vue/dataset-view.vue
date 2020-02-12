@@ -45,9 +45,14 @@
 						<q-breadcrumbs separator=" " class="text-black" active-color="black">
 							<q-breadcrumbs-el :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>
 							<q-breadcrumbs-el v-show="targetImage.lat && targetImage.lng" :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
+							<q-breadcrumbs-el :label="targetImage.annotation?'已標註':'未標註' " icon="aspect_ratio"></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-show="targetImage.annotation" :label="'驗證數 : '+targetImage.verifyNum "></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-show="targetImage.annotation" :label="'認同數 : '+targetImage.agreeNum "></q-breadcrumbs-el>
 						</q-breadcrumbs>
 					</q-card-section>
 					<q-card-actions>
+						<q-btn label="協助標註" @click="AnnotateImage();"></q-btn>
+						<q-btn label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
 				</q-card>
@@ -61,6 +66,13 @@
 
 			<q-dialog maximized v-model="openUploader">
 				<uploader :dataset="info" @uploaded="ReloadImage();"></uploader>
+				<div>
+					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
+				</div>
+			</q-dialog>
+
+			<q-dialog maximized v-model="openAnnotator" v-if="info">
+				<annotator :dataset="info" :image="targetImage" @done="FinishAnnotation();"></annotator>
 				<div>
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
 				</div>
@@ -79,12 +91,14 @@ import util from "../js/util.js"
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import uploader from "./uploader.vue"
+import annotator from "./annotator.vue"
 
 export default {
 	name:"dataset-view",
 	components:{
 		"topbar":topbar,
-		"uploader":uploader
+		"uploader":uploader,
+		"annotator":annotator,
 	},
 	data: function () {
 		return {
@@ -104,7 +118,8 @@ export default {
 			targetImage: null,
 			openViewImage: false,
 			hasMore: true,
-			openUploader: false
+			openUploader: false,
+			openAnnotator: false,
 		};
 	},
 	created: function(){
@@ -201,6 +216,27 @@ export default {
 				if(result.status != "ok") return alert("刪除失敗");
 				this.ReloadImage();
 				this.$q.notify("刪除成功");
+			}.bind(this));
+		},
+		AnnotateImage: function(){
+			this.openAnnotator = true;
+		},
+		FinishAnnotation: function(){
+			this.openAnnotator = false;
+			this.openViewImage = false;
+			this.ReloadImage();
+		},
+		DeleteAnnotation: function(){
+			this.openViewImage = false;
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.dataset = this.datasetID;
+			data.image = this.targetImage._id;
+			data._csrf = csrfToken;
+			$.post("/dataset/set-annotation",data,function(result){
+				if(result.status != "ok") return alert("刪除標註失敗");
+				this.$q.notify("刪除標註成功");
+				this.ReloadImage();
 			}.bind(this));
 		}
 	}

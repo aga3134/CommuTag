@@ -1,8 +1,8 @@
 <template lang="html">
 	<div class="annotator bg-grey-9">
-		<div v-if="datasetSelect">
-			<annotate-image v-if="datasetSelect.annotationType=='image' " ref="annotateImage"></annotate-image>
-			<annotate-bbox v-if="datasetSelect.annotationType=='bbox' " ref="annotateBBox"></annotate-bbox>
+		<div class="fit" v-if="datasetSelect">
+			<annotator-image v-if="datasetSelect.annotationType=='image' " ref="annotatorImage" :dataset="datasetSelect" :image="imageSelect" :task="taskSelect" @setAnnotation="UploadAnnotation" @setVerification="UploadVerification" @skipTask="SkipTask"></annotator-image>
+			<annotator-bbox v-if="datasetSelect.annotationType=='bbox' " ref="annotatorBBox" :dataset="datasetSelect" :image="imageSelect" :task="taskSelect" @setAnnotation="UploadAnnotation" @setVerification="UploadVerification" @skipTask="SkipTask"></annotator-bbox>
 		</div>
 		<q-dialog v-model="openDatabaseSelect">
 			<q-card class="full-width q-pa-sm">
@@ -16,7 +16,7 @@
 			</q-card>
 		</q-dialog>
 
-		<q-page-sticky position="bottom-right" :offset="[18, 18]">
+		<q-page-sticky position="top-left" :offset="[18, 18]">
 			<div class="column q-gutter-sm">
 				<q-btn flat round class="bg-primary text-white" size="md" icon="help" @click="OpenHelp();">
 					<q-tooltip content-class="bg-primary">如何標註</q-tooltip>
@@ -32,75 +32,116 @@
 <script>
 
 import datasetSelect from "./dataset-select.vue"
-import annotateImage from "./annotate-image.vue"
-import annotateBBox from "./annotate-bbox.vue"
+import annotatorImage from "./annotator-image.vue"
+import annotatorBBox from "./annotator-bbox.vue"
 
 export default {
 	name:"annotator",
 	components:{
 		"dataset-select":datasetSelect,
-		"annotate-image":annotateImage,
-		"annotate-bbox":annotateBBox
+		"annotator-image":annotatorImage,
+		"annotator-bbox":annotatorBBox
 	},
 	props: {
 		dataset: Object,
 		image: Object,
-		task: String
+		autoTask: Boolean
 	},
 	data: function () {
 		return {
 			datasetSelect:null,
 			imageSelect:null,
-			mode:"",
+			taskSelect:"",
 			openDatabaseSelect: false,
 		};
 	},
 	mounted: function(){
-		if(this.dataset){
-			this.datasetSelect = this.dataset;
-			this.GenRandomTask();
+		this.datasetSelect = this.dataset;
+		this.imageSelect = this.image;
+		if(!this.dataset){
+			this.openDatabaseSelect = !this.dataset;
 		}
 		else{
-			this.openDatabaseSelect = true;
+			this.GenerateTask();
 		}
 	},
 	methods: {
 		ChangeDataset: function(){
 			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
-			this.GenRandomTask();
+			this.GenerateTask();
 			this.openDatabaseSelect = false;
 		},
-		GenRandomTask: function(){
-			function GetRandomMode(){
-				var r = Math.random();
-				return r>0.5?"annotate":"verify";
-			}
-			function GetRandomImage(){
-
-			}
-			this.mode = this.task||GetRandomMode();
-			this.imageSelect = this.image||GetRandomImage();
-			
-		},
-		UploadAnnotation: function(){
-			var dataset = this.dataset || this.datasetSelect;
-		},
-		VerifyAnnotation: function(){
-
-		},
-		OpenHelp: function(){
+		GenerateTask: function(){
 			if(!this.datasetSelect) return;
-			var annotate = null;
+			this.imageSelect = this.image;
+			this.taskSelect = this.imageSelect.annotation?"verify":"annotate";
+		},
+		GetAnnotator: function(){
+			if(!this.datasetSelect) return null;
+			var annotator = null;
 			switch(this.datasetSelect.annotationType){
 				case "image":
-					annotate = this.$refs.annotateImage;
+					annotator = this.$refs.annotatorImage;
 					break;
 				case "bbox":
-					annotate = this.$refs.annotateBBox;
+					annotator = this.$refs.annotatorBBox;
 					break;
 			};
-			if(annotate){
-				annotate.openHelp = true;
+			return annotator;
+		},
+		UploadAnnotation: function(){
+			var annotator = this.GetAnnotator();
+			if(!annotator) return;
+
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.dataset = annotator.dataset._id;
+			data.image = annotator.image._id;
+			data.annotation = annotator.GetAnnotation();
+			data._csrf = csrfToken;
+			$.post("/dataset/set-annotation",data,function(result){
+				if(result.status != "ok") return alert("標註失敗");
+				this.$q.notify("標註成功");
+				if(this.autoTask){
+					this.GenerateTask();
+				}
+				else{
+					this.$emit("done");
+				}
+			}.bind(this));
+		},
+		UploadVerification: function(agree){
+			var annotator = this.GetAnnotator();
+			if(!annotator) return;
+
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.dataset = annotator.dataset._id;
+			data.image = annotator.image._id;
+			data.agree = agree;
+			data._csrf = csrfToken;
+			$.post("/dataset/add-verification",data,function(result){
+				if(result.status != "ok") return alert("驗證失敗");
+				this.$q.notify("驗證成功");
+				if(this.autoTask){
+					this.GenerateTask();
+				}
+				else{
+					this.$emit("done");
+				}
+			}.bind(this));
+		},
+		OpenHelp: function(){
+			var annotator = this.GetAnnotator();
+			if(!annotator) return;
+			annotator.openHelp = true;
+		},
+		SkipTask: function(){
+			if(this.autoTask){
+				this.GenerateTask();
+			}
+			else{
+				this.$emit("done");
 			}
 		}
 	}

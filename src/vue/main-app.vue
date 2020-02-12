@@ -16,7 +16,7 @@
 					</q-tab-panel>
 
 					<q-tab-panel class="q-pa-none" name="annotation">
-						<annotator></annotator>
+						<annotator autoTask></annotator>
 					</q-tab-panel>
 				</q-tab-panels>
 			</q-page>
