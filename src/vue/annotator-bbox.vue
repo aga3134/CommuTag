@@ -1,6 +1,39 @@
 <template lang="html">
 	<div class="annotator-bbox bg-grey-9">
-		<div class="text-h6 text-white q-pa-md">請框選出影像中的物件並給予標籤</div>
+		<q-layout view="lHh lpr lFf" container>
+			<q-page-container>
+				<q-page class="row items-center bg-grey-7">
+					<q-img class="image" :src="image.url"></q-img>
+				</q-page>
+			</q-page-container>
+
+			<q-footer class="row items-center text-white">
+				<q-banner inline-actions class="bg-grey-6 fit" v-if="task =='annotate' ">
+					<div class="text-h6 inline-block">
+						請框選出影像中的物件並給予標籤
+					</div>
+					<template v-slot:action>
+						<q-btn class="q-ma-xs bg-primary" label="確定" @click="SetAnnotation();"></q-btn>
+						<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
+					</template>
+				</q-banner>
+
+				<q-banner inline-actions class="bg-grey-6 fit" v-if="task =='verify' ">
+					<div class="text-h6 inline-block">
+						請驗證此影像框選的物件及標籤是否正確?
+					</div>
+					
+					<template v-slot:action>
+						<q-btn class="q-ma-xs bg-primary" label="是" @click="SetVerification(true);"></q-btn>
+						<q-btn class="q-ma-xs bg-primary" label="否" @click="SetVerification(false);"></q-btn>
+						<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
+					</template>
+				</q-banner>
+
+			</q-footer>
+		</q-layout>
+
+		<div class="text-h6 text-white q-pa-md"></div>
 		<q-dialog v-model="openHelp">
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>
@@ -27,6 +60,7 @@
 export default {
 	name:"annotator-bbox",
 	props: {
+		dataset: Object,
 		image: Object,
 		task: String
 	},
@@ -39,7 +73,18 @@ export default {
 		
 	},
 	methods: {
-		
+		SetAnnotation: function(){
+			this.$emit("setAnnotation");
+		},
+		SetVerification: function(agree){
+			this.$emit("setVerification",agree);
+		},
+		GetAnnotation: function(){
+			
+		},
+		SkipTask: function(){
+			this.$emit("skipTask");
+		}
 	}
 }
 </script>

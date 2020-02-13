@@ -36,6 +36,10 @@
 				</template>
 			</q-infinite-scroll>
 
+			<div class="row justify-center q-ma-xl" v-if="filterArr.length == 0">
+				<div class="text-h5">無資料</div>
+			</div>
+
 			<q-dialog v-model="openViewImage" v-if="targetImage">
 				<q-card class="full-width">
 					<q-card-section>
@@ -44,16 +48,15 @@
 					<q-card-section>
 						<q-breadcrumbs separator=" " class="text-black" active-color="black">
 							<q-breadcrumbs-el :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-show="targetImage.lat && targetImage.lng" :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
-							<q-breadcrumbs-el :label="targetImage.annotation?'已標註':'未標註' " icon="aspect_ratio"></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-show="targetImage.annotation" :label="'驗證數 : '+targetImage.verifyNum "></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-show="targetImage.annotation" :label="'認同數 : '+targetImage.agreeNum "></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-if="targetImage.lat && targetImage.lng" :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-if="targetImage.annotation" :label="'驗證數 : '+targetImage.verifyNum "></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-if="targetImage.verifyNum>0" :label="'認同率 : '+(100*targetImage.agreeNum/targetImage.verifyNum).toFixed(0)+'%' "></q-breadcrumbs-el>
 						</q-breadcrumbs>
 					</q-card-section>
 					<q-card-actions>
-						<q-btn label="協助標註" @click="AnnotateImage();"></q-btn>
-						<q-btn label="刪除標註" @click="DeleteAnnotation();"></q-btn>
-						<q-btn label="刪除影像" @click="DeleteImage();"></q-btn>
+						<q-btn flat label="協助標註" @click="AnnotateImage();"></q-btn>
+						<q-btn flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
+						<q-btn flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</q-dialog>
@@ -155,7 +158,6 @@ export default {
 			this.$refs.imageScroll.reset();
 			this.$refs.imageScroll.resume();
 			this.targetImage = null;
-			this.openUploader = false;
 			this.openViewImage = false;
 		},
 		LoadMoreImage: function(index,done){

@@ -135,6 +135,19 @@ datasetController.ListImage = function(param){
 	});
 };
 
+datasetController.ListImageForAnnotation = function(param){
+	var Image = mongoose.model("image"+param.dataset, ImageSchema);
+	Image.find({},{"__v":0})
+	.$where('this.verifyNum < 10 || this.agreeNum < this.verifyNum*0.9')
+	.exec(function(err, images){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"list image for annotation fail"});
+		}
+		param.succFunc(images);
+	});
+};
+
 datasetController.DeleteImage = function(param){
 	var Image = mongoose.model("image"+param.dataset, ImageSchema);
 	Image.deleteOne({_id:param.image},function(err){
@@ -154,8 +167,7 @@ datasetController.SetAnnotation = function(param){
 		data.user = param.user._id;
 		data.annotation = param.annotation;
 	}
-	var update = {};
-	update["$set"] = {
+	var update = {
 		annotation: data,
 		verifyNum: 0,
 		agreeNum: 0

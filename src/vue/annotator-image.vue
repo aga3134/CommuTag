@@ -8,7 +8,7 @@
 			</q-page-container>
 
 			<q-footer class="row items-center text-white">
-				<q-banner inline-actions class="bg-grey-8 fit" v-if="task =='annotate' ">
+				<q-banner inline-actions class="bg-grey-6 fit" v-if="task =='annotate' ">
 					<div class="text-h6 inline-block">
 						請選擇符合此影像的標籤
 					</div>
@@ -19,7 +19,7 @@
 					</template>
 				</q-banner>
 
-				<q-banner inline-actions class="bg-grey-8 fit" v-if="task =='verify' ">
+				<q-banner inline-actions class="bg-grey-6 fit" v-if="task =='verify' ">
 					<div class="text-h6 inline-block">
 						請驗證此影像是否為 {{image.annotation.annotation}}?
 					</div>
@@ -94,11 +94,6 @@ export default {
 .annotator-image{
 	width: 100%;
 	height: 100%;
-	.image{
-		margin: auto;
-		max-width: 800px;
-		max-height: 100%;
-	}
 	.tag-select{
 		width: 150px;
 		display: inline-block;

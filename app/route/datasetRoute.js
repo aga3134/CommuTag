@@ -153,6 +153,18 @@ router.post('/delete-image', function(req, res) {
 	datasetController.DeleteImage(param);
 });
 
+router.get('/list-image-for-annotation', function(req, res) {
+	var param = {};
+	param.dataset = req.query.dataset;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.ListImageForAnnotation(param);
+});
+
 router.post('/set-annotation', util.CheckAdmin,util.CSRF, function(req, res){
 	var param = {};
 	param.user = req.user;

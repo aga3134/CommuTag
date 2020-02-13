@@ -1,9 +1,13 @@
 <template lang="html">
 	<div class="annotator bg-grey-9">
-		<div class="fit" v-if="datasetSelect">
+		<div class="fit" v-if="datasetSelect && imageSelect">
 			<annotator-image v-if="datasetSelect.annotationType=='image' " ref="annotatorImage" :dataset="datasetSelect" :image="imageSelect" :task="taskSelect" @setAnnotation="UploadAnnotation" @setVerification="UploadVerification" @skipTask="SkipTask"></annotator-image>
 			<annotator-bbox v-if="datasetSelect.annotationType=='bbox' " ref="annotatorBBox" :dataset="datasetSelect" :image="imageSelect" :task="taskSelect" @setAnnotation="UploadAnnotation" @setVerification="UploadVerification" @skipTask="SkipTask"></annotator-bbox>
 		</div>
+		<div class="fit row justify-center items-center" v-else>
+			<div class="text-h5 text-white">{{status}}</div>
+		</div>
+
 		<q-dialog v-model="openDatabaseSelect">
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>
@@ -53,13 +57,16 @@ export default {
 			imageSelect:null,
 			taskSelect:"",
 			openDatabaseSelect: false,
+			imageArr: [],
+			status: ""
 		};
 	},
 	mounted: function(){
 		this.datasetSelect = this.dataset;
 		this.imageSelect = this.image;
 		if(!this.dataset){
-			this.openDatabaseSelect = !this.dataset;
+			this.status = "請選擇資料集";
+			this.openDatabaseSelect = true;
 		}
 		else{
 			this.GenerateTask();
@@ -67,13 +74,39 @@ export default {
 	},
 	methods: {
 		ChangeDataset: function(){
-			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
-			this.GenerateTask();
 			this.openDatabaseSelect = false;
+			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
+			var url = "/dataset/list-image-for-annotation";
+			url += "?dataset="+this.datasetSelect._id;
+			$.get(url,function(result){
+				console.log(result.data);
+				if(result.status != "ok") return;
+				for(var i=0;i<result.data.length;i++){
+					var image = result.data[i];
+					image.url = "/static/upload/dataset/"+this.datasetSelect._id+"/image/"+image._id+".jpg";
+				}
+				this.imageArr = result.data;
+				this.GenerateTask();
+			}.bind(this));
+			
 		},
 		GenerateTask: function(){
-			if(!this.datasetSelect) return;
-			this.imageSelect = this.image;
+			if(!this.datasetSelect){
+				this.status = "請選擇資料集";
+				return;
+			}
+			
+			var GetRandomImage = function(){
+				if(this.imageArr.length == 0) return null;
+				var index = Math.floor(Math.random()*this.imageArr.length);
+				return this.imageArr[index];
+			}.bind(this);
+
+			this.imageSelect = this.image || GetRandomImage();
+			if(!this.imageSelect){
+				this.status = "此資料集影像皆已標註完成";
+				return;
+			}
 			this.taskSelect = this.imageSelect.annotation?"verify":"annotate";
 		},
 		GetAnnotator: function(){
