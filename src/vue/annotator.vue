@@ -79,7 +79,6 @@ export default {
 			var url = "/dataset/list-image-for-annotation";
 			url += "?dataset="+this.datasetSelect._id;
 			$.get(url,function(result){
-				console.log(result.data);
 				if(result.status != "ok") return;
 				for(var i=0;i<result.data.length;i++){
 					var image = result.data[i];

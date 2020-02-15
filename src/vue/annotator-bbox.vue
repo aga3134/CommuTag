@@ -1,39 +1,38 @@
 <template lang="html">
 	<div class="annotator-bbox bg-grey-9">
-		<q-layout view="lHh lpr lFf" container>
-			<q-page-container>
-				<q-page class="row items-center bg-grey-7">
-					<q-img class="image" :src="image.url"></q-img>
-				</q-page>
-			</q-page-container>
+		<div class="column fit bg-grey-7" v-if="task=='view' ">
+			<q-img contain class="col" :src="image.url">
+				<div class="absolute-bottom text-subtitle1 text-center" v-if="image.annotation">
+					{{image.annotation.annotation}}
+				</div>
+			</q-img>
+		</div>
+		<div class="column fit bg-grey-7" v-else>
+			<q-img contain class="col q-my-md" :src="image.url"></q-img>
+			
+			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='annotate' ">
+				<div class="text-h6 inline-block">
+					請框選出影像中的物件並給予標籤
+				</div>
+				<template v-slot:action>
+					<q-btn class="q-ma-xs bg-primary" label="確定" @click="SetAnnotation();"></q-btn>
+					<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
+				</template>
+			</q-banner>
 
-			<q-footer class="row items-center text-white">
-				<q-banner inline-actions class="bg-grey-6 fit" v-if="task =='annotate' ">
-					<div class="text-h6 inline-block">
-						請框選出影像中的物件並給予標籤
-					</div>
-					<template v-slot:action>
-						<q-btn class="q-ma-xs bg-primary" label="確定" @click="SetAnnotation();"></q-btn>
-						<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
-					</template>
-				</q-banner>
+			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='verify' ">
+				<div class="text-h6 inline-block">
+					請驗證此影像框選的物件及標籤是否正確?
+				</div>
+				
+				<template v-slot:action>
+					<q-btn class="q-ma-xs bg-primary" label="是" @click="SetVerification(true);"></q-btn>
+					<q-btn class="q-ma-xs bg-primary" label="否" @click="SetVerification(false);"></q-btn>
+					<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
+				</template>
+			</q-banner>
+		</div>
 
-				<q-banner inline-actions class="bg-grey-6 fit" v-if="task =='verify' ">
-					<div class="text-h6 inline-block">
-						請驗證此影像框選的物件及標籤是否正確?
-					</div>
-					
-					<template v-slot:action>
-						<q-btn class="q-ma-xs bg-primary" label="是" @click="SetVerification(true);"></q-btn>
-						<q-btn class="q-ma-xs bg-primary" label="否" @click="SetVerification(false);"></q-btn>
-						<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
-					</template>
-				</q-banner>
-
-			</q-footer>
-		</q-layout>
-
-		<div class="text-h6 text-white q-pa-md"></div>
 		<q-dialog v-model="openHelp">
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>

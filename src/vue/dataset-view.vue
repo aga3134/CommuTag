@@ -43,7 +43,7 @@
 			<q-dialog v-model="openViewImage" v-if="targetImage">
 				<q-card class="full-width">
 					<q-card-section>
-						<q-img :src="targetImage.url"></q-img>
+						<annotator-view :dataset="info" :image="targetImage"></annotator-view>
 					</q-card-section>
 					<q-card-section>
 						<q-breadcrumbs separator=" " class="text-black" active-color="black">
@@ -95,6 +95,7 @@ import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import uploader from "./uploader.vue"
 import annotator from "./annotator.vue"
+import annotatorView from "./annotator-view.vue"
 
 export default {
 	name:"dataset-view",
@@ -102,6 +103,7 @@ export default {
 		"topbar":topbar,
 		"uploader":uploader,
 		"annotator":annotator,
+		"annotator-view":annotatorView
 	},
 	data: function () {
 		return {

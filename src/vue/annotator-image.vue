@@ -1,6 +1,13 @@
 <template lang="html">
 	<div class="annotator-image">
-		<div class="column fit bg-grey-7">
+		<div class="column fit bg-grey-7" v-if="task=='view' ">
+			<q-img contain class="col" :src="image.url">
+				<div class="absolute-bottom text-subtitle1 text-center" v-if="image.annotation">
+					{{image.annotation.annotation}}
+				</div>
+			</q-img>
+		</div>
+		<div class="column fit bg-grey-7" v-else>
 			<q-img contain class="col q-my-md" :src="image.url"></q-img>
 
 			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='annotate' ">
@@ -57,7 +64,8 @@ export default {
 	props: {
 		dataset: Object,
 		image: Object,
-		task: String
+		task: String,
+		status: String
 	},
 	data: function () {
 		return {
