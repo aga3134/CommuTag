@@ -6,7 +6,7 @@
 
 		<q-page-container>
 			<q-page class="bg-grey-1">
-				<q-tab-panels v-model="tab" class="absolute full-width full-height" animated>
+				<q-tab-panels v-model="tab" class="absolute fit" animated>
 					<q-tab-panel name="dataset">
 						<dataset-list mode="view"></dataset-list>
 					</q-tab-panel>
