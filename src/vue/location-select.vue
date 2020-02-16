@@ -1,9 +1,19 @@
 <template lang="html">
-	<div class="location-select">
-		<div class="text-h6">選擇地點</div>
-		<div class="map" ref="map"></div>
-		<div class="text-center">{{status}}</div>
-	</div>
+	<q-card class="full-width q-pa-sm">
+		<q-card-section>
+			<div class="location-select">
+				<div class="text-h6">選擇地點</div>
+				<div class="map" ref="map"></div>
+				<div class="text-center">{{status}}</div>
+			</div>
+		</q-card-section>
+		<q-card-actions class="justify-center">
+			<q-btn flat label="確定" @click="ConfirmSelect();"></q-btn>
+			<q-btn flat label="取消" @click="CancelSelect();"></q-btn>
+		</q-card-actions>
+	</q-card>
+
+	
 </template>
 
 <script>
@@ -79,6 +89,12 @@ export default {
 				this.status = "瀏覽器不支援GPS-請點選位置";
 			}
 		},
+		ConfirmSelect: function(){
+			this.$emit("confirm");
+		},
+		CancelSelect: function(){
+			this.$emit("cancel");
+		}
 	}
 }
 </script>

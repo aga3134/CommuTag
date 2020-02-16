@@ -23,38 +23,15 @@
 		</div>
 
 		<div class="full-width" v-show="stepArr[step] && stepArr[step].id == 'crop' ">
-			<image-edit ref="imageEdit" ></image-edit>
-			
-			<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
-				<q-btn color="primary" label="確定" @click="NextStep();">
-				</q-btn>
-				<q-btn color="primary" label="取消" @click="PrevStep();">
-				</q-btn>
-			</div>
+			<image-edit ref="imageEdit" @confirm="NextStep();" @cancel="PrevStep();"></image-edit>
 		</div>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'dataset'">
-			<q-card class="full-width q-pa-sm">
-				<q-card-section>
-					<dataset-select ref="datasetSelect" @change="DatasetChange();"></dataset-select>
-				</q-card-section>
-				<q-card-actions class="justify-center">
-					<q-btn flat label="確定" @click="NextStep();"></q-btn>
-					<q-btn flat label="取消" @click="PrevStep();"></q-btn>
-				</q-card-actions>
-			</q-card>
+			<dataset-select ref="datasetSelect" @change="DatasetChange();" @confirm="NextStep();" @cancel="PrevStep();"></dataset-select>
 		</q-dialog>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'location'">
-			<q-card class="full-width q-pa-sm">
-				<q-card-section>
-					<location-select ref="locationSelect" @change="LocationChange();"></location-select>
-				</q-card-section>
-				<q-card-actions class="justify-center">
-					<q-btn flat label="確定" @click="NextStep();"></q-btn>
-					<q-btn flat label="取消" @click="PrevStep();"></q-btn>
-				</q-card-actions>
-			</q-card>
+			<location-select ref="locationSelect" @change="LocationChange();" @confirm="NextStep();" @cancel="PrevStep();"></location-select>
 		</q-dialog>
 
 		<image-upload ref="uploader" v-show="false"></image-upload>

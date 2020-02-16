@@ -1,25 +1,32 @@
 <template lang="html">
-	<div class="dataset-select">
-		<div class="text-h6">選擇資料集</div>
-		
-		<q-scroll-area style="height: 300px;">
-			<q-infinite-scroll @load="LoadMoreDataset" ref="datasetScroll">
-				<q-input placeholder="輸入篩選文字" outlined dense square v-model="searchKey" @change="ReloadDataset();"></q-input>
-				<q-list bordered separator>
-					<q-item clickable v-for="(dataset,i) in datasetArr" :key="i" :active="selectIndex == i" active-class="bg-green-2" @click="SelectItem(i);">
-						{{dataset.name}}
-					</q-item>
-				</q-list>
+	<q-card class="dataset-select full-width q-pa-sm">
+		<q-card-section>
+			<div class="text-h6">選擇資料集</div>
+	
+			<q-scroll-area style="height: 300px;">
+				<q-infinite-scroll @load="LoadMoreDataset" ref="datasetScroll">
+					<q-input placeholder="輸入篩選文字" outlined dense square v-model="searchKey" @change="ReloadDataset();"></q-input>
+					<q-list bordered separator>
+						<q-item clickable v-for="(dataset,i) in datasetArr" :key="i" :active="selectIndex == i" active-class="bg-green-2" @click="SelectItem(i);" @dblclick="ConfirmSelect();">
+							{{dataset.name}}
+						</q-item>
+					</q-list>
 
-				<template v-slot:loading>
-					<div class="row justify-center q-my-md">
-						<q-spinner-dots color="primary" size="40px" />
-					</div>
-				</template>
-			</q-infinite-scroll>
-		</q-scroll-area>
-		
-	</div>
+					<template v-slot:loading>
+						<div class="row justify-center q-my-md">
+							<q-spinner-dots color="primary" size="40px" />
+						</div>
+					</template>
+				</q-infinite-scroll>
+			</q-scroll-area>
+		</q-card-section>
+
+		<q-card-actions class="justify-center">
+			<q-btn flat label="確定" @click="ConfirmSelect();"></q-btn>
+			<q-btn flat label="取消" @click="CancelSelect();"></q-btn>
+		</q-card-actions>
+	</q-card>
+
 </template>
 
 <script>
@@ -73,6 +80,12 @@ export default {
 		SelectItem: function(i){
 			this.selectIndex = i;
 			this.$emit("change");
+		},
+		ConfirmSelect: function(){
+			this.$emit("confirm");
+		},
+		CancelSelect: function(){
+			this.$emit("cancel");
 		}
 	}
 }

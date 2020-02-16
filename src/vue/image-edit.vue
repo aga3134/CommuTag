@@ -21,6 +21,13 @@
 			</q-btn>
 		</div>
 
+		<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
+			<q-btn color="primary" label="確定" @click="ConfirmEdit();">
+			</q-btn>
+			<q-btn color="primary" label="取消" @click="CancelEdit();">
+			</q-btn>
+		</div>
+
 	</div>
 </template>
 
@@ -70,6 +77,12 @@ export default {
 		},
 		GetCanvasData: function(){
 			return this.cropper.getCroppedCanvas();
+		},
+		ConfirmEdit: function(){
+			this.$emit("confirm");
+		},
+		CancelEdit: function(){
+			this.$emit("cancel");
 		}
 	}
 }

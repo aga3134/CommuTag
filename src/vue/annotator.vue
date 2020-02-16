@@ -9,15 +9,7 @@
 		</div>
 
 		<q-dialog v-model="openDatabaseSelect">
-			<q-card class="full-width q-pa-sm">
-				<q-card-section>
-					<dataset-select ref="datasetSelect"></dataset-select>
-				</q-card-section>
-				<q-card-actions class="justify-center">
-					<q-btn flat label="確定" @click="ChangeDataset();"></q-btn>
-					<q-btn flat label="取消" v-close-popup></q-btn>
-				</q-card-actions>
-			</q-card>
+			<dataset-select ref="datasetSelect" @confirm="ChangeDataset();"></dataset-select>
 		</q-dialog>
 
 		<q-page-sticky position="top-left" :offset="[18, 18]">

@@ -22,7 +22,7 @@
 			
 			<q-infinite-scroll @load="LoadMoreImage" ref="imageScroll">
 				<div class="row q-pa-md q-col-gutter-md">
-					<div class="col-12 col-sm-6 col-md-3 q-pa-sm" v-for="(image,i) in filterArr" :key="i" transition="scale">
+					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in filterArr" :key="i" transition="scale">
 						<q-card class="bg-grey-7 text-white" @click="ViewImage(image);">
 							<q-img :src="image.url" :ratio="16/9"></q-img>
 						</q-card>
