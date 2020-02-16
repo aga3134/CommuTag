@@ -1,16 +1,16 @@
 <template lang="html">
 	<div class="annotator-image">
-		<div class="column fit bg-grey-7" v-if="task=='view' ">
+		<div class="column fit" v-if="task=='view' ">
 			<q-img contain class="col" :src="image.url">
 				<div class="absolute-bottom text-subtitle1 text-center" v-if="image.annotation">
 					{{image.annotation.annotation}}
 				</div>
 			</q-img>
 		</div>
-		<div class="column fit bg-grey-7" v-else>
+		<div class="column fit" v-else>
 			<q-img contain class="col q-my-md" :src="image.url"></q-img>
 
-			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='annotate' ">
+			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='annotate' ">
 				<div class="text-h6 inline-block">
 					請選擇符合此影像的標籤
 				</div>
@@ -21,7 +21,7 @@
 				</template>
 			</q-banner>
 
-			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='verify' ">
+			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='verify' ">
 				<div class="text-h6 inline-block">
 					請驗證此影像是否為 {{image.annotation.annotation}}?
 				</div>

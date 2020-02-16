@@ -1,16 +1,14 @@
 <template lang="html">
-	<div class="annotator-bbox bg-grey-9">
-		<div class="column fit bg-grey-7" v-if="task=='view' ">
-			<q-img contain class="col" :src="image.url">
-				<div class="absolute-bottom text-subtitle1 text-center" v-if="image.annotation">
-					{{image.annotation.annotation}}
-				</div>
-			</q-img>
+	<div class="annotator-bbox">
+		<img class="hidden" ref="srcImage" :src="image.url" @load="ChangeImage">
+
+		<div class="column fit" v-if="task=='view' ">
+			<div class="col" ref="viewCanvas"></div>
 		</div>
-		<div class="column fit bg-grey-7" v-else>
-			<q-img contain class="col q-my-md" :src="image.url"></q-img>
-			
-			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='annotate' ">
+		<div class="column fit" v-else>
+			<div class="col q-my-md" ref="editCanvas"></div>
+
+			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='annotate' ">
 				<div class="text-h6 inline-block">
 					請框選出影像中的物件並給予標籤
 				</div>
@@ -20,7 +18,7 @@
 				</template>
 			</q-banner>
 
-			<q-banner inline-actions class="bg-grey-9 text-white col-shrink" v-if="task =='verify' ">
+			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='verify' ">
 				<div class="text-h6 inline-block">
 					請驗證此影像框選的物件及標籤是否正確?
 				</div>
@@ -65,13 +63,51 @@ export default {
 	},
 	data: function () {
 		return {
-			openHelp: false
+			openHelp: false,
+			container: null,
+			stage: null,
+			imageLayer: null,
+			annotationLayer: null,
+			imageNode: null,
+			annotationNode: null
 		};
 	},
 	mounted: function(){
-		
+		this.InitCanvas();
 	},
 	methods: {
+		InitCanvas: function(){
+			this.container = this.task=="view"?this.$refs.viewCanvas:this.$refs.editCanvas;
+			this.stage = new Konva.Stage({
+				container: this.container,
+				width: this.container.clientWidth,
+				height: this.container.clientHeight
+			});
+			this.imageLayer = new Konva.Layer();
+			this.annotationLayer = new Konva.Layer();
+			this.stage.add(this.imageLayer);
+			this.stage.add(this.annotationLayer);
+		},
+		ChangeImage: function(){
+			if(this.imageNode){
+				this.imageNode.destroy();
+			}
+			var srcImage = this.$refs.srcImage;
+			var w = this.container.clientWidth;
+			var h = this.container.clientHeight;
+			var scaleW = w/srcImage.width;
+			var scaleH = h/srcImage.height;
+			var scale = Math.min(scaleW,scaleH);
+			this.imageNode = new Konva.Image({
+				x: (w-srcImage.width*scale)*0.5,
+				y: (h-srcImage.height*scale)*0.5,
+				width: srcImage.width*scale,
+				height: srcImage.height*scale,
+				image: srcImage,
+			});
+			this.imageLayer.add(this.imageNode);
+			this.imageLayer.draw();
+		},
 		SetAnnotation: function(){
 			this.$emit("setAnnotation");
 		},

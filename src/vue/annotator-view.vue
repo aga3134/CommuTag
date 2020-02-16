@@ -1,5 +1,5 @@
 <template lang="html">
-	<div class="annotator-view bg-grey-9">
+	<div class="annotator-view bg-grey-7">
 		<div class="fit" v-if="dataset && image">
 			<annotator-image v-if="dataset.annotationType=='image' " :dataset="dataset" :image="image" task="view"></annotator-image>
 			<annotator-bbox v-if="dataset.annotationType=='bbox' " :dataset="dataset" :image="image" task="view"></annotator-bbox>

@@ -42,9 +42,9 @@
 
 			<q-dialog v-model="openViewImage" v-if="targetImage">
 				<q-card class="full-width">
-					<q-card-section>
+					<div style="height: 400px;">
 						<annotator-view :dataset="info" :image="targetImage"></annotator-view>
-					</q-card-section>
+					</div>
 					<q-card-section>
 						<q-breadcrumbs separator=" " class="text-black" active-color="black">
 							<q-breadcrumbs-el :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>

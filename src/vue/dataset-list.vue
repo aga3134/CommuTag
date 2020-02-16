@@ -21,14 +21,14 @@
 			</div>
 		</div>
 		
-		<div class="row q-col-gutter-md">
-			<div class="col-12 col-sm-6 col-md-3 q-pa-md" v-for="dataset in datasetArr">
-				<q-card class="bg-grey-7 text-white">
-					<q-img :src="dataset.picCover || '/static/image/logo-16-9.png' " :ratio="16/9"></q-img>
+		<div class="row q-col-gutter-md q-mb-md">
+			<div class="col-12 col-sm-6 col-md-3" v-for="dataset in datasetArr">
+				<q-card class="bg-grey-7 text-white" >
+					<q-img :src="dataset.picCover || '/static/image/logo-16-9.png' " :ratio="16/9" class="cursor-pointer" @click="GoToDataset(dataset);"></q-img>
 
 					<q-separator dark></q-separator>
 
-					<q-card-section>
+					<q-card-section class="cursor-pointer" @click="GoToDataset(dataset);">
 						<div class="text-h6">{{dataset.name}}</div>
 						<div class="text-subtitle2">圖片數: {{dataset.picNum}}</div>
 						<div class="text-subtitle2">標註數: {{dataset.tagNum}}</div>
@@ -37,17 +37,10 @@
 					<q-separator dark></q-separator>
 
 					<q-card-actions align="right" v-if="mode == 'edit' ">
-						<q-btn flat icon="remove_red_eye" label="檢視"></q-btn>
 						<q-btn flat icon="edit" label="修改" @click="ModifyDataset(dataset);"></q-btn>
 						<q-btn flat icon="delete" label="刪除" @click="DeleteDataset(dataset);"></q-btn>
 					</q-card-actions>
 
-					<q-card-actions align="right" v-if="mode == 'view' ">
-						
-						<q-btn flat icon="remove_red_eye" label="檢視" @click="GoToDataset(dataset);"></q-btn>
-						
-						<q-btn flat icon="cloud_download" label="下載" @click="DownloadDataset(dataset);"></q-btn>
-					</q-card-actions>
 				</q-card>
 			</div>
 		</div>
@@ -144,9 +137,6 @@ export default {
 					this.ReloadDataset();
 				}.bind(this));
 			}
-		},
-		DownloadDataset: function(dataset){
-			
 		},
 		GoToDataset: function(dataset){
 			window.location.href="/view?id="+dataset._id;
