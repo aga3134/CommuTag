@@ -6,7 +6,7 @@
 			<div class="col" ref="viewCanvas"></div>
 		</div>
 		<div class="column fit" v-else>
-			<div class="col q-my-md" ref="editCanvas"></div>
+			<div class="col q-ma-auto" ref="editCanvas"></div>
 
 			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='annotate' ">
 				<div class="text-h6 inline-block">
@@ -78,11 +78,53 @@ export default {
 	methods: {
 		InitCanvas: function(){
 			this.container = this.task=="view"?this.$refs.viewCanvas:this.$refs.editCanvas;
+
+			var BoundStage = function(pos){
+				var size = this.stage.size();
+				var scale = this.stage.scale();
+				if(pos.x > 0) pos.x = 0;
+				else if(pos.x+size.width*scale.x<size.width){
+					pos.x = size.width*(1-scale.x);
+				}
+				if(pos.y > 0) pos.y = 0;
+				else if(pos.y+size.height*scale.y<size.height){
+					pos.y = size.height*(1-scale.y);
+				}
+				return pos;
+			}.bind(this);
+
 			this.stage = new Konva.Stage({
 				container: this.container,
 				width: this.container.clientWidth,
-				height: this.container.clientHeight
+				height: this.container.clientHeight,
+				draggable: true,
+				dragBoundFunc: BoundStage
 			});
+			//make konva center align
+			this.stage.content.style.margin = "auto";
+
+			this.stage.on("wheel", function(e){
+				e.evt.preventDefault();
+				var factor = 0.95;
+				var old = this.stage.scaleX();
+				var s = e.evt.deltaY>0?old*factor:old/factor;
+				if(s < 1) s = 1;
+				//scale之後，滑鼠還是要指在影像上的同一個pixel
+				var mousePt = this.stage.getPointerPosition();
+				var imagePt = {
+					x: (mousePt.x-this.stage.x())/old,
+					y: (mousePt.y-this.stage.y())/old
+				};
+				this.stage.scale({x:s,y:s});
+				var newPos = {
+					x:-imagePt.x*s+mousePt.x,
+					y:-imagePt.y*s+mousePt.y
+				};
+				newPos = BoundStage(newPos);
+				this.stage.position(newPos);
+				this.stage.draw();
+			}.bind(this));
+
 			this.imageLayer = new Konva.Layer();
 			this.annotationLayer = new Konva.Layer();
 			this.stage.add(this.imageLayer);
@@ -93,16 +135,22 @@ export default {
 				this.imageNode.destroy();
 			}
 			var srcImage = this.$refs.srcImage;
-			var w = this.container.clientWidth;
-			var h = this.container.clientHeight;
-			var scaleW = w/srcImage.width;
-			var scaleH = h/srcImage.height;
+			var cw = this.container.clientWidth;
+			var ch = this.container.clientHeight;
+			var scaleW = cw/srcImage.width;
+			var scaleH = ch/srcImage.height;
 			var scale = Math.min(scaleW,scaleH);
+			var w = srcImage.width*scale;
+			var h = srcImage.height*scale;
+			this.stage.size({
+				width: w,
+				height: h,
+			});
 			this.imageNode = new Konva.Image({
-				x: (w-srcImage.width*scale)*0.5,
-				y: (h-srcImage.height*scale)*0.5,
-				width: srcImage.width*scale,
-				height: srcImage.height*scale,
+				x: 0,
+				y: 0,
+				width: w,
+				height: h,
 				image: srcImage,
 			});
 			this.imageLayer.add(this.imageNode);
