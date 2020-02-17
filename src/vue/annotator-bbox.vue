@@ -66,10 +66,11 @@ export default {
 			openHelp: false,
 			container: null,
 			stage: null,
-			imageLayer: null,
-			annotationLayer: null,
+			layer: null,
 			imageNode: null,
-			annotationNode: null
+			annotationNode: null,
+			isDrag: false,
+			activeRect: null
 		};
 	},
 	mounted: function(){
@@ -81,14 +82,42 @@ export default {
 
 			var BoundStage = function(pos){
 				var size = this.stage.size();
+				var imSize = this.imageNode.size();
 				var scale = this.stage.scale();
-				if(pos.x > 0) pos.x = 0;
-				else if(pos.x+size.width*scale.x<size.width){
-					pos.x = size.width*(1-scale.x);
+				//影像四個角位置
+				var left = (size.width-imSize.width)*0.5*scale.x;
+				var top = (size.height-imSize.height)*0.5*scale.y;
+				var right = (size.width+imSize.width)*0.5*scale.x;
+				var bottom = (size.height+imSize.height)*0.5*scale.y;
+				//影像scale後寬度>container寬度
+				if(imSize.width*scale.x > size.width){
+					//讓影像寬cover整個container寬
+					if(pos.x+left > 0) pos.x = -left;
+					else if(pos.x+right < size.width){
+						pos.x = size.width-right;
+					}
 				}
-				if(pos.y > 0) pos.y = 0;
-				else if(pos.y+size.height*scale.y<size.height){
-					pos.y = size.height*(1-scale.y);
+				else{
+					//讓container寬contain整個影像寬
+					if(pos.x+left < 0) pos.x = -left;
+					else if(pos.x+right > size.width){
+						pos.x = size.width-right;
+					}
+				}
+				//影像scale後高度>container高度
+				if(imSize.height*scale.y > size.height){
+					//讓影像高cover整個container高
+					if(pos.y+top > 0) pos.y = -top;
+					else if(pos.y+bottom < size.height){
+						pos.y = size.height-bottom;
+					}
+				}
+				else{
+					//讓container高contain整個影像高
+					if(pos.y+top < 0) pos.y = -top;
+					else if(pos.y+bottom > size.height){
+						pos.y = size.height-bottom;
+					}
 				}
 				return pos;
 			}.bind(this);
@@ -97,7 +126,7 @@ export default {
 				container: this.container,
 				width: this.container.clientWidth,
 				height: this.container.clientHeight,
-				draggable: true,
+				draggable: false,
 				dragBoundFunc: BoundStage
 			});
 			//make konva center align
@@ -122,13 +151,42 @@ export default {
 				};
 				newPos = BoundStage(newPos);
 				this.stage.position(newPos);
-				this.stage.draw();
+				this.stage.batchDraw();
 			}.bind(this));
 
-			this.imageLayer = new Konva.Layer();
-			this.annotationLayer = new Konva.Layer();
-			this.stage.add(this.imageLayer);
-			this.stage.add(this.annotationLayer);
+			this.stage.on('mousedown touchstart', function(e){
+				var mousePt = this.stage.getPointerPosition();
+				this.isDrag = true;
+				this.activeRect = new Konva.Rect({
+					x: mousePt.x,
+					y: mousePt.y,
+					width: 0,
+					height: 0,
+					fill: "rgba(0,0,0,0)",
+					stroke: "red",
+				});
+				this.layer.add(this.activeRect);
+				this.layer.batchDraw();
+			}.bind(this));
+			
+			this.stage.on('mousemove touchmove', function(e){
+				if(!this.isDrag || !this.activeRect) return;
+				var mousePt = this.stage.getPointerPosition();
+				var origin = this.activeRect.position();
+				this.activeRect.setAttrs({
+					width: mousePt.x-origin.x,
+					height: mousePt.y-origin.y
+				});
+				this.layer.batchDraw();
+			}.bind(this));
+
+			this.stage.on('mouseup touchend', function() {
+        		this.isDrag = false;
+        		this.activeRect = null;
+			}.bind(this));
+
+			this.layer = new Konva.Layer();
+			this.stage.add(this.layer);
 		},
 		ChangeImage: function(){
 			if(this.imageNode){
@@ -142,19 +200,16 @@ export default {
 			var scale = Math.min(scaleW,scaleH);
 			var w = srcImage.width*scale;
 			var h = srcImage.height*scale;
-			this.stage.size({
-				width: w,
-				height: h,
-			});
+			
 			this.imageNode = new Konva.Image({
-				x: 0,
-				y: 0,
+				x: (cw-w)*0.5,
+				y: (ch-h)*0.5,
 				width: w,
 				height: h,
 				image: srcImage,
 			});
-			this.imageLayer.add(this.imageNode);
-			this.imageLayer.draw();
+			this.layer.add(this.imageNode);
+			this.layer.draw();
 		},
 		SetAnnotation: function(){
 			this.$emit("setAnnotation");
