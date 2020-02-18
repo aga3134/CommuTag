@@ -1,6 +1,6 @@
 <template lang="html">
-	<div class="tag-select q-pa-sm">
-		<q-select filled dense bg-color="white" v-model="selectTag" use-input hide-selected fill-input input-debounce="0" :options="tagArr" @filter="FilterTag" @input="SelectTag"></q-select>
+	<div class="tag-select">
+		<q-select filled dense bg-color="grey-2" v-model="selectTag" use-input hide-selected fill-input input-debounce="0" :options="tagArr" @filter="FilterTag" @input="SelectTag"></q-select>
 		
 	</div>
 </template>

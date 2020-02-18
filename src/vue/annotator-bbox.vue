@@ -31,6 +31,22 @@
 			</q-banner>
 		</div>
 
+		<q-dialog v-model="openTagSelect" persistent >
+			<q-card>
+				<q-card-section>
+					<div class="text-h6 q-py-sm">請選擇標籤</div>
+					<tag-select :dataset="dataset" ref="tagSelect"></tag-select>
+				</q-card-section>
+				<q-separator></q-separator>
+				<q-card-actions align="around">
+					<q-btn flat v-if="newRect" label="新增" @click="AddAnnotation();"></q-btn>
+					<q-btn v-else flat label="修改" @click="ConfirmTagSelect();"></q-btn>
+					<q-btn flat label="取消" @click="CancelTagSelect();"></q-btn>
+					<q-btn v-if="target" flat label="刪除" @click="RemoveAnnotation();"></q-btn>
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
+
 		<q-dialog v-model="openHelp">
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>
@@ -53,9 +69,13 @@
 </template>
 
 <script>
+import tagSelect from "./tag-select.vue"
 
 export default {
 	name:"annotator-bbox",
+	components:{
+		"tag-select":tagSelect
+	},
 	props: {
 		dataset: Object,
 		image: Object,
@@ -64,19 +84,27 @@ export default {
 	data: function () {
 		return {
 			openHelp: false,
+			openTagSelect: false,
 			container: null,
 			stage: null,
 			layer: null,
 			imageNode: null,
-			annotationNode: null,
+			annotationArr: [],
 			isDrag: false,
-			activeRect: null
+			newRect: null,
+			target: null,
 		};
 	},
 	mounted: function(){
 		this.InitCanvas();
 	},
 	methods: {
+		GetRelativeMousePos: function(node) {
+			var transform = node.getAbsoluteTransform().copy();
+			transform.invert();
+			var pos = node.getStage().getPointerPosition();
+			return transform.point(pos);
+		},
 		InitCanvas: function(){
 			this.container = this.task=="view"?this.$refs.viewCanvas:this.$refs.editCanvas;
 
@@ -155,38 +183,188 @@ export default {
 			}.bind(this));
 
 			this.stage.on('mousedown touchstart', function(e){
-				var mousePt = this.stage.getPointerPosition();
+				var mousePt = this.GetRelativeMousePos(this.stage);
 				this.isDrag = true;
-				this.activeRect = new Konva.Rect({
+				this.newRect = new Konva.Rect({
 					x: mousePt.x,
 					y: mousePt.y,
 					width: 0,
 					height: 0,
 					fill: "rgba(0,0,0,0)",
-					stroke: "red",
+					stroke: "#ffffff",
 				});
-				this.layer.add(this.activeRect);
+				this.layer.add(this.newRect);
 				this.layer.batchDraw();
 			}.bind(this));
 			
 			this.stage.on('mousemove touchmove', function(e){
-				if(!this.isDrag || !this.activeRect) return;
-				var mousePt = this.stage.getPointerPosition();
-				var origin = this.activeRect.position();
-				this.activeRect.setAttrs({
+				if(!this.isDrag || !this.newRect) return;
+				var mousePt = this.GetRelativeMousePos(this.stage);
+				var origin = this.newRect.position();
+				this.newRect.setAttrs({
 					width: mousePt.x-origin.x,
 					height: mousePt.y-origin.y
 				});
 				this.layer.batchDraw();
 			}.bind(this));
 
-			this.stage.on('mouseup touchend', function() {
-        		this.isDrag = false;
-        		this.activeRect = null;
+			this.stage.on('mouseup touchend', function(e){
+				if(!this.isDrag || !this.newRect) return;
+				this.isDrag = false;
+				var size = this.newRect.size();
+				if(Math.abs(size.width) < 10 || Math.abs(size.height) < 10){
+					return this.CancelTagSelect();
+				}
+				this.openTagSelect = true;
 			}.bind(this));
 
 			this.layer = new Konva.Layer();
 			this.stage.add(this.layer);
+		},
+		ConfirmTagSelect: function(){
+			if(!this.target) return;
+			var tag = this.$refs.tagSelect.selectTag;
+			if(!tag || tag == "") return alert("請選擇標籤");
+
+			this.target.tag = tag;
+			var label = this.target.node.getChildren(function(node){
+				return node.getClassName() === "Label";
+			});
+			label[0].getText().text(tag);
+			
+			this.target = null;
+			this.openTagSelect = false;
+			this.layer.batchDraw();
+		},
+		CancelTagSelect: function(){
+			this.openTagSelect = false;
+			this.target = null;
+			if(this.newRect){
+				this.newRect.destroy();
+				this.newRect = null;
+			}
+			this.layer.batchDraw();
+		},
+		AddAnnotation: function(){
+			if(!this.newRect) return;
+			var tag = this.$refs.tagSelect.selectTag;
+			if(!tag || tag == "") return alert("請選擇標籤");
+
+			var x,y,w,h;
+			if(this.newRect.width()>0){
+				x = this.newRect.x();
+				w = this.newRect.width();
+			}
+			else{
+				x = this.newRect.x()+this.newRect.width();
+				w = -this.newRect.width();
+			}
+			if(this.newRect.height()>0){
+				y = this.newRect.y();
+				h = this.newRect.height();
+			}
+			else{
+				y = this.newRect.y()+this.newRect.height();
+				h = -this.newRect.height();
+			}
+
+			var group = new Konva.Group();
+			var rect = new Konva.Rect({
+				x: x,
+				y: y,
+				width: w,
+				height: h,
+				fill: "rgba(0,0,0,0)",
+				stroke: "#ff0000",
+			});
+			var ctlSize = 10;
+			var ctlFill = "#ffffff";
+			var ctlStroke = "#3333ff";
+			var rectTL = new Konva.Rect({
+				x: x-ctlSize*0.5,
+				y: y-ctlSize*0.5,
+				width: ctlSize,
+				height: ctlSize,
+				fill: "#ffffff",
+				stroke: "#3333ff",
+			});
+			var rectTR = new Konva.Rect({
+				x: x+w-ctlSize*0.5,
+				y: y-ctlSize*0.5,
+				width: ctlSize,
+				height: ctlSize,
+				fill: ctlFill,
+				stroke: ctlStroke,
+			});
+			var rectBR = new Konva.Rect({
+				x: x+w-ctlSize*0.5,
+				y: y+h-ctlSize*0.5,
+				width: ctlSize,
+				height: ctlSize,
+				fill: ctlFill,
+				stroke: ctlStroke,
+			});
+			var rectBL = new Konva.Rect({
+				x: x-ctlSize*0.5,
+				y: y+h-ctlSize*0.5,
+				width: ctlSize,
+				height: ctlSize,
+				fill: ctlFill,
+				stroke: ctlStroke,
+			});
+
+			var label = new Konva.Label({
+				x:x,
+				y:y+h-20,
+				height:20
+			});
+			label.add(new Konva.Tag({
+				fill: "#ff0000",
+			}));
+			label.add(new Konva.Text({
+				text: tag,
+				padding: 5,
+				fill: "#ffffff"
+			}));
+
+			group.add(rect);
+			group.add(label);
+			group.add(rectTL);
+			group.add(rectTR);
+			group.add(rectBR);
+			group.add(rectBL);
+			
+			this.layer.add(group);
+			var annotation = {
+				tag: tag,
+				x: x,
+				y: y,
+				width: w,
+				height: h,
+				node: group,
+				index: this.annotationArr.length
+			};
+			this.annotationArr.push(annotation);
+			label.on("click tap", function(e){
+				this.openTagSelect = true;
+				this.target = annotation;
+				Vue.nextTick(function(){
+					this.$refs.tagSelect.selectTag = annotation.tag;
+				}.bind(this));
+			}.bind(this));
+
+			this.openTagSelect = false;
+			this.newRect.destroy();
+			this.newRect = null;
+			this.layer.batchDraw();
+		},
+		RemoveAnnotation: function(){
+			if(!this.target) return;
+			this.target.node.destroy();
+			this.annotationArr.splice(this.target.index,1);
+			this.target = null;
+			this.openTagSelect = false;
+			this.layer.batchDraw();
 		},
 		ChangeImage: function(){
 			if(this.imageNode){

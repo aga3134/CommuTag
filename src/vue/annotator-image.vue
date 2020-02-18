@@ -11,10 +11,12 @@
 			<q-img contain class="col q-my-md" :src="image.url"></q-img>
 
 			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='annotate' ">
-				<div class="text-h6 inline-block">
-					請選擇符合此影像的標籤
+				<div class="row items-center">
+					<div class="text-h6 inline-block">
+						請選擇符合此影像的標籤
+					</div>
+					<tag-select class="tag-select" :dataset="dataset" ref="tagSelect"></tag-select>
 				</div>
-				<tag-select class="tag-select" :dataset="dataset" ref="tagSelect"></tag-select>
 				<template v-slot:action>
 					<q-btn class="q-ma-xs bg-primary" label="確定" @click="SetAnnotation();"></q-btn>
 					<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
@@ -104,6 +106,7 @@ export default {
 	.tag-select{
 		width: 150px;
 		display: inline-block;
+		padding: 0px 5px;
 	}
 }
 </style>
