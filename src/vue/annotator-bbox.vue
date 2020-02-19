@@ -93,9 +93,11 @@ export default {
 			isDrag: false,
 			newRect: null,
 			target: null,
+			labelColor:{}
 		};
 	},
 	mounted: function(){
+		this.GenLabelColor();
 		this.InitCanvas();
 	},
 	methods: {
@@ -104,6 +106,41 @@ export default {
 			transform.invert();
 			var pos = node.getStage().getPointerPosition();
 			return transform.point(pos);
+		},
+		HSVtoRGB: function(h,s,v,alpha) {
+			var r, g, b, i, f, p, q, t;
+			if (arguments.length === 1) {
+				s = h.s, v = h.v, h = h.h;
+			}
+			i = Math.floor(h * 6);
+			f = h * 6 - i;
+			p = v * (1 - s);
+			q = v * (1 - f * s);
+			t = v * (1 - (1 - f) * s);
+			switch (i % 6) {
+				case 0: r = v, g = t, b = p; break;
+				case 1: r = q, g = v, b = p; break;
+				case 2: r = p, g = v, b = t; break;
+				case 3: r = p, g = q, b = v; break;
+				case 4: r = t, g = p, b = v; break;
+				case 5: r = v, g = p, b = q; break;
+			}
+			r = Math.round(r * 255);
+			g = Math.round(g * 255);
+			b = Math.round(b * 255);
+			return "rgba("+r+","+g+","+b+","+alpha+")";
+		},
+		GenLabelColor: function(){
+			this.labelColor = {};
+			var colorNum = this.dataset.tagArr.length;
+			for(var i=0;i<colorNum;i++){
+				var h = (i%10)*0.1;
+				var s = 1-(parseInt(i*0.1)%10)*0.1;
+				var v = 1-(parseInt(i*0.01)%10)*0.1;
+				var color = this.HSVtoRGB(h,s,v,1);
+				var tag = this.dataset.tagArr[i];
+				this.labelColor[tag] = color;
+			}
 		},
 		InitCanvas: function(){
 			this.container = this.task=="view"?this.$refs.viewCanvas:this.$refs.editCanvas;
@@ -159,6 +196,7 @@ export default {
 			});
 			//make konva center align
 			this.stage.content.style.margin = "auto";
+			
 
 			this.stage.on("wheel", function(e){
 				e.evt.preventDefault();
@@ -183,8 +221,14 @@ export default {
 			}.bind(this));
 
 			this.stage.on('mousedown touchstart', function(e){
+				//點到內部的物件，不產生新bbox
+				if(e.target.name() != "") return;
+
 				var mousePt = this.GetRelativeMousePos(this.stage);
 				this.isDrag = true;
+				if(this.newRect){
+					this.newRect.destroy();
+				}
 				this.newRect = new Konva.Rect({
 					x: mousePt.x,
 					y: mousePt.y,
@@ -227,10 +271,12 @@ export default {
 			if(!tag || tag == "") return alert("請選擇標籤");
 
 			this.target.tag = tag;
-			var label = this.target.node.getChildren(function(node){
-				return node.getClassName() === "Label";
-			});
-			label[0].getText().text(tag);
+			var color = this.labelColor[tag];
+			var bbox = this.target.node.find("Rect")[0];
+			bbox.setAttr("stroke",color);
+			var label = this.target.node.find("Label")[0];
+			label.getTag().setAttr("fill",color);
+			label.getText().text(tag);
 			
 			this.target = null;
 			this.openTagSelect = false;
@@ -250,101 +296,152 @@ export default {
 			var tag = this.$refs.tagSelect.selectTag;
 			if(!tag || tag == "") return alert("請選擇標籤");
 
-			var x,y,w,h;
-			if(this.newRect.width()>0){
-				x = this.newRect.x();
-				w = this.newRect.width();
+			var pos = this.newRect.position();
+			var size = this.newRect.size();
+			if(size.width < 0){
+				pos.x = pos.x+size.width;
+				size.width = -size.width;
 			}
-			else{
-				x = this.newRect.x()+this.newRect.width();
-				w = -this.newRect.width();
-			}
-			if(this.newRect.height()>0){
-				y = this.newRect.y();
-				h = this.newRect.height();
-			}
-			else{
-				y = this.newRect.y()+this.newRect.height();
-				h = -this.newRect.height();
+			if(size.height < 0){
+				pos.y = pos.y+size.height;
+				size.height = -size.height;
 			}
 
 			var group = new Konva.Group();
-			var rect = new Konva.Rect({
-				x: x,
-				y: y,
-				width: w,
-				height: h,
-				fill: "rgba(0,0,0,0)",
-				stroke: "#ff0000",
-			});
-			var ctlSize = 10;
-			var ctlFill = "#ffffff";
-			var ctlStroke = "#3333ff";
-			var rectTL = new Konva.Rect({
-				x: x-ctlSize*0.5,
-				y: y-ctlSize*0.5,
-				width: ctlSize,
-				height: ctlSize,
-				fill: "#ffffff",
-				stroke: "#3333ff",
-			});
-			var rectTR = new Konva.Rect({
-				x: x+w-ctlSize*0.5,
-				y: y-ctlSize*0.5,
-				width: ctlSize,
-				height: ctlSize,
-				fill: ctlFill,
-				stroke: ctlStroke,
-			});
-			var rectBR = new Konva.Rect({
-				x: x+w-ctlSize*0.5,
-				y: y+h-ctlSize*0.5,
-				width: ctlSize,
-				height: ctlSize,
-				fill: ctlFill,
-				stroke: ctlStroke,
-			});
-			var rectBL = new Konva.Rect({
-				x: x-ctlSize*0.5,
-				y: y+h-ctlSize*0.5,
-				width: ctlSize,
-				height: ctlSize,
-				fill: ctlFill,
-				stroke: ctlStroke,
-			});
+			this.layer.add(group);
 
+			//add bbox
+			var bbox = new Konva.Rect({
+				x: pos.x,
+				y: pos.y,
+				width: size.width,
+				height: size.height,
+				fill: "rgba(0,0,0,0)",
+				stroke: this.labelColor[tag],
+			});
+			group.add(bbox);
+
+			//add annotation label
 			var label = new Konva.Label({
-				x:x,
-				y:y+h-20,
-				height:20
+				x:pos.x,
+				y:pos.y-20,
 			});
 			label.add(new Konva.Tag({
-				fill: "#ff0000",
+				fill: this.labelColor[tag],
 			}));
 			label.add(new Konva.Text({
 				text: tag,
 				padding: 5,
-				fill: "#ffffff"
+				fill: "#ffffff",
+				name: "BBoxLabel"
 			}));
-
-			group.add(rect);
 			group.add(label);
-			group.add(rectTL);
-			group.add(rectTR);
-			group.add(rectBR);
-			group.add(rectBL);
+
+			//add corner control
+			var updateBBox = function(active){
+				//adjust corner to maintain rect shape
+				var lt = group.find(".LT")[0];
+				var rt = group.find(".RT")[0];
+				var rb = group.find(".RB")[0];
+				var lb = group.find(".LB")[0];
+				switch(active.getName()){
+					case "LT":
+						lb.x(active.x());
+						rt.y(active.y());
+						break;
+					case "RT":
+						rb.x(active.x());
+						lt.y(active.y());
+						break;
+					case "RB":
+						rt.x(active.x());
+						lb.y(active.y());
+						break;
+					case "LB":
+						lt.x(active.x());
+						rb.y(active.y());
+						break;
+				}
+
+				//get bbox corner
+				var ctlArr = [lt,rt,rb,lb];
+				var minX = Number.MAX_VALUE;
+				var minY = Number.MAX_VALUE;
+				var maxX = Number.MIN_VALUE;
+				var maxY = Number.MIN_VALUE;
+				for(var i=0;i<ctlArr.length;i++){
+					var pos = ctlArr[i].position();
+					var size = ctlArr[i].size();
+					var cx = pos.x+size.width*0.5;
+					var cy = pos.y+size.height*0.5;
+					if(cx < minX) minX = cx;
+					if(cx > maxX) maxX = cx;
+					if(cy < minY) minY = cy;
+					if(cy > maxY) maxY = cy;
+				}
+				//update bbox size
+				bbox.setAttrs({
+					x: minX,
+					y: minY,
+					width: maxX-minX,
+					height: maxY-minY
+				});
+
+				//update label pos
+				label.setAttrs({
+					x:minX,
+					y:minY-20,
+				});
+			}.bind(this);
+
+			var AddControl = function(group,x,y,name){
+				var ctlSize = 10;
+				var offset = ctlSize*0.5;
+				var ctl = new Konva.Rect({
+					x: x-offset,
+					y: y-offset,
+					width: ctlSize,
+					height: ctlSize,
+					fill: "#ffffff",
+					stroke: "#3333ff",
+					name: name,
+					draggable:true,
+					dragBoundFunc: function(pos){
+						var imPos = this.imageNode.absolutePosition();
+						var imSize = this.imageNode.size();
+						var imScale = this.imageNode.getAbsoluteScale();
+
+						if(pos.x+offset < imPos.x) pos.x = imPos.x-offset;
+						if(pos.x+offset >= imPos.x+imSize.width*imScale.x) pos.x = imPos.x+imSize.width*imScale.x-offset;
+						if(pos.y+offset < imPos.y) pos.y = imPos.y-offset;
+						if(pos.y+offset >= imPos.y+imSize.height*imScale.y) pos.y = imPos.y+imSize.height*imScale.y-offset;
+						return pos; 
+					}.bind(this)
+				});
+				ctl.on("dragmove", function() {
+					updateBBox(ctl);
+					this.layer.batchDraw();
+				}.bind(this));
+
+				group.add(ctl);
+			}.bind(this);
+
+			AddControl(group,pos.x,pos.y,"LT");
+			AddControl(group,pos.x+size.width,pos.y,"RT");
+			AddControl(group,pos.x+size.width,pos.y+size.height,"RB");
+			AddControl(group,pos.x,pos.y+size.height,"LB");
 			
-			this.layer.add(group);
 			var annotation = {
 				tag: tag,
-				x: x,
-				y: y,
-				width: w,
-				height: h,
+				x: pos.x,
+				y: pos.y,
+				width: size.width,
+				height: size.height,
 				node: group,
 				index: this.annotationArr.length
 			};
 			this.annotationArr.push(annotation);
+
 			label.on("click tap", function(e){
 				this.openTagSelect = true;
 				this.target = annotation;
