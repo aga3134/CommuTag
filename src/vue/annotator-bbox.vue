@@ -31,6 +31,17 @@
 			</q-banner>
 		</div>
 
+		<div class="absolute-top row justify-center q-gutter-sm q-pa-sm" v-if="task=='annotate' ">
+			 <q-btn-toggle v-model="tool" glossy size="sm" :options="toolOption" color="grey-1" text-color="grey-6" @input="ChangeTool();">
+			 	<template v-slot:bbox>
+					<q-icon name="aspect_ratio"></q-icon>
+				</template>
+			 	<template v-slot:move>
+					<q-icon name="pan_tool"></q-icon>
+				</template>
+			 </q-btn-toggle>
+		</div>
+
 		<q-dialog v-model="openTagSelect" persistent >
 			<q-card>
 				<q-card-section>
@@ -85,9 +96,15 @@ export default {
 		return {
 			openHelp: false,
 			openTagSelect: false,
+			tool: "move",
+			toolOption: [
+				{value: "bbox", slot: "bbox"},
+				{value: "move", slot: "move"}
+			],
 			container: null,
 			stage: null,
-			layer: null,
+			imageLayer: null,
+			bboxLayer: null,
 			imageNode: null,
 			annotationArr: [],
 			isDrag: false,
@@ -191,13 +208,15 @@ export default {
 				container: this.container,
 				width: this.container.clientWidth,
 				height: this.container.clientHeight,
-				draggable: false,
+				draggable: this.task=="annotate"?false:true,
 				dragBoundFunc: BoundStage
 			});
 			//make konva center align
 			this.stage.content.style.margin = "auto";
+			//init tool according to task
+			this.tool = this.task=="annotate"?"bbox":"move";
+			this.ChangeTool();
 			
-
 			this.stage.on("wheel", function(e){
 				e.evt.preventDefault();
 				var factor = 0.95;
@@ -221,6 +240,7 @@ export default {
 			}.bind(this));
 
 			this.stage.on('mousedown touchstart', function(e){
+				if(this.tool != "bbox") return;
 				//點到內部的物件，不產生新bbox
 				if(e.target.name() != "") return;
 
@@ -237,11 +257,12 @@ export default {
 					fill: "rgba(0,0,0,0)",
 					stroke: "#ffffff",
 				});
-				this.layer.add(this.newRect);
-				this.layer.batchDraw();
+				this.bboxLayer.add(this.newRect);
+				this.stage.batchDraw();
 			}.bind(this));
 			
 			this.stage.on('mousemove touchmove', function(e){
+				if(this.tool != "bbox") return;
 				if(!this.isDrag || !this.newRect) return;
 				var mousePt = this.GetRelativeMousePos(this.stage);
 				var origin = this.newRect.position();
@@ -249,10 +270,11 @@ export default {
 					width: mousePt.x-origin.x,
 					height: mousePt.y-origin.y
 				});
-				this.layer.batchDraw();
+				this.stage.batchDraw();
 			}.bind(this));
 
 			this.stage.on('mouseup touchend', function(e){
+				if(this.tool != "bbox") return;
 				if(!this.isDrag || !this.newRect) return;
 				this.isDrag = false;
 				var size = this.newRect.size();
@@ -262,8 +284,22 @@ export default {
 				this.openTagSelect = true;
 			}.bind(this));
 
-			this.layer = new Konva.Layer();
-			this.stage.add(this.layer);
+			this.imageLayer = new Konva.Layer();
+			this.bboxLayer = new Konva.Layer();
+			this.stage.add(this.imageLayer);
+			this.stage.add(this.bboxLayer);
+		},
+		ChangeTool: function(){
+			switch(this.tool){
+				case "move":
+					this.container.style.cursor = "grab";
+					this.stage.setAttr("draggable",true);
+					break;
+				case "bbox":
+					this.container.style.cursor = "default";
+					this.stage.setAttr("draggable",false);
+					break;
+			}
 		},
 		ConfirmTagSelect: function(){
 			if(!this.target) return;
@@ -280,7 +316,7 @@ export default {
 			
 			this.target = null;
 			this.openTagSelect = false;
-			this.layer.batchDraw();
+			this.stage.batchDraw();
 		},
 		CancelTagSelect: function(){
 			this.openTagSelect = false;
@@ -289,7 +325,7 @@ export default {
 				this.newRect.destroy();
 				this.newRect = null;
 			}
-			this.layer.batchDraw();
+			this.stage.batchDraw();
 		},
 		AddAnnotation: function(){
 			if(!this.newRect) return;
@@ -308,7 +344,7 @@ export default {
 			}
 
 			var group = new Konva.Group();
-			this.layer.add(group);
+			this.bboxLayer.add(group);
 
 			//add bbox
 			var bbox = new Konva.Rect({
@@ -335,7 +371,25 @@ export default {
 				fill: "#ffffff",
 				name: "BBoxLabel"
 			}));
+			label.on("click tap", function(e){
+				this.openTagSelect = true;
+				this.target = annotation;
+				Vue.nextTick(function(){
+					this.$refs.tagSelect.selectTag = annotation.tag;
+				}.bind(this));
+			}.bind(this));
 			group.add(label);
+
+			var annotation = {
+				tag: tag,
+				x: pos.x,
+				y: pos.y,
+				width: size.width,
+				height: size.height,
+				node: group,
+				index: this.annotationArr.length
+			};
+			this.annotationArr.push(annotation);
 
 			//add corner control
 			var updateBBox = function(active){
@@ -380,18 +434,25 @@ export default {
 					if(cy > maxY) maxY = cy;
 				}
 				//update bbox size
+				var w = maxX-minX;
+				var h = maxY-minY;
 				bbox.setAttrs({
 					x: minX,
 					y: minY,
-					width: maxX-minX,
-					height: maxY-minY
+					width: w,
+					height: h
 				});
+				annotation.x = minX;
+				annotation.y = minY;
+				annotation.width = w;
+				annotation.height = h;
 
 				//update label pos
 				label.setAttrs({
 					x:minX,
 					y:minY-20,
 				});
+				this.stage.batchDraw();
 			}.bind(this);
 
 			var AddControl = function(group,x,y,name){
@@ -420,7 +481,6 @@ export default {
 				});
 				ctl.on("dragmove", function() {
 					updateBBox(ctl);
-					this.layer.batchDraw();
 				}.bind(this));
 
 				group.add(ctl);
@@ -430,30 +490,11 @@ export default {
 			AddControl(group,pos.x+size.width,pos.y,"RT");
 			AddControl(group,pos.x+size.width,pos.y+size.height,"RB");
 			AddControl(group,pos.x,pos.y+size.height,"LB");
-			
-			var annotation = {
-				tag: tag,
-				x: pos.x,
-				y: pos.y,
-				width: size.width,
-				height: size.height,
-				node: group,
-				index: this.annotationArr.length
-			};
-			this.annotationArr.push(annotation);
-
-			label.on("click tap", function(e){
-				this.openTagSelect = true;
-				this.target = annotation;
-				Vue.nextTick(function(){
-					this.$refs.tagSelect.selectTag = annotation.tag;
-				}.bind(this));
-			}.bind(this));
 
 			this.openTagSelect = false;
 			this.newRect.destroy();
 			this.newRect = null;
-			this.layer.batchDraw();
+			this.stage.batchDraw();
 		},
 		RemoveAnnotation: function(){
 			if(!this.target) return;
@@ -461,7 +502,7 @@ export default {
 			this.annotationArr.splice(this.target.index,1);
 			this.target = null;
 			this.openTagSelect = false;
-			this.layer.batchDraw();
+			this.stage.batchDraw();
 		},
 		ChangeImage: function(){
 			if(this.imageNode){
@@ -483,8 +524,63 @@ export default {
 				height: h,
 				image: srcImage,
 			});
-			this.layer.add(this.imageNode);
-			this.layer.draw();
+			this.imageLayer.add(this.imageNode);
+			if(this.task == "view" || this.task == "verify"){
+				this.DrawAnnotation();
+			}
+			this.stage.batchDraw();
+		},
+		DrawAnnotation: function(){
+			if(!this.image.annotation) return;
+			var imPos = this.imageNode.position();
+			var imSize = this.imageNode.size();
+			var srcImage = this.$refs.srcImage;
+
+			for(var i=0;i<this.image.annotation.annotation.length;i++){
+				var annotation = this.image.annotation.annotation[i];
+				var x = parseFloat(annotation.x);
+				var y = parseFloat(annotation.y);
+				var w = parseFloat(annotation.width);
+				var h = parseFloat(annotation.height);
+				var group = new Konva.Group();
+				this.bboxLayer.add(group);
+
+				var lt = {x:x,y:y};
+				var rb = {x:x+w,y:y+h};
+				//從原始影像座標轉到canvas座標
+				lt.x = lt.x*imSize.width/srcImage.width+imPos.x;
+				lt.y = lt.y*imSize.height/srcImage.height+imPos.y;
+				rb.x = rb.x*imSize.width/srcImage.width+imPos.x;
+				rb.y = rb.y*imSize.height/srcImage.height+imPos.y;
+
+				//add bbox
+				var bbox = new Konva.Rect({
+					x: lt.x,
+					y: lt.y,
+					width: rb.x-lt.x,
+					height: rb.y-lt.y,
+					fill: "rgba(0,0,0,0)",
+					stroke: this.labelColor[annotation.tag],
+				});
+				group.add(bbox);
+
+				//add annotation label
+				var label = new Konva.Label({
+					x:lt.x,
+					y:lt.y-20,
+				});
+				label.add(new Konva.Tag({
+					fill: this.labelColor[annotation.tag],
+				}));
+				label.add(new Konva.Text({
+					text: annotation.tag,
+					padding: 5,
+					fill: "#ffffff",
+					name: "BBoxLabel"
+				}));
+				group.add(label);
+			}
+			this.stage.batchDraw();
 		},
 		SetAnnotation: function(){
 			this.$emit("setAnnotation");
@@ -493,7 +589,30 @@ export default {
 			this.$emit("setVerification",agree);
 		},
 		GetAnnotation: function(){
-			
+			var result = [];
+			var imPos = this.imageNode.position();
+			var imSize = this.imageNode.size();
+			var srcImage = this.$refs.srcImage;
+
+			for(var i=0;i<this.annotationArr.length;i++){
+				var annotation = this.annotationArr[i];
+				var bbox = {};
+				var lt = {x:annotation.x,y:annotation.y};
+				var rb = {x:annotation.x+annotation.width,y:annotation.y+annotation.height};
+				//還原成原始影像座標
+				lt.x = (lt.x-imPos.x)*srcImage.width/imSize.width;
+				lt.y = (lt.y-imPos.y)*srcImage.height/imSize.height;
+				rb.x = (rb.x-imPos.x)*srcImage.width/imSize.width;
+				rb.y = (rb.y-imPos.y)*srcImage.height/imSize.height;
+
+				bbox.x = lt.x;
+				bbox.y = lt.y;
+				bbox.width = rb.x-lt.x;
+				bbox.height = rb.y-lt.y;
+				bbox.tag = annotation.tag;
+				result.push(bbox);
+			}
+			return result;
 		},
 		SkipTask: function(){
 			this.$emit("skipTask");
@@ -506,5 +625,6 @@ export default {
 .annotator-bbox{
 	width: 100%;
 	height: 100%;
+	position: relative;
 }
 </style>

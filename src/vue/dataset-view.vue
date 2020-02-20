@@ -74,7 +74,7 @@
 				</div>
 			</q-dialog>
 
-			<q-dialog maximized v-model="openAnnotator" v-if="info">
+			<q-dialog maximized persistent v-model="openAnnotator" v-if="info">
 				<annotator :dataset="info" :image="targetImage" @done="FinishAnnotation();"></annotator>
 				<div>
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
