@@ -14,7 +14,8 @@ var ImageSchema = new mongoose.Schema({
 		default: 0
 	},
 	lat: Number,
-	lng: Number
+	lng: Number,
+	remark: String
 },{timestamps: {createdAt:"createdAt", updatedAt:"updatedAt"} });
 
 module.exports = ImageSchema;

@@ -34,7 +34,7 @@ var DatasetSchema = new mongoose.Schema({
 		type: String,
 		default: "bbox"
 	},
-	enableAddTag: {
+	enableRemark: {
 		type: Boolean,
 		default: false
 	},

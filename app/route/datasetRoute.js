@@ -105,6 +105,8 @@ router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem
 	param.dataset = req.body.dataset;
 	param.lat = req.body.lat;
 	param.lng = req.body.lng;
+	param.remark = req.body.remark;
+	console.log(param);
 	param.succFunc = function(result){
 		var imageParam = {};
 		imageParam.newPath = "/static/upload/dataset/"+req.body.dataset+"/image/";

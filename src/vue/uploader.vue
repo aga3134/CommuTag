@@ -34,6 +34,10 @@
 			<location-select ref="locationSelect" @change="LocationChange();" @confirm="NextStep();" @cancel="PrevStep();"></location-select>
 		</q-dialog>
 
+		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'remark'">
+			<image-remark ref="imageRemark" @change="RemarkChange();" @confirm="NextStep();" @cancel="PrevStep();"></image-remark>
+		</q-dialog>
+
 		<image-upload ref="uploader" v-show="false"></image-upload>
 
 		<q-page-sticky position="bottom-left" :offset="[9,9]" v-if="stepArr[step]">
@@ -50,6 +54,7 @@ import imageUpload from "./image-upload.vue"
 import imageEdit from "./image-edit.vue"
 import datasetSelect from "./dataset-select.vue"
 import locationSelect from "./location-select.vue"
+import imageRemark from "./image-remark.vue"
 
 export default {
 	name:"uploader",
@@ -58,7 +63,8 @@ export default {
 		"image-upload":imageUpload,
 		"image-edit":imageEdit,
 		"dataset-select":datasetSelect,
-		"location-select":locationSelect
+		"location-select":locationSelect,
+		"image-remark":imageRemark
 	},
 	props: {
 		dataset: Object,
@@ -70,7 +76,9 @@ export default {
 			step:0,
 			locationIndex:-1,
 			datasetSelect:null,
-			locationSelect:null
+			locationSelect:null,
+			remark:"",
+			remarkIndex:-1
 		};
 	},
 	mounted: function(){
@@ -84,6 +92,10 @@ export default {
 			if(this.dataset.enableGPS){
 				this.locationIndex = this.stepArr.length;
 				this.stepArr.push({"id":"location",name:"確認位置"});
+			}
+			if(this.dataset.enableRemark){
+				this.remarkIndex = this.stepArr.length;
+				this.stepArr.push({"id":"remark",name:"備註說明"});
 			}
 		}
 		this.ChangeCamera();
@@ -125,6 +137,7 @@ export default {
 		DatasetChange: function(){
 			if(this.dataset) return;
 			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
+			//add or remove gps select
 			if(this.datasetSelect.enableGPS){
 				if(this.locationIndex == -1){
 					this.locationIndex = this.stepArr.length;
@@ -137,9 +150,25 @@ export default {
 					this.locationIndex = -1;
 				}
 			}
+			//add or remove remark select
+			if(this.dataset.enableRemark){
+				if(this.remarkIndex == -1){
+					this.remarkIndex = this.stepArr.length;
+					this.stepArr.push({"id":"remark",name:"備註說明"});
+				}
+			}
+			else{
+				if(this.remarkIndex != -1){
+					this.stepArr.splice(this.remarkIndex,1);
+					this.remarkIndex = -1;
+				}
+			}
 		},
 		LocationChange: function(){
 			this.locationSelect = this.$refs.locationSelect.loc;
+		},
+		RemarkChange: function(){
+			this.remark = this.$refs.imageRemark.remark;
 		},
 		UploadImageToDataset: function(){
 			var dataset = this.dataset || this.datasetSelect;
@@ -168,6 +197,10 @@ export default {
 				data.lat = loc.lat;
 				data.lng = loc.lng;
 			}
+			if(this.remark && this.remark != ""){
+				data.remark = this.remark;
+			}
+			console.log(data);
 			uploader.additionData = data;
 			var canvas = this.$refs.imageEdit.GetCanvasData();
 			uploader.FitCanvasFromCanvas(canvas);

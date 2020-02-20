@@ -53,6 +53,9 @@
 							<q-breadcrumbs-el v-if="targetImage.verifyNum>0" :label="'認同率 : '+(100*targetImage.agreeNum/targetImage.verifyNum).toFixed(0)+'%' "></q-breadcrumbs-el>
 						</q-breadcrumbs>
 					</q-card-section>
+					<q-card-section v-if="targetImage.remark">
+						{{targetImage.remark}}
+					</q-card-section>
 					<q-card-actions>
 						<q-btn flat label="協助標註" @click="AnnotateImage();"></q-btn>
 						<q-btn flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
