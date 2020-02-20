@@ -17,6 +17,7 @@
 				<q-btn icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
 				<q-btn icon="cloud_download" label="整包下載" flat></q-btn>
 				<q-btn icon="star_border" label="收藏" flat></q-btn>
+				<q-btn icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 
 			
@@ -53,7 +54,7 @@
 							<q-breadcrumbs-el v-if="targetImage.verifyNum>0" :label="'認同率 : '+(100*targetImage.agreeNum/targetImage.verifyNum).toFixed(0)+'%' "></q-breadcrumbs-el>
 						</q-breadcrumbs>
 					</q-card-section>
-					<q-card-section v-if="targetImage.remark">
+					<q-card-section v-if="info.enableRemark && targetImage.remark">
 						{{targetImage.remark}}
 					</q-card-section>
 					<q-card-actions>
@@ -83,6 +84,10 @@
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
 				</div>
 			</q-dialog>
+
+			<q-dialog v-model="openDatasetEditor">
+				<dataset-editor :info="editInfo" @reload="ReloadDataset"></dataset-editor>
+			</q-dialog>
 		</q-page-container>
 
 		<q-footer>
@@ -99,6 +104,7 @@ import topbar from "./topbar.vue"
 import uploader from "./uploader.vue"
 import annotator from "./annotator.vue"
 import annotatorView from "./annotator-view.vue"
+import datasetEditor from "./dataset-editor.vue"
 
 export default {
 	name:"dataset-view",
@@ -106,7 +112,8 @@ export default {
 		"topbar":topbar,
 		"uploader":uploader,
 		"annotator":annotator,
-		"annotator-view":annotatorView
+		"annotator-view":annotatorView,
+		"dataset-editor":datasetEditor
 	},
 	data: function () {
 		return {
@@ -128,6 +135,8 @@ export default {
 			hasMore: true,
 			openUploader: false,
 			openAnnotator: false,
+			openDatasetEditor: false,
+			editInfo: null
 		};
 	},
 	created: function(){
@@ -144,6 +153,7 @@ export default {
 			this.info = result.data;
 			this.badgeArr = [];
 			if(this.info.enableGPS) this.badgeArr.push("GPS");
+			if(this.info.enableRemark) this.badgeArr.push("備註說明");
 			switch(this.info.annotationType){
 				case "bbox":
 					this.badgeArr.push("框選標註");
@@ -155,6 +165,13 @@ export default {
 		}.bind(this));
 	},
 	methods: {
+		ModifyDataset: function(){
+			this.openDatasetEditor = true;
+			this.editInfo = Object.assign({}, this.info);
+		},
+		ReloadDataset: function(){
+			window.location.reload();
+		},
 		GoHome: function(){
 			window.location.href="/";
 		},
