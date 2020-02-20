@@ -78,11 +78,13 @@ router.get('/view-dataset', function(req, res) {
 router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
 	param.id = req.body.dataset;
-	param.picCover = param.newPath+param.newName;
+	var newPath = "/static/upload/dataset/"+req.body.dataset+"/";
+	var newName = "cover.jpg";
+	param.picCover = newPath+newName;
 	param.succFunc = function(result){
 		var imageParam = {};
-		imageParam.newPath = "/static/upload/dataset/"+req.query.dataset+"/";
-		imageParam.newName = "cover.jpg";
+		imageParam.newPath = newPath;
+		imageParam.newName = newName;
 		imageParam.encode = "base64";
 		imageParam.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
 		imageParam.succFunc = function(result){
