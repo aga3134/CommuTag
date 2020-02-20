@@ -6,7 +6,19 @@
 			<div class="col" ref="viewCanvas"></div>
 		</div>
 		<div class="column fit" v-else>
-			<div class="col q-ma-auto" ref="editCanvas"></div>
+			<div class="col q-ma-auto relative-position">
+				<div class="fit" ref="editCanvas"></div>
+				<div class="tool-set" v-if="task=='annotate' ">
+					<q-btn-toggle v-model="tool" glossy size="sm" :options="toolOption" color="grey-1" text-color="grey-6" @input="ChangeTool();">
+						<template v-slot:bbox>
+							<q-icon name="aspect_ratio"></q-icon>
+						</template>
+						<template v-slot:move>
+							<q-icon name="pan_tool"></q-icon>
+						</template>
+					</q-btn-toggle>
+				</div>
+			</div>
 
 			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='annotate' ">
 				<div class="text-h6 inline-block">
@@ -29,17 +41,6 @@
 					<q-btn class="q-ma-xs bg-primary" label="略過" @click="SkipTask();"></q-btn>
 				</template>
 			</q-banner>
-		</div>
-
-		<div class="absolute-top row justify-center q-gutter-sm q-pa-sm" v-if="task=='annotate' ">
-			 <q-btn-toggle v-model="tool" glossy size="sm" :options="toolOption" color="grey-1" text-color="grey-6" @input="ChangeTool();">
-			 	<template v-slot:bbox>
-					<q-icon name="aspect_ratio"></q-icon>
-				</template>
-			 	<template v-slot:move>
-					<q-icon name="pan_tool"></q-icon>
-				</template>
-			 </q-btn-toggle>
 		</div>
 
 		<q-dialog v-model="openTagSelect" persistent >
@@ -159,60 +160,76 @@ export default {
 				this.labelColor[tag] = color;
 			}
 		},
+		BoundInImage: function(pos){
+			var imPos = this.imageNode.absolutePosition();
+			var imSize = this.imageNode.size();
+			var imScale = this.imageNode.getAbsoluteScale();
+
+			if(pos.x < imPos.x) pos.x = imPos.x;
+			if(pos.x >= imPos.x+imSize.width*imScale.x) pos.x = imPos.x+imSize.width*imScale.x;
+			if(pos.y < imPos.y) pos.y = imPos.y-offset;
+			if(pos.y >= imPos.y+imSize.height*imScale.y) pos.y = imPos.y+imSize.height*imScale.y;
+			return pos; 
+		},
+		BoundStage: function(pos){
+			var size = this.stage.size();
+			var imSize = this.imageNode.size();
+			var scale = this.stage.scale();
+			//影像四個角位置
+			var left = (size.width-imSize.width)*0.5*scale.x;
+			var top = (size.height-imSize.height)*0.5*scale.y;
+			var right = (size.width+imSize.width)*0.5*scale.x;
+			var bottom = (size.height+imSize.height)*0.5*scale.y;
+			//影像scale後寬度>container寬度
+			if(imSize.width*scale.x > size.width){
+				//讓影像寬cover整個container寬
+				if(pos.x+left > 0) pos.x = -left;
+				else if(pos.x+right < size.width){
+					pos.x = size.width-right;
+				}
+			}
+			else{
+				//讓container寬contain整個影像寬
+				if(pos.x+left < 0) pos.x = -left;
+				else if(pos.x+right > size.width){
+					pos.x = size.width-right;
+				}
+			}
+			//影像scale後高度>container高度
+			if(imSize.height*scale.y > size.height){
+				//讓影像高cover整個container高
+				if(pos.y+top > 0) pos.y = -top;
+				else if(pos.y+bottom < size.height){
+					pos.y = size.height-bottom;
+				}
+			}
+			else{
+				//讓container高contain整個影像高
+				if(pos.y+top < 0) pos.y = -top;
+				else if(pos.y+bottom > size.height){
+					pos.y = size.height-bottom;
+				}
+			}
+			return pos;
+		},
 		InitCanvas: function(){
 			this.container = this.task=="view"?this.$refs.viewCanvas:this.$refs.editCanvas;
-
-			var BoundStage = function(pos){
-				var size = this.stage.size();
-				var imSize = this.imageNode.size();
-				var scale = this.stage.scale();
-				//影像四個角位置
-				var left = (size.width-imSize.width)*0.5*scale.x;
-				var top = (size.height-imSize.height)*0.5*scale.y;
-				var right = (size.width+imSize.width)*0.5*scale.x;
-				var bottom = (size.height+imSize.height)*0.5*scale.y;
-				//影像scale後寬度>container寬度
-				if(imSize.width*scale.x > size.width){
-					//讓影像寬cover整個container寬
-					if(pos.x+left > 0) pos.x = -left;
-					else if(pos.x+right < size.width){
-						pos.x = size.width-right;
-					}
-				}
-				else{
-					//讓container寬contain整個影像寬
-					if(pos.x+left < 0) pos.x = -left;
-					else if(pos.x+right > size.width){
-						pos.x = size.width-right;
-					}
-				}
-				//影像scale後高度>container高度
-				if(imSize.height*scale.y > size.height){
-					//讓影像高cover整個container高
-					if(pos.y+top > 0) pos.y = -top;
-					else if(pos.y+bottom < size.height){
-						pos.y = size.height-bottom;
-					}
-				}
-				else{
-					//讓container高contain整個影像高
-					if(pos.y+top < 0) pos.y = -top;
-					else if(pos.y+bottom > size.height){
-						pos.y = size.height-bottom;
-					}
-				}
-				return pos;
-			}.bind(this);
 
 			this.stage = new Konva.Stage({
 				container: this.container,
 				width: this.container.clientWidth,
 				height: this.container.clientHeight,
 				draggable: this.task=="annotate"?false:true,
-				dragBoundFunc: BoundStage
+				dragBoundFunc: this.BoundStage
 			});
 			//make konva center align
 			this.stage.content.style.margin = "auto";
+			window.addEventListener("resize", function(){
+				this.stage.setAttrs({
+					width: this.container.clientWidth,
+					height: this.container.clientHeight,
+				});
+			}.bind(this));
 			//init tool according to task
 			this.tool = this.task=="annotate"?"bbox":"move";
 			this.ChangeTool();
@@ -234,7 +251,7 @@ export default {
 					x:-imagePt.x*s+mousePt.x,
 					y:-imagePt.y*s+mousePt.y
 				};
-				newPos = BoundStage(newPos);
+				newPos = this.BoundStage(newPos);
 				this.stage.position(newPos);
 				this.stage.batchDraw();
 			}.bind(this));
@@ -245,6 +262,8 @@ export default {
 				if(e.target.name() != "") return;
 
 				var mousePt = this.GetRelativeMousePos(this.stage);
+				mousePt = this.BoundInImage(mousePt);
+
 				this.isDrag = true;
 				if(this.newRect){
 					this.newRect.destroy();
@@ -265,6 +284,7 @@ export default {
 				if(this.tool != "bbox") return;
 				if(!this.isDrag || !this.newRect) return;
 				var mousePt = this.GetRelativeMousePos(this.stage);
+				mousePt = this.BoundInImage(mousePt);
 				var origin = this.newRect.position();
 				this.newRect.setAttrs({
 					width: mousePt.x-origin.x,
@@ -468,14 +488,11 @@ export default {
 					name: name,
 					draggable:true,
 					dragBoundFunc: function(pos){
-						var imPos = this.imageNode.absolutePosition();
-						var imSize = this.imageNode.size();
-						var imScale = this.imageNode.getAbsoluteScale();
-
-						if(pos.x+offset < imPos.x) pos.x = imPos.x-offset;
-						if(pos.x+offset >= imPos.x+imSize.width*imScale.x) pos.x = imPos.x+imSize.width*imScale.x-offset;
-						if(pos.y+offset < imPos.y) pos.y = imPos.y-offset;
-						if(pos.y+offset >= imPos.y+imSize.height*imScale.y) pos.y = imPos.y+imSize.height*imScale.y-offset;
+						pos.x += offset;
+						pos.y += offset;
+						pos = this.BoundInImage(pos);
+						pos.x -= offset;
+						pos.y -= offset;
 						return pos; 
 					}.bind(this)
 				});
@@ -626,5 +643,11 @@ export default {
 	width: 100%;
 	height: 100%;
 	position: relative;
+	.tool-set{
+		position: absolute;
+		display: inline-block;
+		bottom: 10px;
+		left: 10px;
+	}
 }
 </style>
