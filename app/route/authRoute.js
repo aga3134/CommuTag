@@ -25,6 +25,7 @@ router.get('/google/callback', function(req, res, next) {
 });
 
 router.post('/login-by-password', util.StoreIntentUrl, function(req, res, next){
+	console.log(req);
 	passport.authenticate("local", {
 		successRedirect : util.RetrieveIntentUrl(req),
 		failureRedirect : '/login?message='+encodeURIComponent('登入失敗')

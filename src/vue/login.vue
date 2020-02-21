@@ -1,6 +1,6 @@
 <template lang="html">
 	<div class="login">
-		<q-form class="q-pa-xl" v-show="mode === 'login'">
+		<form ref="loginForm" :action="pwLoginAction" method="POST" class="q-pa-xl" v-show="mode === 'login'">
 			<div class="column">
 				<div class="text-h5 text-center">社群登入</div>
 				<q-btn class="q-ma-sm q-pa-xs full-width" color="red" label="Google 登入" @click="LoginByGoogle();"></q-btn>
@@ -9,12 +9,12 @@
 			<q-separator class="q-my-md"></q-separator>
 			<div class="column">
 				<div class="text-h5 text-center">信箱登入</div>
-				<q-input class="q-my-sm" outlined dense v-model="email" placeholder="請輸入電子信箱">
+				<q-input name="email" class="q-my-sm" outlined dense v-model="email" placeholder="請輸入電子信箱">
 					<template v-slot:before>
 						帳號
 					</template>
 				</q-input>
-				<q-input class="q-my-sm" type="password" outlined dense v-model="password" placeholder="請輸入密碼">
+				<q-input name="password" class="q-my-sm" type="password" outlined dense v-model="password" placeholder="請輸入密碼" @keyup.enter="LoginByPassword();">
 					<template v-slot:before>
 						密碼
 					</template>
@@ -35,9 +35,9 @@
 				</q-item>
 			</div>
 			
-		</q-form>
+		</form>
 
-		<q-form class="q-pa-xl" v-show="mode === 'signup'">
+		<form ref="signupForm" :action="pwSignupAction" method="POST" class="q-pa-xl" v-show="mode === 'signup'">
 			<div class="column">
 				<div class="text-h5 text-center">快速註冊</div>
 				<q-btn class="q-ma-sm q-pa-xs full-width" color="red" label="Google 登入" @click="LoginByGoogle();"></q-btn>
@@ -46,22 +46,22 @@
 			<q-separator class="q-my-md"></q-separator>
 			<div class="column">
 				<div class="text-h5 text-center">信箱登入</div>
-				<q-input class="q-my-sm" outlined dense v-model="email" placeholder="請輸入電子信箱">
+				<q-input name="email" class="q-my-sm" outlined dense v-model="email" placeholder="請輸入電子信箱">
 					<template v-slot:before>
 						帳號
 					</template>
 				</q-input>
-				<q-input class="q-my-sm" outlined dense v-model="name" placeholder="請輸入姓名">
+				<q-input name="name" class="q-my-sm" outlined dense v-model="name" placeholder="請輸入姓名">
 					<template v-slot:before>
 						姓名
 					</template>
 				</q-input>
-				<q-input class="q-my-sm" type="password" outlined dense v-model="password" placeholder="請輸入密碼">
+				<q-input name="password" class="q-my-sm" type="password" outlined dense v-model="password" placeholder="請輸入密碼">
 					<template v-slot:before>
 						密碼
 					</template>
 				</q-input>
-				<q-input class="q-my-sm" type="password" outlined dense v-model="passwordConfirm" placeholder="請再次確認密碼">
+				<q-input class="q-my-sm" type="password" outlined dense v-model="passwordConfirm" placeholder="請再次確認密碼" @keyup.enter="SignupByPassword();">
 					<template v-slot:before>
 						確認密碼
 					</template>
@@ -78,7 +78,7 @@
 				</q-item>
 
 			</div>
-		</q-form>
+		</form>
 
 	</div>
 </template>
@@ -113,7 +113,7 @@ export default {
 			this.token = urlParam.token;
 		}
 		if(urlParam.message){
-			alert(urlParam.message);
+			alert(decodeURIComponent(urlParam.message));
 		}
 	},
 	methods: {
@@ -150,10 +150,14 @@ export default {
 			if(this.email == "") return alert("請輸入電子信箱");
 			else if(!util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
 
-			$.post("/auth/forget-password", {email: this.email}, function(data){
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.email = this.email;
+			data._csrf = csrfToken;
+			$.post("/auth/forget-password", data, function(data){
 				//console.log(data);
 				if(data.status == "ok"){
-					alert("修改密碼的連結已寄至您的信箱，請點擊連結並更新密碼");
+					this.$q.notify("修改密碼的連結已寄至您的信箱，請點擊連結並更新密碼");
 				}
 			});
 		},
@@ -161,10 +165,15 @@ export default {
 			if(this.password == "") return alert("請輸入密碼");
 			else if(this.password != this.passwordConfirm) return alert("請確認密碼一致");
 
-			$.post("/auth/reset-password", {password: this.password, token:this.token}, function(data){
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.password = this.password;
+			data.token = this.token;
+			data._csrf = csrfToken;
+			$.post("/auth/reset-password", data, function(data){
 				//console.log(data);
 				if(data.status == "ok"){
-					alert("密碼已更新，請重新登入");
+					this.$q.notify("密碼已更新，請重新登入");
 				}
 				else{
 					//console.log(data.message);

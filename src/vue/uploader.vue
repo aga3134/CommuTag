@@ -67,6 +67,7 @@ export default {
 		"image-remark":imageRemark
 	},
 	props: {
+		user: Object,
 		dataset: Object,
 	},
 	data: function () {
@@ -82,6 +83,8 @@ export default {
 		};
 	},
 	mounted: function(){
+		if(!this.user) window.location.href="/login?intentUrl="+encodeURIComponent(window.location.pathname+window.location.search);
+
 		this.stepArr = [];
 		this.stepArr.push({"id":"capture",name:"拍照選檔"});
 		this.stepArr.push({"id":"crop",name:"旋轉裁切"});

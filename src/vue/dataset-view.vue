@@ -72,14 +72,14 @@
 			</q-page-sticky>
 
 			<q-dialog maximized v-model="openUploader">
-				<uploader :dataset="info" @uploaded="ReloadImage();"></uploader>
+				<uploader :user="user" :dataset="info" @uploaded="ReloadImage();"></uploader>
 				<div>
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
 				</div>
 			</q-dialog>
 
 			<q-dialog maximized persistent v-model="openAnnotator" v-if="info">
-				<annotator :dataset="info" :image="targetImage" @done="FinishAnnotation();"></annotator>
+				<annotator :user="user" :dataset="info" :image="targetImage" @done="FinishAnnotation();"></annotator>
 				<div>
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
 				</div>
@@ -118,7 +118,7 @@ export default {
 	data: function () {
 		return {
 			tab: "",
-			user: {},
+			user: null,
 			filterKey: "all",
 			filterOption: [
 				{label: "全部",value:"all"},

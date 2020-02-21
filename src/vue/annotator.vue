@@ -39,6 +39,7 @@ export default {
 		"annotator-bbox":annotatorBBox
 	},
 	props: {
+		user: Object,
 		dataset: Object,
 		image: Object,
 		autoTask: Boolean
@@ -54,6 +55,8 @@ export default {
 		};
 	},
 	mounted: function(){
+		if(!this.user) window.location.href="/login?intentUrl="+encodeURIComponent(window.location.pathname+window.location.search);
+
 		this.datasetSelect = this.dataset;
 		this.imageSelect = this.image;
 		if(!this.dataset){

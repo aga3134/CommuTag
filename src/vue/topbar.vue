@@ -12,7 +12,7 @@
 			</a>
 
 			<q-space />
-			<q-item v-if="user._id == null" clickable tag="a" href="/login">
+			<q-item v-if="!user" clickable tag="a" href="/login">
 				<q-icon size="md" name="account_box" />
 				<q-item-section>
 					<q-item-label class="text-h6">登入</q-item-label>

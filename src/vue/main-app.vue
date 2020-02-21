@@ -12,11 +12,11 @@
 					</q-tab-panel>
 
 					<q-tab-panel class="q-pa-none" name="upload">
-						<uploader></uploader>
+						<uploader :user="user"></uploader>
 					</q-tab-panel>
 
 					<q-tab-panel class="q-pa-none" name="annotation">
-						<annotator autoTask></annotator>
+						<annotator autoTask :user="user"></annotator>
 					</q-tab-panel>
 				</q-tab-panels>
 			</q-page>
@@ -52,7 +52,7 @@ export default {
 	data: function () {
 		return {
 			tab: "dataset",
-			user: {},
+			user: null,
 		};
 	},
 	created: function(){
