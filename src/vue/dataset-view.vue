@@ -151,6 +151,7 @@ export default {
 			if(result.status != "ok") return;
 			this.info = result.data;
 			this.badgeArr = [];
+			if(!this.info.isPublic) this.badgeArr.push("不公開");
 			if(this.info.enableGPS) this.badgeArr.push("GPS");
 			if(this.info.enableRemark) this.badgeArr.push("備註說明");
 			switch(this.info.annotationType){

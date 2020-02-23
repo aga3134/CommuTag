@@ -44,6 +44,7 @@ var DatasetSchema = new mongoose.Schema({
 		type: Number,
 		default: 0
 	},
+	member:[mongoose.Schema.Types.Mixed]
 },{
 	collection: "datasets",
 	timestamps: {createdAt:"createdAt", updatedAt:"updatedAt"} 

@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var userController = require("../controller/userController");
+var adminController = require("../controller/adminController");
 var util = require("../controller/util");
 var Config = require("../../config.json");
 var upload = require("../controller/upload");
@@ -17,6 +18,7 @@ router.get('/info', util.CheckLogin, function(req, res) {
 
 router.get('/list-user', util.CheckAdmin, function(req, res) {
 	var param = {};
+	param.keyword = req.query.keyword;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};

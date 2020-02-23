@@ -44,6 +44,32 @@
 				    <div class="full-width">
 						<q-chip removable v-for="(tag,i) in info.tagArr" :key="tag" @remove="RemoveTag(i);">{{tag}}</q-chip>
 					</div>
+
+					<div class="full-width q-pa-md" v-if="!info.isPublic">
+						<div class="text-h6">私密成員</div>
+						<div class="text-subtitle2">不公開的資料集只有管理員跟私密成員能看到</div>
+						
+						<user-select @change="AddMember();" ref="userSelect"></user-select>
+
+						<q-list class="q-my-md" bordered>
+							<q-item clickable v-ripple v-for="(member,i) in info.member" :key="member.id">
+								<q-item-section avatar>
+									<q-avatar>
+										<img :src="member.icon">
+									</q-avatar>
+								</q-item-section>
+
+								<q-item-section>
+									<q-item-label>{{member.name}}</q-item-label>
+									<q-item-label caption lines="1">{{member.email}}</q-item-label>
+								</q-item-section>
+
+								<q-item-section side>
+									<q-icon name="close" color="gray-8" @click="RemoveMember(i);"></q-icon>
+								</q-item-section>
+							</q-item>
+						</q-list>
+					</div>
 				</div>
 			</q-form>
 		</q-card-section>
@@ -57,6 +83,7 @@
 
 <script>
 import imageUpload from "./image-upload.vue"
+import userSelect from "./user-select.vue"
 
 export default {
 	name:"dataset-editor",
@@ -64,7 +91,8 @@ export default {
 		info: Object
 	},
 	components:{
-		"image-upload":imageUpload
+		"image-upload":imageUpload,
+		"user-select":userSelect
 	},
 	data: function () {
 		return {
@@ -163,6 +191,22 @@ export default {
 		},
 		RemoveTag: function(i){
 			this.info.tagArr.splice(i,1);
+		},
+		AddMember: function(){
+			var user = this.$refs.userSelect.selectUser;
+			var duplicate = this.info.member.filter(function(member){
+				return member.id == user.id;
+			});
+			if(duplicate.length == 0){
+				this.info.member.unshift(user);
+			}
+			else{
+				this.$q.notify("此使用者已是私密成員");
+			}
+			this.$refs.userSelect.ClearSelect();
+		},
+		RemoveMember: function(i){
+			this.info.member.splice(i,1);
 		}
 	}
 }
