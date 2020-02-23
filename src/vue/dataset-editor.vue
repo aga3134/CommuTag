@@ -52,7 +52,7 @@
 						<user-select @change="AddMember();" ref="userSelect"></user-select>
 
 						<q-list class="q-my-md" bordered>
-							<q-item clickable v-ripple v-for="(member,i) in info.member" :key="member.id">
+							<q-item v-for="(member,i) in info.member" :key="member.id">
 								<q-item-section avatar>
 									<q-avatar>
 										<img :src="member.icon">

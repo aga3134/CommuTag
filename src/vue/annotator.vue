@@ -168,7 +168,7 @@ export default {
 				this.GenerateTask();
 			}
 			else{
-				this.$emit("done");
+				this.$emit("skip");
 			}
 		}
 	}

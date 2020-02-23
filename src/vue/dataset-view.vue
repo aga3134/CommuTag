@@ -25,7 +25,11 @@
 				<div class="row q-pa-md q-col-gutter-md">
 					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in filterArr" :key="i" transition="scale">
 						<q-card class="bg-grey-7 text-white" @click="ViewImage(image);">
-							<q-img :src="image.url" :ratio="16/9"></q-img>
+							<q-img :src="image.url" :ratio="16/9">
+								<div v-if="image.annotation" class="absolute-bottom">
+									已標註
+								</div>
+							</q-img>
 						</q-card>
 					</div>
 
@@ -57,7 +61,7 @@
 						<pre class="q-ma-none" v-if="targetImage.remark && targetImage.remark != '' ">{{targetImage.remark}}</pre>
 					</q-card-section>
 					<q-card-actions>
-						<q-btn flat label="協助標註" @click="AnnotateImage();"></q-btn>
+						<q-btn flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
@@ -78,7 +82,7 @@
 			</q-dialog>
 
 			<q-dialog maximized persistent v-model="openAnnotator" v-if="info">
-				<annotator :user="user" :dataset="info" :image="targetImage" @done="FinishAnnotation();"></annotator>
+				<annotator :user="user" :dataset="info" :image="targetImage" @done="FinishAnnotation();" @skip="openAnnotator = false;"></annotator>
 				<div>
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
 				</div>
@@ -214,14 +218,14 @@ export default {
 					break;
 				case "withTag":
 					for(var i=0;i<this.imageArr.length;i++){
-						if(this.imageArr[i].tag){
+						if(this.imageArr[i].annotation){
 							this.filterArr.push(this.imageArr[i]);
 						}
 					}
 					break;
 				case "withoutTag":
 					for(var i=0;i<this.imageArr.length;i++){
-						if(!this.imageArr[i].tag){
+						if(!this.imageArr[i].annotation){
 							this.filterArr.push(this.imageArr[i]);
 						}
 					}

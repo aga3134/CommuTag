@@ -525,6 +525,13 @@ export default {
 			if(this.imageNode){
 				this.imageNode.destroy();
 			}
+
+			for(var i=0;i<this.annotationArr.length;i++){
+				var annotation = this.annotationArr[i];
+				annotation.node.destroy();
+			}
+			this.annotationArr = [];
+
 			var srcImage = this.$refs.srcImage;
 			var cw = this.container.clientWidth;
 			var ch = this.container.clientHeight;
@@ -596,6 +603,17 @@ export default {
 					name: "BBoxLabel"
 				}));
 				group.add(label);
+
+				var a = {
+					tag: annotation.tag,
+					x: bbox.x(),
+					y: bbox.y(),
+					width: bbox.width(),
+					height: bbox.height(),
+					node: group,
+					index: this.annotationArr.length
+				};
+				this.annotationArr.push(a);
 			}
 			this.stage.batchDraw();
 		},

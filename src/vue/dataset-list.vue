@@ -24,7 +24,11 @@
 		<div class="row q-col-gutter-md q-mb-md">
 			<div class="col-12 col-sm-6 col-md-3" v-for="dataset in datasetArr">
 				<q-card class="bg-grey-7 text-white" >
-					<q-img :src="dataset.picCover || '/static/image/logo-16-9.png' " :ratio="16/9" class="cursor-pointer" @click="GoToDataset(dataset);"></q-img>
+					<q-img :src="dataset.picCover || '/static/image/logo-16-9.png' " :ratio="16/9" class="cursor-pointer" @click="GoToDataset(dataset);">
+						<div v-if="!dataset.isPublic" class="absolute-top">
+							不公開
+						</div>
+					</q-img>
 
 					<q-separator dark></q-separator>
 
@@ -70,7 +74,7 @@ export default {
 			sortKey: "updatedAt",
 			sortOption: [
 				{label: "更新時間",value:"updatedAt"},
-				{label: "影像數",value:"picNum"},
+				{label: "圖片數",value:"picNum"},
 				{label: "標註數",value:"tagNum"},
 			],
 			orderType: "desc",
