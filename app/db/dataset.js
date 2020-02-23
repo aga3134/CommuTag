@@ -34,10 +34,6 @@ var DatasetSchema = new mongoose.Schema({
 		type: String,
 		default: "bbox"
 	},
-	enableRemark: {
-		type: Boolean,
-		default: false
-	},
 	tagArr: [String],
 	picCover: String,
 	picNum: {

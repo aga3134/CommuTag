@@ -36,8 +36,6 @@
 						val => !!val || '標註方式不能空白'
 					]"/>
 
-					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableRemark" label="開放備註說明"/>
-
 					<q-input class="col-12 q-pa-sm" v-model="tagName" label="新增標籤" @keyup.enter="AddTag();">
 						<template v-slot:append>
 							<q-btn round dense flat icon="add" @click="AddTag();" />

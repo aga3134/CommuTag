@@ -101,7 +101,7 @@ datasetController.UploadImage = function(param){
 	newImage.lat = param.lat;
 	newImage.lng = param.lng;
 	newImage.remark = param.remark;
-	console.log(newImage);
+	newImage.dataTime = param.dataTime;
 	Image.create(newImage,function(err, result){
 		if(err){
 			console.log(err);

@@ -1,11 +1,17 @@
 <template lang="html">
-	<q-card class="full-width q-pa-sm">
+	<q-card class="image-info full-width q-pa-sm" v-if="dataset">
 		<q-card-section>
-			<div class="location-select">
-				<div class="text-h6">選擇地點</div>
-				<div class="map" ref="map"></div>
-				<div class="text-center">{{status}}</div>
-			</div>
+			<div class="text-h6">選擇資料時間</div>
+			<input class="q-pa-sm" v-model="dataTime" type="datetime-local" @change="$emit('change');"></input>
+		</q-card-section>
+		<q-card-section v-if="dataset.enableGPS">
+			<div class="text-h6">選擇資料地點</div>
+			<div class="map" ref="map"></div>
+			<div class="text-center">{{status}}</div>
+		</q-card-section>
+		<q-card-section>
+			<div class="text-h6">資料備註說明(若無備註說明請直接按確定)</div>
+			<q-input v-model="remark" filled type="textarea" @input="$emit('change');"></q-input>
 		</q-card-section>
 		<q-card-actions class="justify-center">
 			<q-btn flat label="確定" @click="ConfirmSelect();"></q-btn>
@@ -19,9 +25,9 @@
 <script>
 
 export default {
-	name:"location-select",
+	name:"image-info",
 	props: {
-		
+		dataset: Object
 	},
 	components:{
 		
@@ -32,12 +38,17 @@ export default {
 			status:"",
 			OnGPSReady: null,
 			map: null,
-			marker: null
+			marker: null,
+			dataTime: null,
+			remark: ""
 		};
 	},
 	mounted: function(){
-		this.InitMap();
-		this.GetGPS();
+		this.dataTime = spacetime.now().unixFmt("yyyy-MM-ddTHH:mm");
+		if(this.dataset.enableGPS){
+			this.InitMap();
+			this.GetGPS();
+		}
 	},
 	methods: {
 		InitMap: function(){
@@ -89,6 +100,14 @@ export default {
 				this.status = "瀏覽器不支援GPS-請點選位置";
 			}
 		},
+		GetImageInfo: function(){
+			var info = {};
+			var s = spacetime.now();
+			info.dataTime = spacetime(this.dataTime,s.timezone().name).format("iso");
+			info.remark = this.remark;
+			info.loc = this.loc;
+			return info;
+		},
 		ConfirmSelect: function(){
 			this.$emit("confirm");
 		},
@@ -100,7 +119,7 @@ export default {
 </script>
 
 <style lang="scss">
-.location-select{
+.image-info{
 	width: 100%;
 	.map{
 		width: 100%;

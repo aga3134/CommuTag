@@ -14,10 +14,10 @@
 
 			<div class="row q-px-md q-gutter-sm">
 				<q-select dense class="col-1" v-model="filterKey" :options="filterOption" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
-				<q-btn icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
-				<q-btn icon="cloud_download" label="整包下載" flat></q-btn>
+				<q-btn v-if="info && info.enableUpload" icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
+				<q-btn v-if="info && info.enableDownload" icon="cloud_download" label="整包下載" flat></q-btn>
 				<q-btn icon="star_border" label="收藏" flat></q-btn>
-				<q-btn icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
+				<q-btn v-if="user && user.authType =='admin' " icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 
 			
@@ -48,24 +48,23 @@
 					</div>
 					<q-card-section>
 						<q-breadcrumbs separator=" " class="text-black" active-color="black">
-							<q-breadcrumbs-el :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-if="targetImage.time" :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>
 							<q-breadcrumbs-el v-if="targetImage.lat && targetImage.lng" :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-if="targetImage.annotation" :label="'驗證數 : '+targetImage.verifyNum "></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-if="targetImage.verifyNum>0" :label="'認同率 : '+(100*targetImage.agreeNum/targetImage.verifyNum).toFixed(0)+'%' "></q-breadcrumbs-el>
+							<q-breadcrumbs-el v-if="targetImage.annotation" :label="'認同數 / 驗證數 : '+AgreeVerifyRatio"></q-breadcrumbs-el>
 						</q-breadcrumbs>
 					</q-card-section>
-					<q-card-section v-if="info.enableRemark && targetImage.remark">
-						{{targetImage.remark}}
+					<q-card-section class="q-py-none">
+						<pre class="q-ma-none" v-if="targetImage.remark && targetImage.remark != '' ">{{targetImage.remark}}</pre>
 					</q-card-section>
 					<q-card-actions>
 						<q-btn flat label="協助標註" @click="AnnotateImage();"></q-btn>
-						<q-btn flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
-						<q-btn flat label="刪除影像" @click="DeleteImage();"></q-btn>
+						<q-btn v-if="user && user.authType=='admin' " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
+						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</q-dialog>
 
-			<q-page-sticky position="bottom-left" :offset="[18, 18]">
+			<q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="info && info.enableUpload">
 				<q-btn round class="bg-teal text-white" icon="add_photo_alternate" @click="openUploader = true;">
 					<q-tooltip content-class="bg-grey-8" @click="openUploader = true">拍照上傳</q-tooltip>
 				</q-btn>
@@ -195,8 +194,10 @@ export default {
 				var tz = spacetime().name;	//get browser time zone
 				for(var i=0;i<result.data.images.length;i++){
 					var image = result.data.images[i];
-					var t = spacetime(image.createdAt).goto(tz);
-					image.time = t.unixFmt("yyyy-MM-dd HH:mm:ss");
+					if(image.dataTime){
+						var t = spacetime(image.dataTime).goto(tz);
+						image.time = t.unixFmt("yyyy-MM-dd HH:mm:ss");
+					}
 					image.url = "/static/upload/dataset/"+this.datasetID+"/image/"+image._id+".jpg";
 					this.imageArr.push(image);
 				}
@@ -262,6 +263,15 @@ export default {
 				this.$q.notify("刪除標註成功");
 				this.ReloadImage();
 			}.bind(this));
+		}
+	},
+	computed: {
+		AgreeVerifyRatio: function(){
+			var str = this.targetImage.agreeNum+' / '+this.targetImage.verifyNum;
+			if(this.targetImage.verifyNum > 0){
+				str +=' ('+(100*this.targetImage.agreeNum/this.targetImage.verifyNum).toFixed(0)+'%)';
+			}
+			return str;
 		}
 	}
 }
