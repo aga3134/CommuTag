@@ -61,7 +61,7 @@
 						<pre class="q-ma-none" v-if="targetImage.remark && targetImage.remark != '' ">{{targetImage.remark}}</pre>
 					</q-card-section>
 					<q-card-actions>
-						<q-btn flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
+						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
@@ -152,20 +152,26 @@ export default {
 		}.bind(this));
 
 		$.get("/dataset/view-dataset?id="+param.id, function(result){
-			if(result.status != "ok") return;
+			if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示資料集");;
 			this.info = result.data;
+
 			this.badgeArr = [];
 			if(!this.info.isPublic) this.badgeArr.push("不公開");
 			if(this.info.enableGPS) this.badgeArr.push("GPS");
-			if(this.info.enableRemark) this.badgeArr.push("備註說明");
-			switch(this.info.annotationType){
-				case "bbox":
-					this.badgeArr.push("框選標註");
-					break;
-				case "image":
-					this.badgeArr.push("整張標註");
-					break;
+			if(!this.info.enableAnnotation){
+				this.badgeArr.push("暫停標註");
 			}
+			else{
+				switch(this.info.annotationType){
+					case "bbox":
+						this.badgeArr.push("框選標註");
+						break;
+					case "image":
+						this.badgeArr.push("整張標註");
+						break;
+				}
+			}
+			
 		}.bind(this));
 	},
 	methods: {

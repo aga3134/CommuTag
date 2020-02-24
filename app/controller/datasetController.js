@@ -8,6 +8,35 @@ var ImageSchema = require("../db/ImageSchema");
 
 var datasetController = {};
 
+function CheckDatasetAuth(param){
+	return new Promise(function(resolve, reject) {
+		Dataset.findOne({_id:param.dataset},{"__v":0})
+		.exec(function(err, result){
+			if(err){
+				console.log(err);
+				return reject({err:"find dataset fail"});
+			}
+			if(param.checkUpload && !result.enableUpload){
+				return reject({err:"upload not enabled"});
+			}
+			if(param.checkAnnotation && !result.enableAnnotation){
+				return reject({err:"annotation not enabled"});
+			}
+			if(param.checkView && !result.isPublic){
+				//不公開的資料集，管理員跟私密成員才能看
+				if(!param.user) return reject({err:"view not allowed"});
+				if(param.user.authType != "admin"){
+					var isMember = result.member.filter(function(m){
+						return m.id == param.user._id.toString();
+					});
+					if(isMember.length == 0) return reject({err:"view not allowed"});
+				}
+			}
+			return resolve(result);
+		});
+	});
+}
+
 datasetController.CreateDataset = function(param){
 	Dataset.create({},function(err, dataset){
 		if(err){
@@ -58,6 +87,12 @@ datasetController.ListDataset = function(param){
 			{isPublic: false, "member.id": param.user._id.toString()}
 		];
 	}
+	if(param.enableUpload){
+		queryOption.enableUpload = param.enableUpload=="1"?true:false;
+	}
+	if(param.enableAnnotation){
+		queryOption.enableAnnotation = param.enableAnnotation=="1"?true:false;
+	}
 	var sortOption = {};
 	if(param.sort){
 		sortOption[param.sort] = param.orderType=="desc"?-1:1;
@@ -84,13 +119,16 @@ datasetController.ListDataset = function(param){
 };
 
 datasetController.ViewDataset = function(param){
-	Dataset.findOne({_id:param.id},{"__v":0})
-	.exec(function(err, result){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"find dataset fail"});
-		}
+	CheckDatasetAuth({
+		dataset: param.id,
+		user: param.user,
+		checkView: true
+	})
+	.then(function(result){
 		param.succFunc(result);
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
 };
 
@@ -109,58 +147,91 @@ datasetController.ChangeCover = function(param){
 };
 
 datasetController.UploadImage = function(param){
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	var newImage = {};
-	newImage.lat = param.lat;
-	newImage.lng = param.lng;
-	newImage.remark = param.remark;
-	newImage.dataTime = param.dataTime;
-	Image.create(newImage,function(err, result){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"create image fail"});
-		}
-		param.succFunc(result);
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true,
+		checkUpload: true
+	})
+	.then(function(result){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		var newImage = {};
+		newImage.lat = param.lat;
+		newImage.lng = param.lng;
+		newImage.remark = param.remark;
+		newImage.dataTime = param.dataTime;
+		Image.create(newImage,function(err, result){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"create image fail"});
+			}
+			param.succFunc(result);
+		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
+
 };
 
 datasetController.ListImage = function(param){
-	var limit = 8;
-	var skip = (param.page||0)*limit;
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true
+	})
+	.then(function(result){
+		var limit = 8;
+		var skip = (param.page||0)*limit;
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
 
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-
-	Image.find({},{"__v":0},{limit:limit+1, skip:skip})
-	.sort({"createdAt":-1})
-	.exec(function(err, images){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"list image fail"});
-		}
-		var result = {};
-		if(images.length > limit){
-			result.hasMore = true;
-			result.images = images.slice(0,-1);
-		}
-		else{
-			result.hasMore = false;
-			result.images = images;
-		}
-		param.succFunc(result);
+		Image.find({},{"__v":0},{limit:limit+1, skip:skip})
+		.sort({"createdAt":-1})
+		.exec(function(err, images){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"list image fail"});
+			}
+			var result = {};
+			if(images.length > limit){
+				result.hasMore = true;
+				result.images = images.slice(0,-1);
+			}
+			else{
+				result.hasMore = false;
+				result.images = images;
+			}
+			param.succFunc(result);
+		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
+
 };
 
 datasetController.ListImageForAnnotation = function(param){
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	Image.find({},{"__v":0})
-	.$where('this.verifyNum < 10 || this.agreeNum < this.verifyNum*0.9')
-	.exec(function(err, images){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"list image for annotation fail"});
-		}
-		param.succFunc(images);
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true
+	})
+	.then(function(result){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		Image.find({},{"__v":0})
+		.$where('this.verifyNum < 10 || this.agreeNum < this.verifyNum*0.9')
+		.exec(function(err, images){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"list image for annotation fail"});
+			}
+			param.succFunc(images);
+		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
+
 };
 
 datasetController.DeleteImage = function(param){
@@ -175,42 +246,66 @@ datasetController.DeleteImage = function(param){
 };
 
 datasetController.SetAnnotation = function(param){
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	var data = null;
-	if(param.user && param.annotation){
-		data = {};
-		data.user = param.user._id;
-		data.annotation = param.annotation;
-	}
-	var update = {
-		annotation: data,
-		verifyNum: 0,
-		agreeNum: 0
-	};
-	Image.updateOne({_id:param.image},update,function(err, image){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"update annotation fail"});
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true,
+		checkAnnotation: true
+	})
+	.then(function(result){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		var data = null;
+		if(param.user && param.annotation){
+			data = {};
+			data.user = param.user._id;
+			data.annotation = param.annotation;
 		}
-		param.succFunc(image);
+		var update = {
+			annotation: data,
+			verifyNum: 0,
+			agreeNum: 0
+		};
+		Image.updateOne({_id:param.image},update,function(err, image){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"update annotation fail"});
+			}
+			param.succFunc(image);
+		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
+
 };
 
 datasetController.AddVerification = function(param){
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	var data = {};
-	data.user = param.user._id;
-	data.agree = param.agree;
-	var update = {};
-	update["$push"] = {verification:data};
-	update["$inc"] = {verifyNum:1,agreeNum:param.agree=="true"?1:0};
-	Image.updateOne({_id:param.image},update,function(err, image){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"update annotation fail"});
-		}
-		param.succFunc(image);
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true,
+		checkAnnotation: true
+	})
+	.then(function(result){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		var data = {};
+		data.user = param.user._id;
+		data.agree = param.agree;
+		var update = {};
+		update["$push"] = {verification:data};
+		update["$inc"] = {verifyNum:1,agreeNum:param.agree=="true"?1:0};
+		Image.updateOne({_id:param.image},update,function(err, image){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"update annotation fail"});
+			}
+			param.succFunc(image);
+		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
+
 };
 
 module.exports = datasetController;

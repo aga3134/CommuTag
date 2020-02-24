@@ -34,7 +34,8 @@
 export default {
 	name:"dataset-select",
 	props: {
-		
+		forUpload: Boolean,
+		forAnnotation: Boolean
 	},
 	components:{
 		
@@ -56,6 +57,12 @@ export default {
 			url += "?page="+(index-1);
 			url += "&sort=updatedAt";
 			url += "&orderType=desc";
+			if(this.forUpload){
+				url += "&enableUpload=1";
+			}
+			if(this.forAnnotation){
+				url += "&enableAnnotation=1";
+			}
 			url += "&keyword="+this.searchKey;
 			$.get(url,function(result){
 				if(result.status != "ok") return;

@@ -8,8 +8,8 @@
 			<div class="text-h5 text-white">{{status}}</div>
 		</div>
 
-		<q-dialog v-model="openDatabaseSelect">
-			<dataset-select ref="datasetSelect" @confirm="ChangeDataset();"></dataset-select>
+		<q-dialog v-model="openDatasetSelect">
+			<dataset-select forAnnotation ref="datasetSelect" @confirm="ChangeDataset();" @cancel="openDatasetSelect=false;"></dataset-select>
 		</q-dialog>
 
 		<q-page-sticky position="top-left" :offset="[18, 18]">
@@ -17,7 +17,7 @@
 				<q-btn flat round class="bg-primary text-white" size="md" icon="help" @click="OpenHelp();">
 					<q-tooltip content-class="bg-primary">如何標註</q-tooltip>
 				</q-btn>
-				<q-btn flat round class="bg-primary text-white" size="md" icon="view_quilt" :disable="dataset != null" @click="openDatabaseSelect = true;">
+				<q-btn flat round class="bg-primary text-white" size="md" icon="view_quilt" :disable="dataset != null" @click="openDatasetSelect = true;">
 					<q-tooltip content-class="bg-primary">選擇資料集</q-tooltip>
 				</q-btn>
 			</div>
@@ -49,7 +49,7 @@ export default {
 			datasetSelect:null,
 			imageSelect:null,
 			taskSelect:"",
-			openDatabaseSelect: false,
+			openDatasetSelect: false,
 			imageArr: [],
 			status: ""
 		};
@@ -61,7 +61,7 @@ export default {
 		this.imageSelect = this.image;
 		if(!this.dataset){
 			this.status = "請選擇資料集";
-			this.openDatabaseSelect = true;
+			this.openDatasetSelect = true;
 		}
 		else{
 			this.GenerateTask();
@@ -69,7 +69,7 @@ export default {
 	},
 	methods: {
 		ChangeDataset: function(){
-			this.openDatabaseSelect = false;
+			this.openDatasetSelect = false;
 			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
 			var url = "/dataset/list-image-for-annotation";
 			url += "?dataset="+this.datasetSelect._id;

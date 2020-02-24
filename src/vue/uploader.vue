@@ -27,7 +27,7 @@
 		</div>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'dataset'">
-			<dataset-select ref="datasetSelect" @change="DatasetChange();" @confirm="NextStep();" @cancel="PrevStep();"></dataset-select>
+			<dataset-select forUpload ref="datasetSelect" @change="DatasetChange();" @confirm="NextStep();" @cancel="PrevStep();"></dataset-select>
 		</q-dialog>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'info'">

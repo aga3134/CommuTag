@@ -54,6 +54,8 @@ router.get('/list-dataset', function(req, res) {
 	param.page = req.query.page;
 	param.sort = req.query.sort;
 	param.orderType = req.query.orderType;
+	param.enableUpload = req.query.enableUpload;
+	param.enableAnnotation = req.query.enableAnnotation;
 	param.keyword = req.query.keyword;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
@@ -66,6 +68,7 @@ router.get('/list-dataset', function(req, res) {
 
 router.get('/view-dataset', function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.id = req.query.id;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
@@ -105,6 +108,7 @@ router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem
 
 router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
+	param.user = req.user;
 	param.dataset = req.body.dataset;
 	param.lat = req.body.lat;
 	param.lng = req.body.lng;
@@ -132,6 +136,7 @@ router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem
 
 router.get('/list-image', function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.dataset = req.query.dataset;
 	param.page = req.query.page;
 	param.succFunc = function(result){
@@ -143,7 +148,7 @@ router.get('/list-image', function(req, res) {
 	datasetController.ListImage(param);
 });
 
-router.post('/delete-image', function(req, res) {
+router.post('/delete-image', util.CheckAdmin, util.CSRF, function(req, res) {
 	var param = {};
 	param.dataset = req.body.data.dataset;
 	param.image = req.body.data.image;
@@ -160,6 +165,7 @@ router.post('/delete-image', function(req, res) {
 
 router.get('/list-image-for-annotation', function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.dataset = req.query.dataset;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
@@ -170,7 +176,7 @@ router.get('/list-image-for-annotation', function(req, res) {
 	datasetController.ListImageForAnnotation(param);
 });
 
-router.post('/set-annotation', util.CheckAdmin,util.CSRF, function(req, res){
+router.post('/set-annotation', util.CheckLogin,util.CSRF, function(req, res){
 	var param = {};
 	param.user = req.user;
 	param.dataset = req.body.dataset;
@@ -185,7 +191,7 @@ router.post('/set-annotation', util.CheckAdmin,util.CSRF, function(req, res){
 	datasetController.SetAnnotation(param);
 });
 
-router.post('/add-verification', util.CheckAdmin,util.CSRF, function(req, res){
+router.post('/add-verification', util.CheckLogin,util.CSRF, function(req, res){
 	var param = {};
 	param.user = req.user;
 	param.dataset = req.body.dataset;

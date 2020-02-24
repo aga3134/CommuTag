@@ -31,6 +31,7 @@
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableUpload" label="開放上傳影像"/>
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableDownload" label="開放下載資料集"/>
 					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableGPS" label="儲存位置資訊"/>
+					<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="info.enableAnnotation" label="開放編輯標註"/>
 
 					<q-select class="col-12 col-sm-6 q-pa-sm" v-model="info.annotationType" :options="annotationTypeOption" option-value="value" option-label="label" emit-value map-options label="標註方式" ref="annotationType" :rules="[
 						val => !!val || '標註方式不能空白'

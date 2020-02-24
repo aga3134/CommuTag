@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import util from "../js/util.js"
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import datasetList from "./dataset-list.vue"
@@ -56,6 +57,11 @@ export default {
 		};
 	},
 	created: function(){
+		var urlParam = util.GetUrlParameter();
+		if(urlParam.message){
+			alert(decodeURIComponent(urlParam.message));
+		}
+
 		$.get("/user/info",function(result){
 			if(result.status != "ok") return;
 			this.user = result.data;

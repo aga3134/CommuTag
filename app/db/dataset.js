@@ -30,6 +30,10 @@ var DatasetSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
+	enableAnnotation: {
+		type: Boolean,
+		default: true
+	},
 	annotationType: {
 		type: String,
 		default: "bbox"
