@@ -50,6 +50,7 @@ router.post('/delete-dataset', util.CheckAdmin,util.CSRF, function(req, res){
 
 router.get('/list-dataset', function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.page = req.query.page;
 	param.sort = req.query.sort;
 	param.orderType = req.query.orderType;

@@ -19,6 +19,10 @@ datasetController.CreateDataset = function(param){
 };
 
 datasetController.UpdateDataset = function(param){
+	//若無member資料傳輸時會自動省略，這邊補上空陣列讓資料庫更新member
+	if(!param.info.member){
+		param.info.member = [];
+	}
 	Dataset.updateOne({_id:param.info._id},param.info,function(err, dataset){
 		if(err){
 			console.log(err);
@@ -44,6 +48,15 @@ datasetController.ListDataset = function(param){
 	var queryOption = {};
 	if(param.keyword){
 		queryOption.name = {"$regex": param.keyword,"$options": "i"};
+	}
+	if(!param.user){
+		queryOption.isPublic = true;
+	}
+	else if(param.user.authType != "admin"){
+		queryOption["$or"] = [
+			{isPublic: true},
+			{isPublic: false, "member.id": param.user._id.toString()}
+		];
 	}
 	var sortOption = {};
 	if(param.sort){
