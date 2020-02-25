@@ -67,7 +67,7 @@
 				</q-tab-panel>
 
 				<q-tab-panel name="favorite">
-					<user-favorite :user="user"></user-favorite>
+					<dataset-list mode="favorite"></dataset-list>
 				</q-tab-panel>
 
 				<q-tab-panel name="data-admin">

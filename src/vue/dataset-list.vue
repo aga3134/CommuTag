@@ -87,11 +87,23 @@ export default {
 			datasetPage: 0,
 			hasMoreDataset: true,
 			editInfo: {},
-			openDatasetEditor: false
+			openDatasetEditor: false,
+			favoriteID: []
 		};
 	},
 	created: function(){
-		this.LoadMoreDataset();
+		if(this.mode == "favorite"){
+			$.get("/favorite/list-my-favorite", function(result){
+				if(result.status != "ok") return alert("讀取追蹤清單失敗");
+				this.favoriteID = result.data.map(function(d){
+					return d.datasetID;
+				});
+				this.LoadMoreDataset();
+			}.bind(this));
+		}
+		else{
+			this.LoadMoreDataset();
+		}
 	},
 	methods: {
 		LoadMoreDataset: function(){
@@ -100,6 +112,7 @@ export default {
 			url += "&sort="+this.sortKey;
 			url += "&orderType="+this.orderType;
 			url += "&keyword="+this.searchKey;
+			if(this.mode == "favorite") url+="&idList="+this.favoriteID.join(",");
 			$.get(url, function(result){
 				if(result.status != "ok") return;
 				this.hasMoreDataset = result.data.hasMore;

@@ -120,6 +120,9 @@ datasetController.ListDataset = function(param){
 	if(param.enableAnnotation){
 		queryOption.enableAnnotation = param.enableAnnotation=="1"?true:false;
 	}
+	if(param.idList){
+		queryOption._id = param.idList.split(",");
+	}
 	var sortOption = {};
 	if(param.sort){
 		sortOption[param.sort] = param.orderType=="desc"?-1:1;

@@ -16,7 +16,8 @@
 				<q-select dense class="col-1" v-model="filterKey" :options="filterOption" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
 				<q-btn v-if="info && info.enableUpload" icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
 				<q-btn v-if="info && info.enableDownload" icon="cloud_download" label="整包下載" flat></q-btn>
-				<q-btn icon="star_border" label="收藏" flat></q-btn>
+				<q-btn v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
+				<q-btn v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
 				<q-btn v-if="user && user.authType =='admin' " icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 
@@ -139,7 +140,8 @@ export default {
 			openUploader: false,
 			openAnnotator: false,
 			openDatasetEditor: false,
-			editInfo: null
+			editInfo: null,
+			favorite: false
 		};
 	},
 	created: function(){
@@ -149,6 +151,13 @@ export default {
 		$.get("/user/info",function(result){
 			if(result.status != "ok") return;
 			this.user = result.data;
+		}.bind(this));
+
+		$.get("/favorite/list-my-favorite?dataset="+this.datasetID, function(result){
+			if(result.status != "ok") return;
+			if(result.data.length > 0){
+				this.favorite = true;
+			}
 		}.bind(this));
 
 		$.get("/dataset/view-dataset?id="+param.id, function(result){
@@ -273,6 +282,28 @@ export default {
 				if(result.status != "ok") return alert("刪除標註失敗");
 				this.$q.notify("刪除標註成功");
 				this.ReloadImage();
+			}.bind(this));
+		},
+		AddFavorite: function(){
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.dataset = this.datasetID;
+			data._csrf = csrfToken;
+			$.post("/favorite/add-favorite",data,function(result){
+				if(result.status != "ok") return alert("收藏失敗");
+				this.favorite = true;
+				this.$q.notify("收藏成功");
+			}.bind(this));
+		},
+		RemoveFavorite: function(){
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.dataset = this.datasetID;
+			data._csrf = csrfToken;
+			$.post("/favorite/remove-favorite",data,function(result){
+				if(result.status != "ok") return alert("取消收藏失敗");
+				this.favorite = false;
+				this.$q.notify("取消收藏成功");
 			}.bind(this));
 		}
 	},

@@ -56,6 +56,7 @@ router.get('/list-dataset', function(req, res) {
 	param.orderType = req.query.orderType;
 	param.enableUpload = req.query.enableUpload;
 	param.enableAnnotation = req.query.enableAnnotation;
+	param.idList = req.query.idList;
 	param.keyword = req.query.keyword;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});

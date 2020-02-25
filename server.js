@@ -15,6 +15,7 @@ var ViewRoute = require("./app/route/viewRoute.js");
 var AuthRoute = require("./app/route/authRoute.js");
 var UserRoute = require("./app/route/userRoute.js");
 var DatasetRoute = require("./app/route/datasetRoute.js");
+var FavoriteRoute = require("./app/route/favoriteRoute.js");
 
 mongoose.connect("mongodb://localhost:27017/commutag",{
     useNewUrlParser: true,
@@ -59,6 +60,7 @@ app.use("/", ViewRoute);
 app.use("/auth", AuthRoute);
 app.use("/user", UserRoute);
 app.use("/dataset", DatasetRoute);
+app.use("/favorite", FavoriteRoute);
 
 
 app.listen(app.port, app.host);
