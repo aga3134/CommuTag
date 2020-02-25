@@ -62,7 +62,7 @@
 					</q-card-section>
 					<q-card-actions>
 						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
-						<q-btn v-if="user && user.authType=='admin' " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
+						<q-btn v-if="user && user.authType=='admin' && targetImage.annotation " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
 				</q-card>

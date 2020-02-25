@@ -35,7 +35,7 @@
 					<q-card-section class="cursor-pointer" @click="GoToDataset(dataset);">
 						<div class="text-h6">{{dataset.name}}</div>
 						<div class="text-subtitle2">圖片數: {{dataset.picNum}}</div>
-						<div class="text-subtitle2">標註數: {{dataset.tagNum}}</div>
+						<div class="text-subtitle2">標註數: {{dataset.annotationNum}}</div>
 					</q-card-section>
 
 					<q-separator dark></q-separator>
@@ -71,11 +71,12 @@ export default {
 	data: function () {
 		return {
 			searchKey:"",
-			sortKey: "updatedAt",
+			sortKey: "createdAt",
 			sortOption: [
+				{label: "建立時間",value:"createdAt"},
 				{label: "更新時間",value:"updatedAt"},
 				{label: "圖片數",value:"picNum"},
-				{label: "標註數",value:"tagNum"},
+				{label: "標註數",value:"annotationNum"},
 			],
 			orderType: "desc",
 			orderTypeOption: [

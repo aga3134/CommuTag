@@ -148,7 +148,15 @@ export default {
 			data.agree = agree;
 			data._csrf = csrfToken;
 			$.post("/dataset/add-verification",data,function(result){
-				if(result.status != "ok") return alert("驗證失敗");
+				if(result.status != "ok"){
+					console.log(result);
+					switch(result.message){
+						case "verification duplicate":
+							return alert("您之前已驗證過這個標註");
+						default:
+							return alert("驗證失敗");
+					}
+				}
 				this.$q.notify("驗證成功");
 				if(this.autoTask){
 					this.GenerateTask();

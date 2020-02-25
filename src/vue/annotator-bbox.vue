@@ -151,10 +151,12 @@ export default {
 		GenLabelColor: function(){
 			this.labelColor = {};
 			var colorNum = this.dataset.tagArr.length;
+			var binNum = 5;
+			var step = 1.0/binNum;
 			for(var i=0;i<colorNum;i++){
-				var h = (i%10)*0.1;
-				var s = 1-(parseInt(i*0.1)%10)*0.1;
-				var v = 1-(parseInt(i*0.01)%10)*0.1;
+				var h = (i%binNum)*step;
+				var s = 1-(parseInt(i*step)%binNum)*step;
+				var v = 1-(parseInt(i*step*step)%binNum)*step;
 				var color = this.HSVtoRGB(h,s,v,1);
 				var tag = this.dataset.tagArr[i];
 				this.labelColor[tag] = color;

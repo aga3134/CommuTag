@@ -37,6 +37,32 @@ function CheckDatasetAuth(param){
 	});
 }
 
+function UpdateDatasetStatistic(param){
+	return new Promise(function(resolve, reject) {
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		Image.aggregate([
+			{$group: {
+				_id:null,
+				picNum: {$sum:1},
+				annotationNum: {
+					$sum: {
+						$cond: [{$ne: ["$annotation", null]}, 1, 0]
+					}
+				},
+			}},
+			{$project:{ _id:0}}
+		],function(err, result){
+			Dataset.updateOne({_id:param.dataset},result[0],function(err,dataset){
+				if(err){
+					console.log(err);
+					return reject({err:"update dataset fail"});
+				}
+				return resolve();
+			});
+		});
+	});
+}
+
 datasetController.CreateDataset = function(param){
 	Dataset.create({},function(err, dataset){
 		if(err){
@@ -67,6 +93,7 @@ datasetController.DeleteDataset = function(param){
 			console.log(err);
 			return param.failFunc({err:"delete dataset fail"});
 		}
+		mongoose.connection.db.dropCollection("image"+param.dataset);
 		param.succFunc({_id:param.id});
 	});
 };
@@ -153,7 +180,7 @@ datasetController.UploadImage = function(param){
 		checkView: true,
 		checkUpload: true
 	})
-	.then(function(result){
+	.then(function(dataset){
 		var Image = mongoose.model("image"+param.dataset, ImageSchema);
 		var newImage = {};
 		newImage.lat = param.lat;
@@ -165,6 +192,7 @@ datasetController.UploadImage = function(param){
 				console.log(err);
 				return param.failFunc({err:"create image fail"});
 			}
+			UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc(result);
 		});
 	})
@@ -241,6 +269,7 @@ datasetController.DeleteImage = function(param){
 			console.log(err);
 			return param.failFunc({err:"delete image fail"});
 		}
+		UpdateDatasetStatistic({dataset: param.dataset});
 		param.succFunc({_id:param.image});
 	});
 };
@@ -252,7 +281,7 @@ datasetController.SetAnnotation = function(param){
 		checkView: true,
 		checkAnnotation: true
 	})
-	.then(function(result){
+	.then(function(dataset){
 		var Image = mongoose.model("image"+param.dataset, ImageSchema);
 		var data = null;
 		if(param.user && param.annotation){
@@ -261,15 +290,16 @@ datasetController.SetAnnotation = function(param){
 			data.annotation = param.annotation;
 		}
 		var update = {
-			annotation: data,
-			verifyNum: 0,
-			agreeNum: 0
-		};
+			annotation:data,
+			verifyNum:0,
+			agreeNum:0
+		}
 		Image.updateOne({_id:param.image},update,function(err, image){
 			if(err){
 				console.log(err);
 				return param.failFunc({err:"update annotation fail"});
 			}
+			UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc(image);
 		});
 	})
@@ -286,20 +316,36 @@ datasetController.AddVerification = function(param){
 		checkView: true,
 		checkAnnotation: true
 	})
-	.then(function(result){
+	.then(function(dataset){
 		var Image = mongoose.model("image"+param.dataset, ImageSchema);
 		var data = {};
-		data.user = param.user._id;
+		data.user = param.user._id.toString();
 		data.agree = param.agree;
-		var update = {};
-		update["$push"] = {verification:data};
-		update["$inc"] = {verifyNum:1,agreeNum:param.agree=="true"?1:0};
-		Image.updateOne({_id:param.image},update,function(err, image){
+		Image.findOne({_id:param.image},function(err, image){
 			if(err){
 				console.log(err);
-				return param.failFunc({err:"update annotation fail"});
+				return param.failFunc({err:"find image fail"});
 			}
-			param.succFunc(image);
+			if(!image) return param.failFunc({err:"image not found"});
+			
+			var duplicate = image.verification.filter(function(v){
+				return v.user == data.user;
+			});
+			if(duplicate.length > 0){
+				return param.failFunc({err:"verification duplicate"});
+			}
+			else{
+				image.verification.push(data);
+				image.verifyNum++;
+				image.agreeNum += data.agree=="true"?1:0;
+				image.save(function(err, saved){
+					if(err){
+						console.log(err);
+						return param.failFunc({err:"update verification fail"});
+					}
+					param.succFunc(image);
+				});
+			}
 		});
 	})
 	.catch(function(err){

@@ -44,7 +44,7 @@ var DatasetSchema = new mongoose.Schema({
 		type: Number,
 		default: 0
 	},
-	tagNum: {
+	annotationNum: {
 		type: Number,
 		default: 0
 	},

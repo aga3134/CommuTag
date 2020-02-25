@@ -3,8 +3,14 @@ var mongoose = require('mongoose');
 var ImageSchema = new mongoose.Schema({
 	uploadFrom: String,		//user or api
 	uploader: String,		//user id or api token	
-	annotation: mongoose.Schema.Types.Mixed,		//annotation data
-	verification: [mongoose.Schema.Types.Mixed],	//annotation verification data
+	annotation:{			//annotation data
+		type: mongoose.Schema.Types.Mixed,
+		default: null
+	},
+	verification:{				//annotation verification data
+		type: [mongoose.Schema.Types.Mixed],
+		default: []
+	},
 	verifyNum: {		//total number in verification
 		type: Number,
 		default: 0
