@@ -101,7 +101,17 @@ export default {
 				this.status = "此資料集影像皆已標註完成";
 				return;
 			}
-			this.taskSelect = this.imageSelect.annotation?"verify":"annotate";
+			//未標註 -> 標註
+			if(!this.imageSelect.annotation) this.taskSelect = "annotate";
+			else{
+				//驗證數不夠 -> 驗證
+				if(this.imageSelect.verifyNum < 10) this.taskSelect = "verify";
+				else{
+					//認同率太低 -> 重新標註
+					if(this.imageSelect.agreeNum < this.imageSelect.verifyNum*0.70) this.taskSelect = "annotate";
+					else this.taskSelect = "verify";
+				}
+			}
 		},
 		GetAnnotator: function(){
 			if(!this.datasetSelect) return null;
@@ -149,15 +159,17 @@ export default {
 			data._csrf = csrfToken;
 			$.post("/dataset/add-verification",data,function(result){
 				if(result.status != "ok"){
-					console.log(result);
 					switch(result.message){
 						case "verification duplicate":
-							return alert("您之前已驗證過這個標註");
+							this.$q.notify("您之前已驗證過這個標註");
+							break;
 						default:
-							return alert("驗證失敗");
+							alert("驗證失敗");
+							break;
 					}
 				}
-				this.$q.notify("驗證成功");
+				else this.$q.notify("驗證成功");
+
 				if(this.autoTask){
 					this.GenerateTask();
 				}

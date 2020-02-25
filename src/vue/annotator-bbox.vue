@@ -620,6 +620,9 @@ export default {
 			this.stage.batchDraw();
 		},
 		SetAnnotation: function(){
+			if(this.annotationArr.length == 0){
+				return alert("請至少新增一個標籤");
+			}
 			this.$emit("setAnnotation");
 		},
 		SetVerification: function(agree){

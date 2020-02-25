@@ -32,7 +32,7 @@
 				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="add_photo_alternate" label="變更圖片" @click="ChangePhoto();" :loading="uploadPhoto"></q-btn>
 				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="edit" label="修改資料" @click="EditUserInfo();"></q-btn>
 			</q-card-actions>
-			<image-upload ref="uploader"></image-upload>
+			<image-upload :maxResW="640" :maxResH="640" ref="uploader"></image-upload>
 		</q-card>
 
 		<q-dialog v-model="openInputPanel">
@@ -108,7 +108,7 @@ export default {
 
 			uploader.OnChange = function(){
 				this.uploadPhoto = true;
-				uploader.UploadImage(true);
+				uploader.UploadImage();
 			}.bind(this);
 
 			uploader.url = "/user/upload-image";

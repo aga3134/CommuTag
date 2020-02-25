@@ -51,7 +51,7 @@ upload.SaveImage = function(param){
 	var newName = param.newPath+param.newName;
 	var thumbName = param.thumb?param.newPath+param.thumb.name:"";
 	//resize if original size exceed limit
-	var limitW = 1280;
+	var limitW = 1024;
 	var limitH = 1024;
 	image.metadata().then(function(meta){
 		var scaleW = limitW/meta.width;

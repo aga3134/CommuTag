@@ -24,15 +24,23 @@ export default {
 			OnSucc: null,
 			OnFail: null,
 			OnProgress: null,
-			OnChange: null
+			OnChange: null,
+			maxW: 1024,
+			maxH: 1024
 		};
 	},
 	created: function(){
 		if(this.src){
 			this.imageData = this.src;
 		}
+		if(this.maxResW) this.maxW = this.maxResW;
+		if(this.maxResH) this.maxH = this.maxResH;
 	},
 	methods: {
+		SetMaxRes: function(maxW,maxH){
+			this.maxW = maxW;
+			this.maxH = maxH;
+		},
 		SelectFile: function(){
 			var elem = this.$refs.uploadBt;
 			elem.click();
@@ -64,8 +72,8 @@ export default {
 			srcCtx.drawImage(image,0,0);
 			srcCtx.restore();
 
-			var scaleW = this.maxResW/image.width;
-			var scaleH = this.maxResH/image.height;
+			var scaleW = this.maxW/image.width;
+			var scaleH = this.maxH/image.height;
 			var scale = Math.min(scaleW,scaleH);
 			var w = image.width*scale;
 			var h = image.height*scale;
@@ -74,8 +82,8 @@ export default {
 			this.imageData = dstCanvas.toDataURL('image/jpeg', 0.9);
 		},
 		FitCanvasFromCanvas: function(canvas){
-			var scaleW = this.maxResW/canvas.width;
-			var scaleH = this.maxResH/canvas.height;
+			var scaleW = this.maxW/canvas.width;
+			var scaleH = this.maxH/canvas.height;
 			var scale = Math.min(scaleW,scaleH);
 			var w = canvas.width*scale;
 			var h = canvas.height*scale;
@@ -116,13 +124,13 @@ export default {
 			dstCtx.drawImage(srcCanvas,0,0,srcCanvas.width,srcCanvas.height,0,0,w,h);
 			return dstCanvas;
 		},
-		UploadImage: function(useFile){
+		UploadImage: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var formData = new FormData();
 			for(var key in this.additionData){
 				formData.append(key,this.additionData[key]);
 			}
-			formData.append("uploadImage",useFile?this.file:this.imageData);
+			formData.append("uploadImage",this.imageData);
 			$.ajax({
 				url: this.url,
 				headers: {"csrf-token":csrfToken},

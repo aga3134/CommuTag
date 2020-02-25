@@ -126,6 +126,8 @@ export default {
 		DatasetChange: function(){
 			if(this.dataset) return;
 			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
+			var uploader = this.$refs.uploader;
+			uploader.SetMaxRes(this.datasetSelect.maxWidth,this.datasetSelect.maxHeight);
 		},
 		UpdateImageInfo: function(){
 			this.imageInfo = this.$refs.imageInfo.GetImageInfo();

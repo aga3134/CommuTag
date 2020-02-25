@@ -43,11 +43,12 @@ router.post('/edit', util.CheckLogin, util.CSRF, function(req, res) {
 
 router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem, function(req, res){
 	var param = {};
-	var ext = upload.GetImageType(req.file);
-	param.buffer = req.file.buffer;
 	param.newPath = "/static/upload/user/"+req.user.id+"/";
-	param.newName = "photo."+ext;
-	param.thumb = {name:"icon."+ext,w:64,h:64};
+	param.newName = "photo.jpg";
+	param.thumb = {name:"icon.jpg",w:64,h:64};
+	var image = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
+	param.buffer = Buffer.from(image,'base64');
+
 	param.succFunc = function(result){
 		var photoInfo = {};
 		photoInfo.userID = req.user._id;
