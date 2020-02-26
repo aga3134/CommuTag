@@ -86,7 +86,6 @@
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import userSetting from "./account-user-setting.vue"
-import userFavorite from "./account-user-favorite.vue"
 import datasetList from "./dataset-list.vue"
 import siteAdmin from "./account-site-admin.vue"
 
@@ -95,7 +94,6 @@ export default {
 	components:{
 		"topbar":topbar,
 		"user-setting":userSetting,
-		"user-favorite":userFavorite,
 		"dataset-list":datasetList,
 		"site-admin":siteAdmin,
 	},

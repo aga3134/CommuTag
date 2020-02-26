@@ -1,6 +1,7 @@
 var Config = require('../../config');
 var util = require("./util");
 var User = require('../db/user');
+var mongoose = require('mongoose');
 
 var userController = {};
 
@@ -43,6 +44,12 @@ userController.ListUser = function(param){
 			query["$or"].push({"_id":mongoose.Types.ObjectId(param.keyword)});
 		}
 	}
+	if(param.authType){
+		query.authType = param.authType;
+	}
+	if(param.status){
+		query.status = param.status;
+	}
 	var limit = 8;
 	var skip = (param.page||0)*limit;
 	User.find(query,{"__v":0,"password":0,"oauthID":0},{limit:limit+1, skip:skip},function(err, user) {
@@ -64,12 +71,19 @@ userController.ListUser = function(param){
 };
 
 userController.UpdateAuth = function(param){
-	User.updateOne({_id: param.id},{authType: param.authType},function(err, user){
+	var update = {};
+	if(param.authType){
+		update.authType = param.authType;
+	}
+	if(param.status){
+		update.status = param.status;
+	}
+	User.updateOne({_id: param.id},update,function(err, user){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"update auth fail"});
 		}
-		param.succFunc({email: param.email});
+		param.succFunc({id: param.id});
 	});
 };
 

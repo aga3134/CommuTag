@@ -89,6 +89,7 @@ export default {
 			this.$emit("change");
 		},
 		ConfirmSelect: function(){
+			if(this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return alert("請選擇資料集");
 			this.$emit("confirm");
 		},
 		CancelSelect: function(){

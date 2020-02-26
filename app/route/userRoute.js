@@ -18,6 +18,8 @@ router.get('/info', util.CheckLogin, function(req, res) {
 router.get('/list-user', util.CheckAdmin, function(req, res) {
 	var param = {};
 	param.keyword = req.query.keyword;
+	param.authType = req.query.authType;
+	param.status = req.query.status;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};
@@ -72,8 +74,9 @@ router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem
 
 router.post('/update-auth', util.CheckAdmin,util.CSRF, function(req, res){
 	var param = {};
-	param.email = req.body.email;
+	param.id = req.body.id;
 	param.authType = req.body.authType;
+	param.status = req.body.status;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};
