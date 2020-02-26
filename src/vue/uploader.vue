@@ -31,7 +31,7 @@
 		</q-dialog>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'info'">
-			<image-info ref="imageInfo" :dataset="datasetSelect" @change="UpdateImageInfo();" @confirm="NextStep();" @cancel="PrevStep();"></image-info>
+			<image-info ref="imageInfo" :dataset="datasetSelect" @confirm="UpdateImageInfo();NextStep();" @cancel="PrevStep();"></image-info>
 		</q-dialog>
 
 		<image-upload ref="uploader" v-show="false"></image-upload>

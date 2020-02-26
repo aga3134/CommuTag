@@ -1,6 +1,6 @@
 <template lang="html">
 	<div class="annotator bg-grey-9">
-		<div class="fit" v-if="datasetSelect && imageSelect">
+		<div class="fit" v-if="datasetSelect && imageSelect && taskSelect">
 			<annotator-image v-if="datasetSelect.annotationType=='image' " ref="annotatorImage" :dataset="datasetSelect" :image="imageSelect" :task="taskSelect" @setAnnotation="UploadAnnotation" @setVerification="UploadVerification" @skipTask="SkipTask"></annotator-image>
 			<annotator-bbox v-if="datasetSelect.annotationType=='bbox' " ref="annotatorBBox" :dataset="datasetSelect" :image="imageSelect" :task="taskSelect" @setAnnotation="UploadAnnotation" @setVerification="UploadVerification" @skipTask="SkipTask"></annotator-bbox>
 		</div>
@@ -51,7 +51,8 @@ export default {
 			taskSelect:"",
 			openDatasetSelect: false,
 			imageArr: [],
-			status: ""
+			status: "",
+			verify: null
 		};
 	},
 	mounted: function(){
@@ -101,17 +102,30 @@ export default {
 				this.status = "此資料集影像皆已標註完成";
 				return;
 			}
-			//未標註 -> 標註
-			if(!this.imageSelect.annotation) this.taskSelect = "annotate";
-			else{
-				//驗證數不夠 -> 驗證
-				if(this.imageSelect.verifyNum < 10) this.taskSelect = "verify";
+
+			var CheckTask = function(){
+				//未標註 -> 標註
+				if(!this.imageSelect.annotation) this.taskSelect = "annotate";
 				else{
-					//認同率太低 -> 重新標註
-					if(this.imageSelect.agreeNum < this.imageSelect.verifyNum*0.70) this.taskSelect = "annotate";
-					else this.taskSelect = "verify";
+					//驗證數不夠 -> 驗證
+					if(this.imageSelect.verifyNum < this.verify.sample) this.taskSelect = "verify";
+					else{
+						//認同率太低 -> 重新標註
+						if(this.imageSelect.agreeNum < this.imageSelect.verifyNum*this.verify.reject) this.taskSelect = "annotate";
+						else this.taskSelect = "verify";
+					}
 				}
+			}.bind(this);
+
+			if(!this.verify){
+				$.get("/dataset/verify-condition", function(result){
+					if(result.status != "ok") return alert("讀取驗證條件失敗");
+					this.verify = result.data;
+					CheckTask();
+				}.bind(this));
 			}
+			else CheckTask();
+			
 		},
 		GetAnnotator: function(){
 			if(!this.datasetSelect) return null;
@@ -162,7 +176,7 @@ export default {
 			var data = {};
 			data.dataset = annotator.dataset._id;
 			data.image = annotator.image._id;
-			data.agree = agree;
+			data.agree = agree?"1":"0";
 			data._csrf = csrfToken;
 			$.post("/dataset/add-verification",data,function(result){
 				if(result.status != "ok"){

@@ -35,5 +35,10 @@
 	"defaultAdmin": {
 		"provider": "google or facebook or local",
 		"email": "YOUR_ADMIN_EMAIL"
+	},
+	"verify":{
+		"sample": 10,
+		"accept": 0.9,
+		"reject": 0.7
 	}
 }

@@ -1,7 +1,7 @@
 <template lang="html">
-	<div class="user-list q-pa-sm">
-		<div class="row items-center">
-			<div class="col-shrink q-pr-lg">
+	<div class="api-key-list q-pa-md">
+		<div class="row">
+			<div class="col-shrink">
 				<q-btn class="bg-grey-8 text-white" icon="add" label="新增金鑰" @click="openAddKey = true;"></q-btn>
 			</div>
 		</div>
@@ -33,7 +33,7 @@
 					</q-input>
 					
 					<div class="text-subtitle1">金鑰說明</div>
-					<q-input v-model="newKey.desc" filled type="textarea"></q-input>
+					<q-input v-model="newKey.desc" filled></q-input>
 				</q-card-section>
 
 				<q-card-actions align="right">
@@ -110,7 +110,7 @@ export default {
 </script>
 
 <style lang="scss">
-.user-list{
+.api-key-list{
 	width: 100%;
 }
 </style>

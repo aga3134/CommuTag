@@ -249,8 +249,9 @@ datasetController.ListImageForAnnotation = function(param){
 	})
 	.then(function(result){
 		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		var condition = "this.verifyNum < "+Config.verify.sample+" || this.agreeNum < this.verifyNum*"+Config.verify.accept;
 		Image.find({},{"__v":0})
-		.$where('this.verifyNum < 10 || this.agreeNum < this.verifyNum*0.9')
+		.$where(condition)
 		.exec(function(err, images){
 			if(err){
 				console.log(err);
@@ -294,6 +295,7 @@ datasetController.SetAnnotation = function(param){
 		}
 		var update = {
 			annotation:data,
+			verification: [],
 			verifyNum:0,
 			agreeNum:0
 		}
@@ -340,7 +342,7 @@ datasetController.AddVerification = function(param){
 			else{
 				image.verification.push(data);
 				image.verifyNum++;
-				image.agreeNum += data.agree=="true"?1:0;
+				image.agreeNum += data.agree=="1"?1:0;
 				image.save(function(err, saved){
 					if(err){
 						console.log(err);

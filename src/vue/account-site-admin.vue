@@ -6,6 +6,7 @@
 		<div class="text-subtitle2 text-grey-7">被列為黑名單者無法上傳、標註、驗證影像</div>
 		<user-list ref="blackList" enableAdd enableSearch enableRemove userStatus="blacklist" @add="AddBlacklist" @remove="RemoveBlacklist"></user-list>
 		<div class="text-h6">API金鑰</div>
+		<div class="text-subtitle2 text-grey-7">金鑰用於讓程式自動化上傳影像</div>
 		<api-key-list></api-key-list>
 	</div>
 </template>

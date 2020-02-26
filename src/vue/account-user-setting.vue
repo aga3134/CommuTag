@@ -12,7 +12,6 @@
 								<td class="text-right text-subtitle1">姓名</td>
 								<td class="text-left text-subtitle1">
 									{{user.name}}
-									<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
 								</td>
 							</tr>
 							<tr>
@@ -20,12 +19,12 @@
 								<td class="text-left text-subtitle1">{{user.contactEmail}}</td>
 							</tr>
 							<tr>
-								<td class="text-right text-subtitle1">上傳照片數</td>
-								<td class="text-left text-subtitle1">{{userStatistic.uploadNum}}</td>
+								<td class="text-right text-subtitle1">權限</td>
+								<td class="text-left text-subtitle1">{{userAuth}}</td>
 							</tr>
 							<tr>
-								<td class="text-right text-subtitle1">標註數</td>
-								<td class="text-left text-subtitle1">{{userStatistic.annotationNum}}</td>
+								<td class="text-right text-subtitle1">狀態</td>
+								<td class="text-left text-subtitle1">{{userStatus}}</td>
 							</tr>
 						</q-markup-table>
 					</div>
@@ -77,9 +76,8 @@ export default {
 	data: function () {
 		return {
 			editInfo: {},
-		    userStatistic: {},
-		    uploadPhoto: false,
-		    openInputPanel: false,
+			uploadPhoto: false,
+			openInputPanel: false,
 		};
 	},
 	created: function(){
@@ -137,14 +135,24 @@ export default {
 			}.bind(this));
 		}
 	},
-	computed:{
-		badgeArr: function(){
-			var arr = [];
-			if(this.user.authType == "admin") arr.push("管理員");
-			if(this.user.status == "blacklist") arr.push("黑名單");
-			return arr;
+	computed: {
+		userAuth: function(){
+			switch(this.user.authType){
+				case "admin":
+					return "管理員";
+				case "user":
+					return "一般";
+			}
+		},
+		userStatus: function(){
+			switch(this.user.status){
+				case "blacklist":
+					return "黑名單";
+				case "valid":
+					return "正常";
+			}
 		}
-	},
+	}
 }
 </script>
 

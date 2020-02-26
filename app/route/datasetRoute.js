@@ -206,3 +206,7 @@ router.post('/add-verification',util.CheckLogin,util.CheckBlacklist,util.CSRF, f
 	};
 	datasetController.AddVerification(param);
 });
+
+router.get('/verify-condition', function(req, res) {
+	res.status(200).json({"status":"ok","data": Config.verify});
+});
