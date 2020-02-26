@@ -6,18 +6,21 @@
 		<div class="text-subtitle2 text-grey-7">被列為黑名單者無法上傳、標註、驗證影像</div>
 		<user-list ref="blackList" enableAdd enableSearch enableRemove userStatus="blacklist" @add="AddBlacklist" @remove="RemoveBlacklist"></user-list>
 		<div class="text-h6">API金鑰</div>
+		<api-key-list></api-key-list>
 	</div>
 </template>
 
 <script>
 import userList from "./user-list.vue"
 import userSelect from "./user-select.vue"
+import apiKeyList from "./api-key-list.vue"
 
 export default {
 	name:"site-admin",
 	components:{
 		"user-list":userList,
-		"user-select":userSelect
+		"user-select":userSelect,
+		"api-key-list":apiKeyList
 	},
 	props: {
 		user: Object

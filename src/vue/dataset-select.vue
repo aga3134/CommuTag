@@ -8,7 +8,16 @@
 					<q-input placeholder="輸入篩選文字" outlined dense square v-model="searchKey" @change="ReloadDataset();"></q-input>
 					<q-list bordered separator>
 						<q-item clickable v-for="(dataset,i) in datasetArr" :key="i" :active="selectIndex == i" active-class="bg-green-2" @click="SelectItem(i);" @dblclick="ConfirmSelect();">
-							{{dataset.name}}
+							<q-item-section avatar>
+								<q-avatar square rounded>
+									<img style="object-fit:cover;" :src="dataset.picCover || '/static/image/logo-16-9.png' ">
+								</q-avatar>
+							</q-item-section>
+							<q-item-section>
+								<q-item-label>{{dataset.name}}</q-item-label>
+							</q-item-section>
+
+							
 						</q-item>
 					</q-list>
 
