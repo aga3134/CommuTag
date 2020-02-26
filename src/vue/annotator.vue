@@ -137,7 +137,14 @@ export default {
 			data.annotation = annotator.GetAnnotation();
 			data._csrf = csrfToken;
 			$.post("/dataset/set-annotation",data,function(result){
-				if(result.status != "ok") return alert("標註失敗");
+				if(result.status != "ok"){
+					switch(result.message){
+						case "blacklist":
+							return alert("黑名單使用者無此權限");
+						default:
+							return alert("標註失敗");
+					}
+				}
 				this.$q.notify("標註成功");
 				if(this.autoTask){
 					this.GenerateTask();
@@ -162,6 +169,9 @@ export default {
 					switch(result.message){
 						case "verification duplicate":
 							this.$q.notify("您之前已驗證過這個標註");
+							break;
+						case "blacklist":
+							alert("黑名單使用者無此權限");
 							break;
 						default:
 							alert("驗證失敗");

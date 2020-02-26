@@ -43,6 +43,15 @@ util.CheckAdmin = function (req, res, next) {
 	else res.redirect("/?message="+encodeURIComponent("權限不足"));
 };
 
+util.CheckBlacklist = function (req, res, next) {
+	if(req.user){
+		if (req.user.status != "blacklist") return next();
+	}
+	var isAjax = req.xhr;
+	if(isAjax) res.send({"status":"fail","message":"blacklist"});
+	else res.redirect("/?message="+encodeURIComponent("黑名單使用者無此權限"));
+};
+
 util.FailRedirect = function(req, res, redirect, message){
 	var isAjax = req.xhr;
 	if(isAjax) return res.send({"status":"fail","message":message});

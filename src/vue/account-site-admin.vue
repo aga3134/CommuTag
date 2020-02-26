@@ -3,6 +3,7 @@
 		<div class="text-h6">管理員名單</div>
 		<user-list ref="adminList" enableAdd enableSearch enableRemove userAuth="admin" @add="AddAdmin" @remove="RemoveAdmin"></user-list>
 		<div class="text-h6">黑名單</div>
+		<div class="text-subtitle2 text-grey-7">被列為黑名單者無法上傳、標註、驗證影像</div>
 		<user-list ref="blackList" enableAdd enableSearch enableRemove userStatus="blacklist" @add="AddBlacklist" @remove="RemoveBlacklist"></user-list>
 		<div class="text-h6">API金鑰</div>
 	</div>

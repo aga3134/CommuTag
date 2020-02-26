@@ -144,7 +144,14 @@ export default {
 			var uploader = this.$refs.uploader;
 
 			uploader.OnSucc = function(result){
-				if(result.status != "ok") return alert("上傳圖片失敗");
+				if(result.status != "ok"){
+					switch(result.message){
+						case "blacklist":
+							return alert("黑名單使用者無此權限");
+						default:
+							return alert("上傳圖片失敗");
+					}
+				}
 				this.step = 0;
 				this.$q.notify("已將影像上傳至"+dataset.name);
 				this.$emit("uploaded");

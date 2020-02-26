@@ -107,7 +107,7 @@ router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem
 
 });
 
-router.post('/upload-image', util.CheckLogin, util.CSRF, upload.UploadImageToMem, function(req, res){	
+router.post('/upload-image',util.CheckLogin,util.CheckBlacklist,util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
 	param.user = req.user;
 	param.dataset = req.body.dataset;
@@ -177,7 +177,7 @@ router.get('/list-image-for-annotation', function(req, res) {
 	datasetController.ListImageForAnnotation(param);
 });
 
-router.post('/set-annotation', util.CheckLogin,util.CSRF, function(req, res){
+router.post('/set-annotation',util.CheckLogin,util.CheckBlacklist,util.CSRF, function(req, res){
 	var param = {};
 	param.user = req.user;
 	param.dataset = req.body.dataset;
@@ -192,7 +192,7 @@ router.post('/set-annotation', util.CheckLogin,util.CSRF, function(req, res){
 	datasetController.SetAnnotation(param);
 });
 
-router.post('/add-verification', util.CheckLogin,util.CSRF, function(req, res){
+router.post('/add-verification',util.CheckLogin,util.CheckBlacklist,util.CSRF, function(req, res){
 	var param = {};
 	param.user = req.user;
 	param.dataset = req.body.dataset;

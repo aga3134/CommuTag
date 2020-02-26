@@ -146,7 +146,14 @@ export default {
 					return xhr;
 				}.bind(this),
 				success: function(result) {
-					if(result.status != "ok") return alert("上傳影像失敗");
+					if(result.status != "ok"){
+						switch(result.message){
+							case "blacklist":
+								return alert("黑名單使用者無此權限");
+							default:
+								return alert("上傳影像失敗");
+						}
+					}
 					if(this.OnSucc){
 						return this.OnSucc(result);
 					}

@@ -10,7 +10,10 @@
 						<q-markup-table class="transparent text-grey-9" flat separator="vertical">
 							<tr>
 								<td class="text-right text-subtitle1">姓名</td>
-								<td class="text-left text-subtitle1">{{user.name}}</td>
+								<td class="text-left text-subtitle1">
+									{{user.name}}
+									<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
+								</td>
 							</tr>
 							<tr>
 								<td class="text-right text-subtitle1">聯絡信箱</td>
@@ -80,7 +83,7 @@ export default {
 		};
 	},
 	created: function(){
-		
+
 	},
 	methods: {
 		EditUserInfo: function(){
@@ -133,7 +136,15 @@ export default {
 				window.location.reload();
 			}.bind(this));
 		}
-	}
+	},
+	computed:{
+		badgeArr: function(){
+			var arr = [];
+			if(this.user.authType == "admin") arr.push("管理員");
+			if(this.user.status == "blacklist") arr.push("黑名單");
+			return arr;
+		}
+	},
 }
 </script>
 
