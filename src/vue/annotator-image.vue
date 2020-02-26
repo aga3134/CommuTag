@@ -41,8 +41,13 @@
 			<q-card class="full-width q-pa-sm">
 				<q-card-section>
 					<div class="text-h6">如何標註</div>
+					<ul class="text-subtitle2">
+						<li>選擇符合此影像的標籤並按「確定」。</li>
+					</ul>
 					<div class="text-h6">如何驗證</div>
-					<div class="text-h6">參考資料</div>
+					<ul class="text-subtitle2">
+						<li>若此影像符合選擇的標籤，按「是」。反之按「否」。</li>
+					</ul>
 				</q-card-section>
 
 				<q-card-actions class="justify-center">
