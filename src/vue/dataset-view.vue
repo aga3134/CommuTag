@@ -63,6 +63,7 @@
 					</q-card-section>
 					<q-card-actions>
 						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
+						<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' && targetImage.annotation " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
@@ -262,6 +263,15 @@ export default {
 				this.ReloadImage();
 				this.$q.notify("刪除成功");
 			}.bind(this));
+		},
+		DownloadImage: function(){
+			if(!this.targetImage) return;
+			var a = $("<a>")
+				.attr("href", this.targetImage.url)
+				.attr("download", this.targetImage._id+".jpg")
+				.appendTo("body");
+			a[0].click();
+			a.remove();
 		},
 		AnnotateImage: function(){
 			this.openAnnotator = true;

@@ -67,10 +67,9 @@
 						<li>框選出影像中所有符合標籤的物件並選擇對應的標籤，完成後按「確定」送出。</li>
 						<li>優良的標註應符合以下條件：
 							<ol>
-								<li>選擇正確的物件標籤</li>
+								<li>框選出所有符合標籤的物件並選擇正確的物件標籤</li>
 								<li>方框應完整涵蓋該物件可以看到的範圍(不包含被遮住的部分)，並且盡量逼近該物件的大小</li>
 								<li>一個方框只能框一個物件，若有多個物件請分不同方框框選</li>
-								<li>框選出所有符合標籤的物件</li>
 							</ol>
 						</li>
 					</ul>
@@ -85,6 +84,7 @@
 					<div class="text-h6">參考資料</div>
 					<ul>
 						<li><a href="http://vision.stanford.edu/pdf/bbox_submission.pdf" target="_blank">Su, H., Deng, J., & Fei-Fei, L. (2012). Crowdsourcing annotations for visual object detection. In AAAI human computation workshop.</a></li>
+						<li><a href="https://chtseng.wordpress.com/2019/03/10/ai%e9%a0%98%e5%9f%9f%e7%9a%84%e8%97%8d%e9%a0%98%e5%b7%a5%e4%bd%9c-image-labeling/" target="_blank">AI領域的藍領工作- Image Labeling</a></li>
 					</ul>
 				</q-card-section>
 
