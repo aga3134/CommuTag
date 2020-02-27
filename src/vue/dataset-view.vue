@@ -52,15 +52,12 @@
 						<annotator-view :dataset="info" :image="targetImage"></annotator-view>
 					</div>
 					<q-card-section>
-						<q-breadcrumbs separator=" " class="text-black" active-color="black">
-							<q-breadcrumbs-el v-if="targetImage.time" :label="targetImage.time" icon="access_time"></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-if="targetImage.lat && targetImage.lng" :label="targetImage.lat+' '+targetImage.lng " icon="room"></q-breadcrumbs-el>
-							<q-breadcrumbs-el v-if="targetImage.annotation" :label="'認同數 / 驗證數 : '+AgreeVerifyRatio"></q-breadcrumbs-el>
-						</q-breadcrumbs>
+						<q-chip class="transparent" dense v-if="targetImage.time" icon="access_time">{{targetImage.time}}</q-chip>
+						<q-chip class="transparent" dense clickable v-if="targetImage.lat && targetImage.lng" icon="room" @click="ViewLocation();">觀看地點</q-chip>
+						<q-chip class="transparent" dense v-if="targetImage.annotation">{{'認同數 / 驗證數 : '+AgreeVerifyRatio}}</q-chip>
+						<pre class="q-mx-sm q-my-none" v-if="targetImage.remark && targetImage.remark != '' ">{{targetImage.remark}}</pre>
 					</q-card-section>
-					<q-card-section class="q-py-none">
-						<pre class="q-ma-none" v-if="targetImage.remark && targetImage.remark != '' ">{{targetImage.remark}}</pre>
-					</q-card-section>
+
 					<q-card-actions>
 						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 						<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
@@ -92,6 +89,17 @@
 
 			<q-dialog v-model="openDatasetEditor">
 				<dataset-editor :info="editInfo" @reload="ReloadDataset"></dataset-editor>
+			</q-dialog>
+
+			<q-dialog v-model="openLocationView" v-if="targetImage && targetImage.lat && targetImage.lng">
+				<q-card class="full-width q-pa-sm">
+					<div class="text-h6">資料地點</div>
+					<div class="map" style="height: 300px;" ref="map"></div>
+					<div class="text-center">座標: {{targetImage.lat.toFixed(5)+" "+targetImage.lng.toFixed(5)}}</div>
+					<q-card-actions align="center">
+						<q-btn flat label="確定" v-close-popup></q-btn>
+					</q-card-actions>
+				</q-card>
 			</q-dialog>
 		</q-page-container>
 
@@ -141,6 +149,7 @@ export default {
 			openUploader: false,
 			openAnnotator: false,
 			openDatasetEditor: false,
+			openLocationView: false,
 			editInfo: null,
 			favorite: false
 		};
@@ -252,6 +261,20 @@ export default {
 		ViewImage: function(image){
 			this.targetImage = image;
 			this.openViewImage = true;
+		},
+		ViewLocation: function(){
+			this.openLocationView = true;
+			Vue.nextTick(function(){
+				var map = L.map(this.$refs.map).setView([23.682094, 120.7764642], 7);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '<a href="https://www.openstreetmap.org/">OSM</a>',
+					maxZoom: 18,
+				}).addTo(map);
+				var loc = {"lat":this.targetImage.lat,"lng":this.targetImage.lng};
+				var marker = L.marker(loc);
+				marker.addTo(map);
+			}.bind(this));
+			
 		},
 		DeleteImage: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");

@@ -66,7 +66,7 @@ export default {
 		},
 		SetPosition: function(lat,lng){
 			this.loc = {"lat":lat,"lng":lng};
-			this.status = lat.toFixed(5)+" "+lng.toFixed(5);
+			this.status = "座標: "+lat.toFixed(5)+" "+lng.toFixed(5);
 			if(this.marker){
 				this.marker.setLatLng(this.loc, {
 					draggable: 'true'
