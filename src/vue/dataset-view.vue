@@ -18,6 +18,7 @@
 				<q-btn v-if="info && info.enableDownload" icon="cloud_download" label="整包下載" flat></q-btn>
 				<q-btn v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
 				<q-btn v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
+				<q-btn icon="bar_chart" label="資料統計" flat @click="GoToStatistic();"></q-btn>
 				<q-btn v-if="user && user.authType =='admin' " icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 
@@ -203,6 +204,9 @@ export default {
 		},
 		GoHome: function(){
 			window.location.href="/";
+		},
+		GoToStatistic: function(){
+			window.location.href="/statistic?id="+this.datasetID;
 		},
 		ReloadImage: function(){
 			this.imageArr = [];

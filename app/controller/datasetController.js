@@ -216,23 +216,33 @@ datasetController.ListImage = function(param){
 		var skip = (param.page||0)*limit;
 		var Image = mongoose.model("image"+param.dataset, ImageSchema);
 
-		Image.find({},{"__v":0},{limit:limit+1, skip:skip})
+		var option = {};
+		if(param.all != "1"){
+			option.limit = limit+1;
+			option.skip = skip;
+		}
+		Image.find({},{"__v":0},option)
 		.sort({"createdAt":-1})
 		.exec(function(err, images){
 			if(err){
 				console.log(err);
 				return param.failFunc({err:"list image fail"});
 			}
-			var result = {};
-			if(images.length > limit){
-				result.hasMore = true;
-				result.images = images.slice(0,-1);
+			if(param.all == "1"){
+				param.succFunc(images);
 			}
 			else{
-				result.hasMore = false;
-				result.images = images;
+				var result = {};
+				if(images.length > limit){
+					result.hasMore = true;
+					result.images = images.slice(0,-1);
+				}
+				else{
+					result.hasMore = false;
+					result.images = images;
+				}
+				param.succFunc(result);
 			}
-			param.succFunc(result);
 		});
 	})
 	.catch(function(err){

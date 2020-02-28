@@ -47,4 +47,12 @@ router.get('/view', util.CSRF, function(req, res) {
 	res.render("view.ejs",{meta: meta, user:req.user});
 });
 
+router.get('/statistic', util.CSRF, function(req, res) {
+	meta.title = Config.siteName;
+	meta.desc = Config.desc;
+	meta.path = req.originalUrl;
+	meta.csrfToken = req.csrfToken();
+	res.render("statistic.ejs",{meta: meta, user:req.user});
+});
+
 module.exports = router;

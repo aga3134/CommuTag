@@ -140,6 +140,7 @@ router.get('/list-image', function(req, res) {
 	param.user = req.user;
 	param.dataset = req.query.dataset;
 	param.page = req.query.page;
+	param.all = req.query.all;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};
