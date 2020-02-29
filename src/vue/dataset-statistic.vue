@@ -8,17 +8,17 @@
 			<q-page class="bg-grey-1">
 				<q-tab-panels v-model="tab" class="absolute fit" animated>
 					<q-tab-panel class="q-pa-none" name="graph">
-						<statistic-graph :info="info" :imageArr="imageArr"></statistic-graph>
+						<statistic-graph ref="statisticGraph"></statistic-graph>
 					</q-tab-panel>
 					<q-tab-panel class="q-pa-none" name="map">
-						<statistic-map :info="info" :imageArr="imageArr"></statistic-map>
+						<statistic-map ref="statisticMap"></statistic-map>
 					</q-tab-panel>
 				</q-tab-panels>
 			</q-page>
 		</q-page-container>
 
 		<q-footer>
-			<q-tabs v-model="tab" inline-label align="justify" active-bg-color="grey-7" class="bg-grey-8 text-white">
+			<q-tabs v-model="tab" inline-label align="justify" active-bg-color="grey-7" class="bg-grey-8 text-white" @input="InitTabContent();">
 				<q-tab name="graph" icon="bar_chart" label="統計圖"></q-tab>
 				<q-tab name="map" v-if="info && info.enableGPS" icon="place" label="地圖"></q-tab>
 				<q-tab name="home" icon="folder" label="回資料集" @click="GoToDataset();"></q-tab>
@@ -63,18 +63,31 @@ export default {
 		$.get("/dataset/view-dataset?id="+param.id, function(result){
 			if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法取得資料集資訊");
 			this.info = result.data;
+
+			$.get("/dataset/list-image?all=1&dataset="+param.id, function(result){
+				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法取得影像資訊");
+				this.imageArr = result.data;
+
+				this.InitTabContent();
+			}.bind(this));
 		}.bind(this));
 
-		$.get("/dataset/list-image?all=1&dataset="+param.id, function(result){
-			if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法取得影像資訊");
-			this.imageArr = result.data;
-		}.bind(this));
+		
 	},
 	methods: {
 		GoToDataset: function(){
 			window.location.href="/view?id="+this.datasetID;
 		},
-		
+		InitTabContent: function(){
+			switch(this.tab){
+				case "graph":
+					this.$refs.statisticGraph.SetGraphData(this.info,this.imageArr);
+					break;
+				case "map":
+					this.$refs.statisticMap.SetGraphData(this.info,this.imageArr);
+					break;
+			}
+		}
 	}
 }
 </script>

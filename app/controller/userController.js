@@ -70,6 +70,19 @@ userController.ListUser = function(param){
 	});
 };
 
+userController.ListName = function(param){
+	var query = {};
+	query._id = param.id.split(",");
+	User.find(query,{"name":1},function(err, user) {
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"list name fail"});
+		}
+		console.log(user);
+		param.succFunc(user);
+	});
+};
+
 userController.UpdateAuth = function(param){
 	var update = {};
 	if(param.authType){

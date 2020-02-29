@@ -29,6 +29,18 @@ router.get('/list-user', util.CheckAdmin, function(req, res) {
 	userController.ListUser(param);
 });
 
+router.get('/list-name', function(req, res) {
+	var param = {};
+	param.id = req.query.id;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	userController.ListName(param);
+});
+
 router.post('/edit', util.CheckLogin, util.CSRF, function(req, res) {
 	var param = {};
 	param.userID = req.user.id;

@@ -86,7 +86,7 @@ export default {
 			}
 		},
 		RemoveBlacklist: function(i){
-			var user = this.$refs.adminList.userArr[i];
+			var user = this.$refs.blackList.userArr[i];
 			if(!user) return;
 			if(confirm("確定將 "+user.name+" 從黑名單刪除?")){
 				var param = {};
