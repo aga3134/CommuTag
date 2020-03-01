@@ -11,7 +11,7 @@
 						<q-range v-model="tagFilter.time" :min="0" :max="50" color="white"></q-range>
 						<div class="text-subtitle2">
 							地點篩選
-							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍"></q-btn>
+							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect(tagFilter.location);"></q-btn>
 						</div>
 
 						<div class="text-subtitle2">備註篩選</div>
@@ -36,21 +36,8 @@
 						</div>
 
 						<div class="text-subtitle2">
-							標籤篩選
-							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇標籤">
-								<q-menu>
-									<q-list class="q-px-sm">
-										<q-item class="q-pa-none" v-for="tag in dataset.tagArr" :key="tag">
-											<q-checkbox v-model="timelineFilter.tagSelect[tag]" :label="tag"></q-checkbox>
-										</q-item>
-									</q-list>
-								</q-menu>
-							</q-btn>
-						</div>
-
-						<div class="text-subtitle2">
 							地點篩選
-							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍"></q-btn>
+							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect(timelineFilter.location);"></q-btn>
 						</div>
 
 						<div class="text-subtitle2">備註篩選</div>
@@ -82,11 +69,30 @@
 					<div class="graph" ref="verifyRank"></div>
 				</div>
 			</div>
+
+			<q-dialog v-model="openRangeSelect" v-if="rangeTarget">
+				<q-card class="full-width q-pa-sm">
+					<div class="text-h6">選擇範圍</div>
+					<q-toggle v-model="rangeTarget.enable" left-label label="啟用範圍篩選" @input="UpdateRangeSelectMap();"></q-toggle>
+					<div class="text-subtitle2">
+						半徑(公里)
+						<q-slider label  v-model="rangeTarget.range" :min="10" :max="400" @input="UpdateRangeSelectMap();"></q-slider>
+					</div>
+					
+					<location-select mode="selectRange" ref="locationSelect"  @change="UpdateLoc();"></location-select>
+					<div v-if="$refs.locationSelect" class="text-center">{{$refs.locationSelect.status}}</div>
+					<q-card-actions align="center">
+						<q-btn flat label="確定" v-close-popup></q-btn>
+					</q-card-actions>
+				</q-card>
+			</q-dialog>
 		</div>
 	</div>
 </template>
 
 <script>
+
+import locationSelect from "./location-select.vue"
 
 export default {
 	name:"statistic-graph",
@@ -94,7 +100,7 @@ export default {
 		
 	},
 	components:{
-		
+		"location-select": locationSelect
 	},
 	data: function () {
 		return {
@@ -103,9 +109,10 @@ export default {
 			openTagFilter: false,
 			tagFilter: {
 				location:{
+					enable: false,
 					lat: null,
 					lng: null,
-					range: 10
+					range: 50
 				},
 				time: {min:null,max:null},
 				keyword: ""
@@ -118,14 +125,16 @@ export default {
 			],
 			timelineFilter: {
 				type: "time",
-				tagSelect: {},
 				location:{
+					enable: false,
 					lat: null,
 					lng: null,
-					range: 10
+					range: 50
 				},
 				keyword: ""
 			},
+			openRangeSelect: false,
+			rangeTarget: null
 		};
 	},
 	mounted: function(){
@@ -137,13 +146,35 @@ export default {
 		},
 		OpenTimelineFilter: function(){
 			this.openTimelineFilter = true;
-			//init checkbox if not in tag select
-			for(var i=0;i<this.dataset.tagArr.length;i++){
-				var tag = this.dataset.tagArr[i];
-				if(!this.timelineFilter.tagSelect[tag]){
-					this.$set(this.timelineFilter.tagSelect,tag,true);
+		},
+		OpenRangeSelect: function(target){
+			this.openRangeSelect = true;
+			Vue.set(this,"rangeTarget",target);
+			Vue.nextTick(function(){
+				this.$refs.locationSelect.range = this.rangeTarget.range;
+				this.UpdateRangeSelectMap();
+			}.bind(this));
+		},
+		UpdateRangeSelectMap: function(){
+			if(!this.rangeTarget) return;
+			var locationSelect = this.$refs.locationSelect;
+			if(this.rangeTarget.enable){
+				locationSelect.range = this.rangeTarget.range;
+				if(!this.rangeTarget.lat || !this.rangeTarget.lng){
+					locationSelect.GetGPS();
 				}
+				locationSelect.SetRange(this.rangeTarget.lat,this.rangeTarget.lng,this.rangeTarget.range);
 			}
+			else{
+				locationSelect.RemoveMarker();
+			}
+		},
+		UpdateLoc(){
+			if(!this.rangeTarget) return;
+			this.rangeTarget.enable = true;
+			var loc = this.$refs.locationSelect.loc;
+			this.rangeTarget.lat = loc.lat;
+			this.rangeTarget.lng = loc.lng;
 		},
 		SetGraphData: function(dataset,imageArr){
 			this.dataset = dataset;

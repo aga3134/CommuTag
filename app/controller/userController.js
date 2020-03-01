@@ -78,7 +78,6 @@ userController.ListName = function(param){
 			console.log(err);
 			return param.failFunc({err:"list name fail"});
 		}
-		console.log(user);
 		param.succFunc(user);
 	});
 };
