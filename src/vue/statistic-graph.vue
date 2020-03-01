@@ -7,8 +7,8 @@
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="tagRatio"></div>
 					<div class="option-filter column" v-show="openTagFilter">
-						<div class="text-subtitle2">時間篩選</div>
-						<q-range v-model="tagFilter.time" :min="0" :max="50" color="white"></q-range>
+						<div class="text-subtitle2 q-mb-lg">時間篩選</div>
+						<q-range v-model="tagFilter.time" :min="dataTime.rangeMin" :max="dataTime.rangeMax" :step="1" :left-label-value="minTimeLabel" :right-label-value="maxTimeLabel" left-label-color="grey-8" right-label-color="grey-8" color="white" label-always></q-range>
 						<div class="text-subtitle2">
 							地點篩選
 							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect(tagFilter.location);"></q-btn>
@@ -107,6 +107,12 @@ export default {
 			dataset: null,
 			imageArr: [],
 			openTagFilter: false,
+			dataTime:{
+				min:null,
+				max:null,
+				rangeMin:0,
+				rangeMax:0
+			},
 			tagFilter: {
 				location:{
 					enable: false,
@@ -176,9 +182,26 @@ export default {
 			this.rangeTarget.lat = loc.lat;
 			this.rangeTarget.lng = loc.lng;
 		},
+		InitTimeSelect: function(){
+			var s = spacetime.now();
+			for(var i=0;i<this.imageArr.length;i++){
+				var t = spacetime(this.imageArr[i].dataTime,s.timezone().name);
+				if(!this.dataTime.min || this.dataTime.min.isAfter(t)){
+					this.dataTime.min = t.clone().last("day");
+				}
+				if(!this.dataTime.max || this.dataTime.max.isBefore(t)){
+					this.dataTime.max = t.clone().next("day");
+				}
+			}
+			this.dataTime.rangeMin = 0;
+			this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day")+1;
+			this.tagFilter.time.min = this.dataTime.rangeMin;
+			this.tagFilter.time.max = this.dataTime.rangeMax;
+		},
 		SetGraphData: function(dataset,imageArr){
 			this.dataset = dataset;
 			this.imageArr = imageArr;
+			this.InitTimeSelect();
 			Vue.nextTick(function(){
 				this.UpdateGraph();
 			}.bind(this));
@@ -343,6 +366,16 @@ export default {
 				};
 				Plotly.newPlot(this.$refs.verifyRank,[trace],layout,{displayModeBar: false});
 			}.bind(this));
+		}
+	},
+	computed:{
+		minTimeLabel: function(){
+			var day = this.dataTime.min.add(this.tagFilter.time.min,"day");
+			return day.unixFmt("yyyy-MM-dd");
+		},
+		maxTimeLabel: function(){
+			var day = this.dataTime.min.add(this.tagFilter.time.max,"day");
+			return day.unixFmt("yyyy-MM-dd");
 		}
 	}
 }
