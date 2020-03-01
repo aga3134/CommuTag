@@ -190,6 +190,8 @@ datasetController.UploadImage = function(param){
 		newImage.lng = param.lng;
 		newImage.remark = param.remark;
 		newImage.dataTime = param.dataTime;
+		newImage.uploadFrom = "user";
+		newImage.uploader = param.user._id.toString();
 		Image.create(newImage,function(err, result){
 			if(err){
 				console.log(err);

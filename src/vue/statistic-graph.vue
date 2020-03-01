@@ -1,7 +1,6 @@
 <template lang="html">
 	<div class="statistic-graph" v-if="dataset && imageArr">
 		<div class="row items-center q-col-gutter-md q-pa-md">
-
 			<div class="col-12 col-sm-6 column">
 				<div class="text-h6">標註標籤比例</div>
 				<div class="graph-container bg-grey-1">
@@ -55,6 +54,12 @@
 				<div class="text-h6">驗證認同率分佈</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="agreeRate"></div>
+				</div>
+			</div>
+			<div class="col-12 col-sm-6">
+				<div class="text-h6">上傳排行榜</div>
+				<div class="graph-container bg-grey-1">
+					<div class="graph" ref="uploadRank"></div>
 				</div>
 			</div>
 			<div class="col-12 col-sm-6">
@@ -209,6 +214,7 @@ export default {
 		UpdateGraph: function(){
 			this.UpdateGraphTag();
 			this.UpdateGraphTimeline();
+			this.UpdateGraphUploadRank();
 			this.UpdateGraphAgreeRate();
 			this.UpdateGraphAnnotateRank();
 			this.UpdateGraphVerifyRank();
@@ -261,6 +267,55 @@ export default {
 				margin: {l:80, r:40, b:80, t:40},
 			};
 			Plotly.newPlot(this.$refs.agreeRate,[trace],layout,{displayModeBar: false});
+		},
+		UpdateGraphUploadRank: function(){
+			var data = {};
+			for(var i=0;i<this.imageArr.length;i++){
+				var image = this.imageArr[i];
+				if(!image.uploader) continue;
+				if(!data[image.uploader]){
+					data[image.uploader] = {
+						value: 1
+					}
+				}
+				else{
+					data[image.uploader].value++;
+				}
+			}
+			var idArr = Object.keys(data).sort(function(a,b){
+				return data[a].value - data[b].value;
+			}).slice(0,10);
+			$.get("/user/list-name?id="+idArr.join(","), function(result){
+				if(result.status != "ok") return;
+				for(var i=0;i<result.data.length;i++){
+					var d = result.data[i];
+					data[d._id].name = d.name;
+				}
+				var trace = {
+					type: "bar",
+					x: idArr.map(function(key){
+						return data[key].value;
+					}),
+					y: idArr.map(function(key){
+						return data[key].name;
+					}),
+					orientation: "h"
+				}
+				var layout = {
+					xaxis:{
+						fixedrange: true,
+						title:"影像數"
+					},
+					yaxis:{
+						fixedrange: true,
+						title:""
+					},
+					paper_bgcolor: 'rgba(250,250,250,1)',
+					plot_bgcolor: 'rgba(250,250,250,1)',
+					margin: {l:80, r:40, b:80, t:40},
+				};
+				Plotly.newPlot(this.$refs.uploadRank,[trace],layout,{displayModeBar: false});
+			}.bind(this));
 		},
 		UpdateGraphAnnotateRank: function(){
 			var data = {};
