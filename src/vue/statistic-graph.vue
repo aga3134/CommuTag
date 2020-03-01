@@ -7,14 +7,14 @@
 					<div class="graph" ref="tagRatio"></div>
 					<div class="option-filter column" v-show="openTagFilter">
 						<div class="text-subtitle2 q-mb-lg">時間篩選</div>
-						<q-range v-model="tagFilter.time" :min="dataTime.rangeMin" :max="dataTime.rangeMax" :step="1" :left-label-value="minTimeLabel" :right-label-value="maxTimeLabel" left-label-color="grey-8" right-label-color="grey-8" color="white" label-always></q-range>
+						<q-range v-model="tagFilter.time" :min="dataTime.rangeMin" :max="dataTime.rangeMax" :step="1" :left-label-value="minTimeLabel" :right-label-value="maxTimeLabel" left-label-color="grey-8" right-label-color="grey-8" color="white" label-always @change="UpdateGraphTag();"></q-range>
 						<div class="text-subtitle2">
 							地點篩選
 							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect(tagFilter.location);"></q-btn>
 						</div>
 
 						<div class="text-subtitle2">備註篩選</div>
-						<q-input class="q-ma-sm" dense dark color="white" v-model="tagFilter.keyword"></q-input>
+						<q-input class="q-ma-sm" dense dark color="white" v-model="tagFilter.keyword" @input="UpdateGraphTag();"></q-input>
 						<q-space></q-space>
 						<div class="row justify-center">
 							<q-btn class="bg-grey-8" label="確定" @click="openTagFilter = false;"></q-btn>
@@ -87,7 +87,7 @@
 					<location-select mode="selectRange" ref="locationSelect"  @change="UpdateLoc();"></location-select>
 					<div v-if="$refs.locationSelect" class="text-center">{{$refs.locationSelect.status}}</div>
 					<q-card-actions align="center">
-						<q-btn flat label="確定" v-close-popup></q-btn>
+						<q-btn flat label="確定" @click="openRangeSelect=false;UpdateGraph();"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</q-dialog>
@@ -220,7 +220,95 @@ export default {
 			this.UpdateGraphVerifyRank();
 		},
 		UpdateGraphTag: function(){
+			var filterArr = this.imageArr;
+			//filter by location range
+			if(this.tagFilter.location.enable){
+				filterArr = filterArr.filter(function(d){
+					var loc = this.tagFilter.location;
+					var range = loc.range/111;
+					var latDiff = d.lat-loc.lat;
+					var lngDiff = d.lng-loc.lng;
+					return latDiff*latDiff+lngDiff*lngDiff<=range*range;
+				}.bind(this));
+			}
+			
+			//filter by time range
+			var s = spacetime.now();
+			filterArr = filterArr.filter(function(d){
+				var t = spacetime(d.dataTime,s.timezone().name);
+				var min = this.dataTime.min.add(this.tagFilter.time.min,"day");
+				var max = this.dataTime.min.add(this.tagFilter.time.max,"day");
+				return t.isAfter(min) && t.isBefore(max);
+			}.bind(this));
 
+			//filter by keyword
+			filterArr = filterArr.filter(function(d){
+				if(this.tagFilter.keyword == "") return true;
+				else if(!d.remark) return false;
+				else return d.remark.indexOf(this.tagFilter.keyword) != -1;
+			}.bind(this));
+
+			var data = {};
+			switch(this.dataset.annotationType){
+				case "image":
+					for(var i=0;i<filterArr.length;i++){
+						var d = filterArr[i];
+						if(!d.annotation) continue;
+						var tag = d.annotation.annotation;
+						if(!data[tag]){
+							data[tag] = {
+								name: tag,
+								value: 1
+							}
+						}
+						else{
+							data[tag].value++;
+						}
+					}
+					break;
+				case "bbox":
+					for(var i=0;i<filterArr.length;i++){
+						var d = filterArr[i];
+						if(!d.annotation) continue;
+						var bboxArr = d.annotation.annotation;
+						for(var j=0;j<bboxArr.length;j++){
+							var bbox = bboxArr[j];
+							if(!data[bbox.tag]){
+								data[bbox.tag] = {
+									name: bbox.tag,
+									value: 1
+								}
+							}
+							else{
+								data[bbox.tag].value++;
+							}
+						}
+					}
+					break;
+			}
+
+			var tagArr = Object.keys(data).sort(function(a,b){
+				return a.value-b.value;
+			});
+			if(tagArr.length == 0){
+				return Plotly.purge(this.$refs.tagRatio);
+			}
+
+			var trace = {
+				values: tagArr.map(function(d){
+					return data[d].value;
+				}),
+				labels: tagArr,
+				type: "pie"
+			};
+
+			var layout = {
+				paper_bgcolor: 'rgba(250,250,250,1)',
+				plot_bgcolor: 'rgba(250,250,250,1)',
+				margin: {l:40, r:40, b:40, t:40},
+			};
+
+			Plotly.newPlot(this.$refs.tagRatio,[trace],layout,{displayModeBar: false});
 		},
 		UpdateGraphTimeline: function(){
 
@@ -272,7 +360,7 @@ export default {
 			var data = {};
 			for(var i=0;i<this.imageArr.length;i++){
 				var image = this.imageArr[i];
-				if(!image.uploader) continue;
+				if(!image.uploader || image.uploadFrom != "user") continue;
 				if(!data[image.uploader]){
 					data[image.uploader] = {
 						value: 1
