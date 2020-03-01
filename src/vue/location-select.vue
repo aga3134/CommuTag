@@ -111,6 +111,8 @@ export default {
 				this.locMarker.on('dragend', function(event) {
 					var pos = this.locMarker.getLatLng();
 					this.rangeMarker.setLatLng(pos);
+					this.loc = {"lat":pos.lat,"lng":pos.lng};
+					this.$emit("change");
 				}.bind(this));
 
 				this.locMarker.addTo(this.map);

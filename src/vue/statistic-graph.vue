@@ -81,7 +81,7 @@
 					<q-toggle v-model="rangeTarget.enable" left-label label="啟用範圍篩選" @input="UpdateRangeSelectMap();"></q-toggle>
 					<div class="text-subtitle2">
 						半徑(公里)
-						<q-slider label  v-model="rangeTarget.range" :min="10" :max="400" @input="UpdateRangeSelectMap();"></q-slider>
+						<q-slider label  v-model="rangeTarget.range" :min="10" :max="400" @change="UpdateRangeSelectMap();"></q-slider>
 					</div>
 					
 					<location-select mode="selectRange" ref="locationSelect"  @change="UpdateLoc();"></location-select>
@@ -169,8 +169,8 @@ export default {
 		UpdateRangeSelectMap: function(){
 			if(!this.rangeTarget) return;
 			var locationSelect = this.$refs.locationSelect;
+			locationSelect.range = this.rangeTarget.range;
 			if(this.rangeTarget.enable){
-				locationSelect.range = this.rangeTarget.range;
 				if(!this.rangeTarget.lat || !this.rangeTarget.lng){
 					locationSelect.GetGPS();
 				}
@@ -179,6 +179,7 @@ export default {
 			else{
 				locationSelect.RemoveMarker();
 			}
+			this.UpdateGraph();
 		},
 		UpdateLoc(){
 			if(!this.rangeTarget) return;
@@ -186,6 +187,7 @@ export default {
 			var loc = this.$refs.locationSelect.loc;
 			this.rangeTarget.lat = loc.lat;
 			this.rangeTarget.lng = loc.lng;
+			this.UpdateGraph();
 		},
 		InitTimeSelect: function(){
 			var s = spacetime.now();
@@ -543,7 +545,7 @@ export default {
 			top: 0px;
 			left: 0px;
 			padding: 20px;
-			background-color: rgba(50,50,50,0.5);
+			background-color: rgba(100,100,100,0.8);
 			color: white;
 			overflow: auto;
 		}
