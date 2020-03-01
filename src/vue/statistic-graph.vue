@@ -31,7 +31,7 @@
 					<div class="option-filter column" v-show="openTimelineFilter">
 						<div class="text-subtitle2">
 							顯示類型
-							<q-select dense dark color="white" v-model="timelineFilter.type" :options="typeOption" option-value="value" option-label="label" emit-value map-options></q-select>
+							<q-select dense dark color="white" v-model="timelineFilter.type" :options="typeOption" option-value="value" option-label="label" emit-value map-options @input="UpdateGraphTimeline();"></q-select>
 						</div>
 
 						<div class="text-subtitle2">
@@ -40,7 +40,7 @@
 						</div>
 
 						<div class="text-subtitle2">備註篩選</div>
-						<q-input class="q-ma-sm" dense dark color="white" v-model="timelineFilter.keyword"></q-input>
+						<q-input class="q-ma-sm" dense dark color="white" v-model="timelineFilter.keyword" @input="UpdateGraphTimeline();"></q-input>
 						<q-space></q-space>
 						<div class="row justify-center">
 							<q-btn class="bg-grey-8" label="確定" @click="openTimelineFilter = false;"></q-btn>
@@ -313,11 +313,133 @@ export default {
 			Plotly.newPlot(this.$refs.tagRatio,[trace],layout,{displayModeBar: false});
 		},
 		UpdateGraphTimeline: function(){
+			var filterArr = this.imageArr;
+			//filter by location range
+			if(this.timelineFilter.location.enable){
+				filterArr = filterArr.filter(function(d){
+					var loc = this.timelineFilter.location;
+					var range = loc.range/111;
+					var latDiff = d.lat-loc.lat;
+					var lngDiff = d.lng-loc.lng;
+					return latDiff*latDiff+lngDiff*lngDiff<=range*range;
+				}.bind(this));
+			}
 
+			//filter by keyword
+			filterArr = filterArr.filter(function(d){
+				if(this.timelineFilter.keyword == "") return true;
+				else if(!d.remark) return false;
+				else return d.remark.indexOf(this.timelineFilter.keyword) != -1;
+			}.bind(this));
+
+			var s = spacetime.now();
+			var data = {};
+			var format = "";
+			var axisX = {
+				fixedrange: true,
+			};
+			switch(this.timelineFilter.type){
+				case "time":
+					format = "yyyy-MM-dd";
+					axisX.tickformat = "%Y-%m-%d";
+					break;
+				case "hour":
+					format = "HH";
+					axisX.title = "小時變化";
+					axisX.tickformat = ".0f";
+					axisX.range = [0,24];
+					break;
+				case "month":
+					format = "MM";
+					axisX.title = "月份變化";
+					axisX.tickformat = ".0f";
+					axisX.range = [0,12];
+					break;
+			}
+			switch(this.dataset.annotationType){
+				case "image":
+					for(var i=0;i<filterArr.length;i++){
+						var d = filterArr[i];
+						if(!d.annotation) continue;
+						var tag = d.annotation.annotation;
+						var t = spacetime(d.dataTime,s.timezone().name);
+						var tStr = "";
+						var tStr = t.unixFmt(format);
+						if(!data[tag]) data[tag] = {};
+						if(!data[tag][tStr]){
+							data[tag][tStr] = {
+								key: tStr,
+								value:1
+							}
+						}
+						else{
+							data[tag][tStr].value++;
+						}
+					}
+					break;
+				case "bbox":
+					for(var i=0;i<filterArr.length;i++){
+						var d = filterArr[i];
+						if(!d.annotation) continue;
+						var bboxArr = d.annotation.annotation;
+						var t = spacetime(d.dataTime,s.timezone().name);
+						var tStr = "";
+						var tStr = t.unixFmt(format);
+							
+						for(var j=0;j<bboxArr.length;j++){
+							var tag = bboxArr[j].tag;
+							if(!data[tag]) data[tag] = {};
+							if(!data[tag][tStr]){
+								data[tag][tStr] = {
+									key: tStr,
+									value:1
+								}
+							}
+							else{
+								data[tag][tStr].value++;
+							}
+						}
+					}
+					break;
+			}
+
+			var tagArr = Object.keys(data);
+			if(tagArr.length == 0){
+				return Plotly.purge(this.$refs.timeline);
+			}
+
+			var traceArr = [];
+			for(var i=0;i<tagArr.length;i++){
+				var tagData = data[tagArr[i]];
+				var time = Object.keys(tagData);
+				var trace = {
+					x: time,
+					y: time.map(function(t){
+						return tagData[t].value;
+					}),
+					name: tagArr[i],
+					type: "scatter",
+					mode: "lines",
+				};
+				traceArr.push(trace);
+			}
+			var layout = {
+				xaxis: axisX,
+				yaxis:{
+					fixedrange: true,
+					title:"標籤數",
+					tickformat: ".0f"
+				},
+				paper_bgcolor: 'rgba(250,250,250,1)',
+				plot_bgcolor: 'rgba(250,250,250,1)',
+				margin: {l:60, r:40, b:60, t:40},
+			};
+
+			Plotly.newPlot(this.$refs.timeline,traceArr,layout,{displayModeBar: false});
 		},
 		UpdateGraphAgreeRate: function(){
 			var data = [];
-			for(var i=0;i<=100;i+=10){
+			for(var i=0;i<=1;i+=0.1){
 				data.push({x:i,y:0});
 			}
 			for(var i=0;i<this.imageArr.length;i++){
@@ -345,8 +467,9 @@ export default {
 			}
 			var layout = {
 				xaxis:{
+					tickformat: '%',
 					fixedrange: true,
-					title:"認同率(%)"
+					title:"認同率"
 				},
 				yaxis:{
 					fixedrange: true,
