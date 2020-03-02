@@ -11,7 +11,7 @@
 			content-class="bg-grey-2">
 			<q-scroll-area class="fit">
 				<q-list>
-					<q-item clickable @click="tab = 'setting' " :active="tab === 'setting'" active-class="bg-grey-7 text-white">
+					<q-item clickable @click="ChangeTab('setting');" :active="tab === 'setting'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="settings_applications" />
 						</q-item-section>
@@ -20,7 +20,7 @@
 						</q-item-section>
 					</q-item>
 
-					<q-item clickable @click="tab = 'favorite' " :active="tab === 'favorite'" active-class="bg-grey-7 text-white">
+					<q-item clickable @click="ChangeTab('favorite');" :active="tab === 'favorite'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="star_border" />
 						</q-item-section>
@@ -29,7 +29,7 @@
 						</q-item-section>
 					</q-item>
 
-					<q-item v-if="user.authType == 'admin' " clickable @click="tab = 'data-admin' " :active="tab === 'data-admin'" active-class="bg-grey-7 text-white">
+					<q-item v-if="user.authType == 'admin' " clickable @click="ChangeTab('data-admin');" :active="tab === 'data-admin'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="view_quilt" />
 						</q-item-section>
@@ -38,7 +38,7 @@
 						</q-item-section>
 					</q-item>
 
-					<q-item v-if="user.authType == 'admin' " clickable @click="tab = 'site-admin' " :active="tab === 'site-admin'" active-class="bg-grey-7 text-white">
+					<q-item v-if="user.authType == 'admin' " clickable @click="ChangeTab('site-admin');" :active="tab === 'site-admin'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="supervisor_account" />
 						</q-item-section>
@@ -83,6 +83,7 @@
 </template>
 
 <script>
+import util from "../js/util.js"
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import userSetting from "./account-user-setting.vue"
@@ -105,13 +106,19 @@ export default {
 		};
 	},
 	created: function(){
+		var hash = util.GetUrlHash();
+		if(hash.tab) this.tab = hash.tab;
+
 		$.get("/user/info",function(result){
 			if(result.status != "ok") return;
 			this.user = result.data;
 		}.bind(this));
 	},
 	methods: {
-		
+		ChangeTab: function(tab){
+			this.tab = tab;
+			window.location.hash = "#tab="+tab;
+		}
 	}
 }
 </script>

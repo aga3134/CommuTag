@@ -6,10 +6,14 @@
 
 		<q-page-container>
 			<div class="q-pa-md" v-if="info">
-				<div class="text-h4">
+				<div class="text-h4 q-ma-sm">
 					{{info.name}}
 					<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
 				</div>
+
+				<q-chip icon="add_photo_alternate">影像數: {{info.picNum}}</q-chip>
+				<q-chip icon="aspect_ratio">標註數: {{info.annotationNum}}</q-chip>
+				<q-chip icon="turned_in_not">標籤: {{info.tagArr.join(", ")}}</q-chip>
 			</div>
 
 			<div class="row q-px-md q-gutter-sm">
@@ -28,7 +32,10 @@
 					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in filterArr" :key="i" transition="scale">
 						<q-card class="bg-grey-7 text-white" @click="ViewImage(image);">
 							<q-img :src="image.url" :ratio="16/9">
-								<div v-if="image.annotation" class="absolute-bottom">
+								<div v-if="image.verifyFinish" class="absolute-bottom">
+									驗證完成
+								</div>
+								<div v-else-if="image.annotation" class="absolute-bottom">
 									已標註
 								</div>
 							</q-img>
@@ -155,12 +162,19 @@ export default {
 			openDatasetEditor: false,
 			openLocationView: false,
 			editInfo: null,
-			favorite: false
+			favorite: false,
+			verifyCond: null
 		};
 	},
 	created: function(){
 		var param = util.GetUrlParameter();
 		this.datasetID = param.id;
+
+		$.get("/dataset/verify-condition",function(result){
+			if(result.status != "ok") return;
+			this.verifyCond = result.data;
+			this.CheckVerifyFinish();
+		}.bind(this));
 
 		$.get("/user/info",function(result){
 			if(result.status != "ok") return;
@@ -238,6 +252,7 @@ export default {
 					image.url = "/static/upload/dataset/"+this.datasetID+"/image/"+image._id+".jpg";
 					this.imageArr.push(image);
 				}
+				this.CheckVerifyFinish();
 				this.FilterData();
 				done();
 			}.bind(this));
@@ -264,6 +279,27 @@ export default {
 					break;
 			}
 			
+		},
+		CheckVerifyFinish: function(){
+			for(var i=0;i<this.imageArr.length;i++){
+				var image = this.imageArr[i];
+				if(!image.annotation){
+					image.verifyFinish = false;
+					continue;
+				}
+				if(image.verification.length < this.verifyCond.sample){
+					image.verifyFinish = false;
+					continue;
+				}
+				var agreeNum = 0;
+				for(var j=0;j<image.verification.length;j++){
+					var verify = image.verification[j];
+					if(verify.agree == "1") agreeNum++;
+				}
+				var rate = agreeNum/image.verification.length;
+				if(rate > this.verifyCond.accept) image.verifyFinish = true;
+				else image.verifyFinish = false;
+			}
 		},
 		ViewImage: function(image){
 			this.targetImage = image;
