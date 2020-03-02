@@ -70,6 +70,7 @@
 						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 						<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' && targetImage.annotation " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
+						<q-btn v-if="user && user.authType=='admin' " flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
 				</q-card>
@@ -97,6 +98,10 @@
 
 			<q-dialog v-model="openDatasetEditor">
 				<dataset-editor :info="editInfo" @reload="ReloadDataset"></dataset-editor>
+			</q-dialog>
+
+			<q-dialog v-model="openInfoEdit" v-if="targetImage">
+				<image-info ref="imageInfo" :dataset="info" :initDataTime="targetImage.dataTime" :initLat="targetImage.lat" :initLng="targetImage.lng" :initRemark="targetImage.remark" @confirm="UpdateImageInfo();" @cancel="openInfoEdit=false;"></image-info>
 			</q-dialog>
 
 			<q-dialog v-model="openLocationView" v-if="targetImage && targetImage.lat && targetImage.lng">
@@ -128,6 +133,7 @@ import annotator from "./annotator.vue"
 import annotatorView from "./annotator-view.vue"
 import datasetEditor from "./dataset-editor.vue"
 import locationSelect from "./location-select.vue"
+import imageInfo from "./image-info.vue"
 
 export default {
 	name:"dataset-view",
@@ -137,7 +143,8 @@ export default {
 		"annotator":annotator,
 		"annotator-view":annotatorView,
 		"dataset-editor":datasetEditor,
-		"location-select": locationSelect
+		"location-select": locationSelect,
+		"image-info":imageInfo
 	},
 	data: function () {
 		return {
@@ -161,6 +168,7 @@ export default {
 			openAnnotator: false,
 			openDatasetEditor: false,
 			openLocationView: false,
+			openInfoEdit: false,
 			editInfo: null,
 			favorite: false,
 			verifyCond: null
@@ -304,6 +312,24 @@ export default {
 		ViewImage: function(image){
 			this.targetImage = image;
 			this.openViewImage = true;
+		},
+		UpdateImageInfo: function(){
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var info = this.$refs.imageInfo.GetImageInfo();
+			var data = {};
+			data.dataset = this.datasetID;
+			data.image = this.targetImage._id;
+			data.dataTime = info.dataTime;
+			data.remark = info.remark;
+			data.lat = info.loc.lat;
+			data.lng = info.loc.lng;
+			data._csrf = csrfToken;
+			$.post("/dataset/update-image-info", data, function(result){
+				if(result.status != "ok") return alert("更新失敗");
+				this.ReloadImage();
+				this.openInfoEdit = false;
+				this.$q.notify("更新成功");
+			}.bind(this));
 		},
 		ViewLocation: function(){
 			this.openLocationView = true;

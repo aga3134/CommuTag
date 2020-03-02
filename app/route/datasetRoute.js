@@ -150,6 +150,23 @@ router.get('/list-image', function(req, res) {
 	datasetController.ListImage(param);
 });
 
+router.post('/update-image-info', util.CheckAdmin, util.CSRF, function(req, res) {
+	var param = {};
+	param.dataset = req.body.dataset;
+	param.image = req.body.image;
+	param.dataTime = req.body.dataTime;
+	param.remark = req.body.remark;
+	param.lat = req.body.lat;
+	param.lng = req.body.lng;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.UpdateImageInfo(param);
+});
+
 router.post('/delete-image', util.CheckAdmin, util.CSRF, function(req, res) {
 	var param = {};
 	param.dataset = req.body.data.dataset;

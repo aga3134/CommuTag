@@ -278,6 +278,17 @@ datasetController.ListImageForAnnotation = function(param){
 
 };
 
+datasetController.UpdateImageInfo = function(param){
+	var Image = mongoose.model("image"+param.dataset, ImageSchema);
+	Image.updateOne({_id:param.image},param,function(err,image){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"update image fail"});
+		}
+		param.succFunc(image);
+	});
+};
+
 datasetController.DeleteImage = function(param){
 	var Image = mongoose.model("image"+param.dataset, ImageSchema);
 	Image.deleteOne({_id:param.image},function(err){

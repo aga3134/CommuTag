@@ -29,7 +29,11 @@ import locationSelect from "./location-select.vue"
 export default {
 	name:"image-info",
 	props: {
-		dataset: Object
+		dataset: Object,
+		initDataTime: String,
+		initLat: Number,
+		initLng: Number,
+		initRemark: String
 	},
 	components:{
 		"location-select": locationSelect
@@ -41,10 +45,22 @@ export default {
 		};
 	},
 	mounted: function(){
-		this.dataTime = spacetime.now().unixFmt("yyyy-MM-ddTHH:mm");
-		if(this.dataset.enableGPS){
+		var tz = spacetime().name;	//get browser time zone
+		if(this.initDataTime){
+			this.dataTime = spacetime(this.initDataTime).goto(tz).unixFmt("yyyy-MM-ddTHH:mm");
+		}
+		else{
+			this.dataTime = spacetime.now().unixFmt("yyyy-MM-ddTHH:mm");
+		}
+		
+		if(this.initLat && this.initLng){
+			this.$refs.locationSelect.SetPosition(this.initLat,this.initLng);
+		}
+		else if(this.dataset.enableGPS){
 			this.$refs.locationSelect.GetGPS();
 		}
+
+		if(this.initRemark) this.remark = this.initRemark;
 	},
 	methods: {
 		GetImageInfo: function(){

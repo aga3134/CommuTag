@@ -190,9 +190,9 @@ export default {
 			this.UpdateGraph();
 		},
 		InitTimeSelect: function(){
-			var s = spacetime.now();
+			var tz = spacetime().name;
 			for(var i=0;i<this.imageArr.length;i++){
-				var t = spacetime(this.imageArr[i].dataTime,s.timezone().name);
+				var t = spacetime(this.imageArr[i].dataTime).goto(tz);
 				if(!this.dataTime.min || this.dataTime.min.isAfter(t)){
 					this.dataTime.min = t.clone().last("day");
 				}
@@ -235,9 +235,9 @@ export default {
 			}
 			
 			//filter by time range
-			var s = spacetime.now();
+			var tz = spacetime().name;
 			filterArr = filterArr.filter(function(d){
-				var t = spacetime(d.dataTime,s.timezone().name);
+				var t = spacetime(d.dataTime).goto(tz);
 				var min = this.dataTime.min.add(this.tagFilter.time.min,"day");
 				var max = this.dataTime.min.add(this.tagFilter.time.max,"day");
 				return t.isAfter(min) && t.isBefore(max);
@@ -332,7 +332,7 @@ export default {
 				else return d.remark.indexOf(this.timelineFilter.keyword) != -1;
 			}.bind(this));
 
-			var s = spacetime.now();
+			var tz = spacetime().name;
 			var data = {};
 			var format = "";
 			var axisX = {
@@ -362,7 +362,7 @@ export default {
 						var d = filterArr[i];
 						if(!d.annotation) continue;
 						var tag = d.annotation.annotation;
-						var t = spacetime(d.dataTime,s.timezone().name);
+						var t = spacetime(d.dataTime).goto(tz);
 						var tStr = "";
 						var tStr = t.unixFmt(format);
 						if(!data[tag]) data[tag] = {};
@@ -382,7 +382,7 @@ export default {
 						var d = filterArr[i];
 						if(!d.annotation) continue;
 						var bboxArr = d.annotation.annotation;
-						var t = spacetime(d.dataTime,s.timezone().name);
+						var t = spacetime(d.dataTime).goto(tz);
 						var tStr = "";
 						var tStr = t.unixFmt(format);
 							
@@ -419,7 +419,6 @@ export default {
 					}),
 					name: tagArr[i],
 					type: "scatter",
-					mode: "lines",
 				};
 				traceArr.push(trace);
 			}
@@ -428,7 +427,7 @@ export default {
 				yaxis:{
 					fixedrange: true,
 					title:"標籤數",
-					tickformat: ".0f"
+					rangemode: "tozero"
 				},
 				paper_bgcolor: 'rgba(250,250,250,1)',
 				plot_bgcolor: 'rgba(250,250,250,1)',
