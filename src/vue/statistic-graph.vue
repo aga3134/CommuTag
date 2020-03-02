@@ -5,7 +5,7 @@
 				<div class="text-h6">標註標籤比例</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="tagRatio"></div>
-					<div class="option-filter column" v-show="openTagFilter">
+					<div class="option-panel column" v-show="openTagFilter">
 						<div class="text-subtitle2 q-mb-lg">時間篩選</div>
 						<q-range v-model="tagFilter.time" :min="dataTime.rangeMin" :max="dataTime.rangeMax" :step="1" :left-label-value="minTimeLabel" :right-label-value="maxTimeLabel" left-label-color="grey-8" right-label-color="grey-8" color="white" label-always @change="UpdateGraphTag();"></q-range>
 						<div class="text-subtitle2">
@@ -28,7 +28,7 @@
 				<div class="text-h6">資料時間分佈</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="timeline"></div>
-					<div class="option-filter column" v-show="openTimelineFilter">
+					<div class="option-panel column" v-show="openTimelineFilter">
 						<div class="text-subtitle2">
 							顯示類型
 							<q-select dense dark color="white" v-model="timelineFilter.type" :options="typeOption" option-value="value" option-label="label" emit-value map-options @input="UpdateGraphTimeline();"></q-select>
@@ -274,15 +274,15 @@ export default {
 						if(!d.annotation) continue;
 						var bboxArr = d.annotation.annotation;
 						for(var j=0;j<bboxArr.length;j++){
-							var bbox = bboxArr[j];
-							if(!data[bbox.tag]){
-								data[bbox.tag] = {
-									name: bbox.tag,
+							var tag = bboxArr[j].tag;
+							if(!data[tag]){
+								data[tag] = {
+									name: tag,
 									value: 1
 								}
 							}
 							else{
-								data[bbox.tag].value++;
+								data[tag].value++;
 							}
 						}
 					}
@@ -661,7 +661,7 @@ export default {
 			width: 100%;
 			height: 100%;
 		}
-		.option-filter{
+		.option-panel{
 			width: 100%;
 			height: 100%;
 			position: absolute;

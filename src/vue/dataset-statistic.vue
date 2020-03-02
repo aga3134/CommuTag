@@ -54,6 +54,8 @@ export default {
 	created: function(){
 		var param = util.GetUrlParameter();
 		this.datasetID = param.id;
+		var hash = util.GetUrlHash();
+		if(hash.tab) this.tab = hash.tab;
 
 		$.get("/user/info",function(result){
 			if(result.status != "ok") return;
@@ -68,6 +70,11 @@ export default {
 				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法取得影像資訊");
 				this.imageArr = result.data;
 
+				for(var i=0;i<this.imageArr.length;i++){
+					var image =this.imageArr[i];
+					image.url = "/static/upload/dataset/"+param.id+"/image/"+image._id+".jpg";
+				}
+
 				this.InitTabContent();
 			}.bind(this));
 		}.bind(this));
@@ -79,14 +86,17 @@ export default {
 			window.location.href="/view?id="+this.datasetID;
 		},
 		InitTabContent: function(){
-			switch(this.tab){
-				case "graph":
-					this.$refs.statisticGraph.SetGraphData(this.info,this.imageArr);
-					break;
-				case "map":
-					this.$refs.statisticMap.SetGraphData(this.info,this.imageArr);
-					break;
-			}
+			Vue.nextTick(function(){
+				window.location.hash = "#tab="+this.tab;
+				switch(this.tab){
+					case "graph":
+						this.$refs.statisticGraph.SetGraphData(this.info,this.imageArr);
+						break;
+					case "map":
+						this.$refs.statisticMap.SetGraphData(this.info,this.imageArr);
+						break;
+				}
+			}.bind(this));
 		}
 	}
 }
