@@ -34,7 +34,7 @@
 
 					<q-card-section class="cursor-pointer" @click="GoToDataset(dataset);">
 						<div class="text-h6">{{dataset.name}}</div>
-						<div class="text-subtitle2">圖片數: {{dataset.picNum}}</div>
+						<div class="text-subtitle2">影像數: {{dataset.picNum}}</div>
 						<div class="text-subtitle2">標註數: {{dataset.annotationNum}}</div>
 					</q-card-section>
 

@@ -21,6 +21,11 @@
 				</q-tab-panels>
 			</q-page>
 
+			<div class="q-pa-md">
+				<q-chip clickable icon="code" @click="GoToUrl('https://github.com/aga3134/CommuTag','_blank');">開放原始碼</q-chip>
+				<q-chip clickable icon="computer" @click="GoToUrl('https://agawork.tw/','_blank');">其他專案</q-chip>
+			</div>
+
 		</q-page-container>
 
 		<q-footer>
@@ -69,7 +74,9 @@ export default {
 
 	},
 	methods: {
-		
+		GoToUrl: function(url,target){
+			window.open(url,target);
+		}
 	}
 }
 </script>

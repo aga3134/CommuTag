@@ -11,7 +11,7 @@
 					<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
 				</div>
 
-				<q-chip icon="add_photo_alternate">影像數: {{info.picNum}}</q-chip>
+				<q-chip icon="image">影像數: {{info.picNum}}</q-chip>
 				<q-chip icon="aspect_ratio">標註數: {{info.annotationNum}}</q-chip>
 				<q-chip icon="turned_in_not">標籤: {{info.tagArr.join(", ")}}</q-chip>
 			</div>
@@ -196,30 +196,33 @@ export default {
 			}
 		}.bind(this));
 
-		$.get("/dataset/view-dataset?id="+param.id, function(result){
-			if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示資料集");;
-			this.info = result.data;
-
-			this.badgeArr = [];
-			if(!this.info.isPublic) this.badgeArr.push("不公開");
-			if(this.info.enableGPS) this.badgeArr.push("GPS");
-			if(!this.info.enableAnnotation){
-				this.badgeArr.push("暫停標註");
-			}
-			else{
-				switch(this.info.annotationType){
-					case "bbox":
-						this.badgeArr.push("框選標註");
-						break;
-					case "image":
-						this.badgeArr.push("整張標註");
-						break;
-				}
-			}
-			
-		}.bind(this));
+		this.LoadDatasetInfo();
 	},
 	methods: {
+		LoadDatasetInfo: function(){
+			$.get("/dataset/view-dataset?id="+this.datasetID, function(result){
+				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示資料集");;
+				this.info = result.data;
+
+				this.badgeArr = [];
+				if(!this.info.isPublic) this.badgeArr.push("不公開");
+				if(this.info.enableGPS) this.badgeArr.push("GPS");
+				if(!this.info.enableAnnotation){
+					this.badgeArr.push("暫停標註");
+				}
+				else{
+					switch(this.info.annotationType){
+						case "bbox":
+							this.badgeArr.push("框選標註");
+							break;
+						case "image":
+							this.badgeArr.push("整張標註");
+							break;
+					}
+				}
+				
+			}.bind(this));
+		},
 		ModifyDataset: function(){
 			this.openDatasetEditor = true;
 			this.editInfo = Object.assign({}, this.info);
@@ -239,6 +242,7 @@ export default {
 			this.$refs.imageScroll.resume();
 			this.targetImage = null;
 			this.openViewImage = false;
+			this.LoadDatasetInfo();
 		},
 		LoadMoreImage: function(index,done){
 			var url = "/dataset/list-image";
@@ -338,15 +342,17 @@ export default {
 			}.bind(this));
 		},
 		DeleteImage: function(){
-			var csrfToken = $("meta[name='csrf-token']").attr("content");
-			var data = {};
-			data.dataset = this.datasetID;
-			data.image = this.targetImage._id;
-			$.post("/dataset/delete-image", {data: data, _csrf: csrfToken}, function(result){
-				if(result.status != "ok") return alert("刪除失敗");
-				this.ReloadImage();
-				this.$q.notify("刪除成功");
-			}.bind(this));
+			if(confirm("確定刪除此影像?")){
+				var csrfToken = $("meta[name='csrf-token']").attr("content");
+				var data = {};
+				data.dataset = this.datasetID;
+				data.image = this.targetImage._id;
+				$.post("/dataset/delete-image", {data: data, _csrf: csrfToken}, function(result){
+					if(result.status != "ok") return alert("刪除失敗");
+					this.ReloadImage();
+					this.$q.notify("刪除成功");
+				}.bind(this));
+			}
 		},
 		DownloadImage: function(){
 			if(!this.targetImage) return;
@@ -366,17 +372,19 @@ export default {
 			this.ReloadImage();
 		},
 		DeleteAnnotation: function(){
-			this.openViewImage = false;
-			var csrfToken = $("meta[name='csrf-token']").attr("content");
-			var data = {};
-			data.dataset = this.datasetID;
-			data.image = this.targetImage._id;
-			data._csrf = csrfToken;
-			$.post("/dataset/set-annotation",data,function(result){
-				if(result.status != "ok") return alert("刪除標註失敗");
-				this.$q.notify("刪除標註成功");
-				this.ReloadImage();
-			}.bind(this));
+			if(confirm("確定刪除此影像的標註?")){
+				this.openViewImage = false;
+				var csrfToken = $("meta[name='csrf-token']").attr("content");
+				var data = {};
+				data.dataset = this.datasetID;
+				data.image = this.targetImage._id;
+				data._csrf = csrfToken;
+				$.post("/dataset/set-annotation",data,function(result){
+					if(result.status != "ok") return alert("刪除標註失敗");
+					this.$q.notify("刪除標註成功");
+					this.ReloadImage();
+				}.bind(this));
+			}
 		},
 		AddFavorite: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
