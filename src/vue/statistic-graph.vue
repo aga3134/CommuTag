@@ -97,6 +97,7 @@
 
 <script>
 
+import util from "../js/util.js"
 import locationSelect from "./location-select.vue"
 
 export default {
@@ -255,8 +256,9 @@ export default {
 				case "image":
 					for(var i=0;i<filterArr.length;i++){
 						var d = filterArr[i];
-						if(!d.annotation) continue;
-						var tag = d.annotation.annotation;
+						var tag = "";
+						if(!d.annotation) tag = "未標註";
+						else tag = d.annotation.annotation;
 						if(!data[tag]){
 							data[tag] = {
 								name: tag,
@@ -271,8 +273,9 @@ export default {
 				case "bbox":
 					for(var i=0;i<filterArr.length;i++){
 						var d = filterArr[i];
-						if(!d.annotation) continue;
-						var bboxArr = d.annotation.annotation;
+						var bboxArr = [];
+						if(!d.annotation) bboxArr = [{tag:"未標註"}];
+						else bboxArr = d.annotation.annotation;
 						for(var j=0;j<bboxArr.length;j++){
 							var tag = bboxArr[j].tag;
 							if(!data[tag]){
@@ -290,7 +293,7 @@ export default {
 			}
 
 			var tagArr = Object.keys(data).sort(function(a,b){
-				return a.value-b.value;
+				return data[a].value-data[b].value;
 			});
 			if(tagArr.length == 0){
 				return Plotly.purge(this.$refs.tagRatio);
@@ -347,23 +350,21 @@ export default {
 					format = "HH";
 					axisX.title = "小時變化";
 					axisX.tickformat = ".0f";
-					axisX.range = [0,24];
 					break;
 				case "month":
 					format = "MM";
 					axisX.title = "月份變化";
 					axisX.tickformat = ".0f";
-					axisX.range = [0,12];
 					break;
 			}
 			switch(this.dataset.annotationType){
 				case "image":
 					for(var i=0;i<filterArr.length;i++){
 						var d = filterArr[i];
-						if(!d.annotation) continue;
-						var tag = d.annotation.annotation;
+						var tag = "";
+						if(!d.annotation) tag = "未標註";
+						else tag = d.annotation.annotation;
 						var t = spacetime(d.dataTime).goto(tz);
-						var tStr = "";
 						var tStr = t.unixFmt(format);
 						if(!data[tag]) data[tag] = {};
 						if(!data[tag][tStr]){
@@ -380,10 +381,10 @@ export default {
 				case "bbox":
 					for(var i=0;i<filterArr.length;i++){
 						var d = filterArr[i];
-						if(!d.annotation) continue;
-						var bboxArr = d.annotation.annotation;
+						var bboxArr = [];
+						if(!d.annotation) bboxArr = [{tag:"未標註"}];
+						else bboxArr = d.annotation.annotation;
 						var t = spacetime(d.dataTime).goto(tz);
-						var tStr = "";
 						var tStr = t.unixFmt(format);
 							
 						for(var j=0;j<bboxArr.length;j++){
@@ -403,6 +404,38 @@ export default {
 					break;
 			}
 
+			//fill zero to timestamp with no data
+			for(var tag in data){
+				switch(this.timelineFilter.type){
+					case "time":
+						var day = this.dataTime.min;
+						while(day.isBefore(this.dataTime.max)){
+							var key = day.unixFmt(format);
+							if(!data[tag][key]){
+								data[tag][key] = {key:key,value:0};
+							}
+							day = day.add(1,"day");
+						}
+						break;
+					case "hour":
+						for(var i=0;i<24;i++){
+							var key = util.PadLeft(i,2);
+							if(!data[tag][key]){
+								data[tag][key] = {key:key,value:0};
+							}
+						}
+						break;
+					case "month":
+						for(var i=1;i<=12;i++){
+							var key = util.PadLeft(i,2);
+							if(!data[tag][key]){
+								data[tag][key] = {key:key,value:0};
+							}
+						}
+						break;
+				}
+			}
+
 			var tagArr = Object.keys(data);
 			if(tagArr.length == 0){
 				return Plotly.purge(this.$refs.timeline);
@@ -411,7 +444,11 @@ export default {
 			var traceArr = [];
 			for(var i=0;i<tagArr.length;i++){
 				var tagData = data[tagArr[i]];
-				var time = Object.keys(tagData);
+				var time = Object.keys(tagData).sort(function(a,b){
+					if(a<b) return -1;
+					else if(a>b) return 1;
+					else return 0;
+				});
 				var trace = {
 					x: time,
 					y: time.map(function(t){
@@ -423,11 +460,11 @@ export default {
 				traceArr.push(trace);
 			}
 			var layout = {
+				hovermode:"closest",
 				xaxis: axisX,
 				yaxis:{
 					fixedrange: true,
 					title:"標籤數",
-					rangemode: "tozero"
 				},
 				paper_bgcolor: 'rgba(250,250,250,1)',
 				plot_bgcolor: 'rgba(250,250,250,1)',

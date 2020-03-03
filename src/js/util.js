@@ -28,10 +28,16 @@ var ValidateEmail = function(email){
   return pattern.test(email);
 };
 
+var PadLeft = function(val, totalLen, ch){
+	var  len = (totalLen - String(val).length)+1;
+	return len > 0? new Array(len).join(ch || '0')+val : val;
+}
+
 var util = {
 	GetUrlParameter: GetUrlParameter,
 	GetUrlHash: GetUrlHash,
-	ValidateEmail: ValidateEmail
+	ValidateEmail: ValidateEmail,
+	PadLeft: PadLeft
 }
 
 export default util;
