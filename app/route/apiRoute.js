@@ -3,6 +3,7 @@ var router = express.Router();
 var apiController = require("../controller/apiController");
 var util = require("../controller/util");
 var Config = require("../../config.json");
+var upload = require("../controller/upload");
 
 module.exports = router;
 
@@ -40,4 +41,35 @@ router.get('/list-key', util.CheckAdmin, function(req, res){
 		res.status(200).json({"status": "fail","message": result.err});
 	};
 	apiController.ListKey(param);
+});
+
+router.post('/upload-image', upload.UploadImageToMem, function(req, res){
+	console.log(req.headers);
+	console.log(req.body);	
+	var param = {};
+	param.dataset = req.body.dataset;
+	param.lat = req.body.lat;
+	param.lng = req.body.lng;
+	param.remark = req.body.remark;
+	param.dataTime = req.body.dataTime;
+	param.apiKey = req.body.apiKey;
+
+	param.succFunc = function(result){
+		var imageParam = {};
+		imageParam.newPath = "/static/upload/dataset/"+req.body.dataset+"/image/";
+		imageParam.newName = result._id+".jpg";
+		imageParam.encode = "base64";
+		imageParam.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
+		imageParam.succFunc = function(result){
+			res.status(200).json({status: "ok", "data": result});
+		}
+		imageParam.failFunc = function(result){
+			res.status(200).json({status: "fail", message: result.err});
+		}
+		upload.SaveFile(imageParam);
+	};
+	param.failFunc = function(result){
+		res.status(200).json({status: "fail", message: result.err});
+	};
+	apiController.UploadImage(param);
 });

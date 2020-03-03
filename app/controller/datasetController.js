@@ -37,32 +37,6 @@ function CheckDatasetAuth(param){
 	});
 }
 
-function UpdateDatasetStatistic(param){
-	return new Promise(function(resolve, reject) {
-		var Image = mongoose.model("image"+param.dataset, ImageSchema);
-		Image.aggregate([
-			{$group: {
-				_id:null,
-				picNum: {$sum:1},
-				annotationNum: {
-					$sum: {
-						$cond: [{$ne: ["$annotation", null]}, 1, 0]
-					}
-				},
-			}},
-			{$project:{ _id:0}}
-		],function(err, result){
-			Dataset.updateOne({_id:param.dataset},result[0],function(err,dataset){
-				if(err){
-					console.log(err);
-					return reject({err:"update dataset fail"});
-				}
-				return resolve();
-			});
-		});
-	});
-}
-
 datasetController.CreateDataset = function(param){
 	Dataset.create({},function(err, dataset){
 		if(err){
@@ -197,7 +171,7 @@ datasetController.UploadImage = function(param){
 				console.log(err);
 				return param.failFunc({err:"create image fail"});
 			}
-			UpdateDatasetStatistic({dataset: param.dataset});
+			util.UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc(result);
 		});
 	})
@@ -296,7 +270,7 @@ datasetController.DeleteImage = function(param){
 			console.log(err);
 			return param.failFunc({err:"delete image fail"});
 		}
-		UpdateDatasetStatistic({dataset: param.dataset});
+		util.UpdateDatasetStatistic({dataset: param.dataset});
 		param.succFunc({_id:param.image});
 	});
 };
@@ -327,7 +301,7 @@ datasetController.SetAnnotation = function(param){
 				console.log(err);
 				return param.failFunc({err:"update annotation fail"});
 			}
-			UpdateDatasetStatistic({dataset: param.dataset});
+			util.UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc(image);
 		});
 	})

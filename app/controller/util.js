@@ -1,6 +1,11 @@
 var Config = require('../../config');
 var URL = require('url');
 var csrf = require('csurf');
+var Dataset = require('../db/dataset');
+var mongoose = require('mongoose');
+
+//每個dataset存成一個collection，必免資料太大存取很慢
+var ImageSchema = require("../db/ImageSchema");
 
 var util = {};
 
@@ -57,6 +62,32 @@ util.FailRedirect = function(req, res, redirect, message){
 	if(isAjax) return res.send({"status":"fail","message":message});
 	else return res.redirect(redirect+"?message="+encodeURIComponent(message));
 };
+
+util.UpdateDatasetStatistic = function(param){
+	return new Promise(function(resolve, reject) {
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		Image.aggregate([
+			{$group: {
+				_id:null,
+				picNum: {$sum:1},
+				annotationNum: {
+					$sum: {
+						$cond: [{$ne: ["$annotation", null]}, 1, 0]
+					}
+				},
+			}},
+			{$project:{ _id:0}}
+		],function(err, result){
+			Dataset.updateOne({_id:param.dataset},result[0],function(err,dataset){
+				if(err){
+					console.log(err);
+					return reject({err:"update dataset fail"});
+				}
+				return resolve();
+			});
+		});
+	});
+}
 
 
 util.CSRF = csrf();
