@@ -1,6 +1,7 @@
 var Config = require('../../config');
 var util = require("./util");
 var Dataset = require('../db/dataset');
+var Favorite = require('../db/favorite');
 var mongoose = require('mongoose');
 const { exec } = require('child_process');
 var fs   = require("fs-extra");
@@ -78,8 +79,6 @@ datasetController.DeleteDataset = function(param){
 };
 
 datasetController.ListDataset = function(param){
-	var limit = 8;
-	var skip = (param.page||0)*limit;
 	var queryOption = {};
 	if(param.keyword){
 		queryOption.name = {"$regex": param.keyword,"$options": "i"};
@@ -99,32 +98,56 @@ datasetController.ListDataset = function(param){
 	if(param.enableAnnotation){
 		queryOption.enableAnnotation = param.enableAnnotation=="1"?true:false;
 	}
-	if(param.idList){
-		queryOption._id = param.idList.split(",");
-	}
 	var sortOption = {};
 	if(param.sort){
 		sortOption[param.sort] = param.orderType=="desc"?-1:1;
 	}
 
-	Dataset.find(queryOption,{"__v":0},{limit:limit+1, skip:skip})
-	.sort(sortOption)
-	.exec(function(err, dataset){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"list dataset fail"});
-		}
-		var result = {};
-		if(dataset.length > limit){
-			result.hasMore = true;
-			result.dataset = dataset.slice(0,-1);
-		}
-		else{
-			result.hasMore = false;
-			result.dataset = dataset;
-		}
-		param.succFunc(result);
-	});
+	function FindDataset(query,sort){
+		console.log(query);
+		var limit = 8;
+		var skip = (param.page||0)*limit;
+		Dataset.find(query,{"__v":0},{limit:limit+1, skip:skip})
+		.sort(sort)
+		.exec(function(err, dataset){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"list dataset fail"});
+			}
+			var result = {};
+			if(dataset.length > limit){
+				result.hasMore = true;
+				result.dataset = dataset.slice(0,-1);
+			}
+			else{
+				result.hasMore = false;
+				result.dataset = dataset;
+			}
+			param.succFunc(result);
+		});
+	}
+
+	if(param.favorite == "1"){
+		var query = {};
+		query.userID = param.user._id.toString();
+		Favorite.find(query,function(err, favorite){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"list favorite fail"});
+			}
+			if(favorite.length > 0){
+				queryOption._id = favorite.map(function(d){
+					return d.datasetID;
+				});
+				FindDataset(queryOption,sortOption);
+			}
+			else{
+				return param.succFunc({hasMore:false,dataset:[]});
+			}
+		});
+	}
+	else FindDataset(queryOption,sortOption);
+
 };
 
 datasetController.ViewDataset = function(param){
