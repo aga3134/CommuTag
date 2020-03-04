@@ -350,6 +350,7 @@ datasetController.AddVerification = function(param){
 						console.log(err);
 						return param.failFunc({err:"update verification fail"});
 					}
+					util.UpdateDatasetStatistic({dataset: param.dataset});
 					param.succFunc(image);
 				});
 			}
@@ -391,14 +392,18 @@ datasetController.BatchDownload = function(param){
 		}
 
 		//check if file exist and up to date
-		/*var dir = __dirname+"/../..";
-		if(fs.existsSync(dir+param.newPath)){
-			var stats = fs.statSync(dir+param.newPath);
-			var mtime = stats.mtime;
-
+		var dir = __dirname+"/../..";
+		if(fs.existsSync(dir+path)){
+			var stats = fs.statSync(dir+path);
+			var datasetTime = new Date(dataset.updatedAt);
+			var fileTime = new Date(stats.mtime);
+			if(datasetTime.getTime() <= fileTime.getTime()) {
+				console.log("file is up to date");
+				param.succFunc(path);
+			}
+			else GenerateZip();
 		}
-		else GenerateZip();*/
-		GenerateZip();
+		else GenerateZip();
 
 	})
 	.catch(function(err){
