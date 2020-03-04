@@ -244,12 +244,13 @@ export default {
 			});
 			//make konva center align
 			this.stage.content.style.margin = "auto";
-			window.addEventListener("resize", function(){
+			//手機選標籤時會產生resize，造成canvas變很小
+			/*window.addEventListener("resize", function(){
 				this.stage.setAttrs({
 					width: this.container.clientWidth,
 					height: this.container.clientHeight,
 				});
-			}.bind(this));
+			}.bind(this));*/
 			//init tool according to task
 			this.tool = this.task=="annotate"?"bbox":"move";
 			this.ChangeTool();

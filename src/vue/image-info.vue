@@ -68,7 +68,9 @@ export default {
 			var s = spacetime.now();
 			info.dataTime = spacetime(this.dataTime,s.timezone().name).format("iso");
 			info.remark = this.remark;
-			info.loc = this.$refs.locationSelect.loc;
+			if(this.$refs.locationSelect){
+				info.loc = this.$refs.locationSelect.loc;
+			}
 			return info;
 		},
 		ConfirmSelect: function(){

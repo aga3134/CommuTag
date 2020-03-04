@@ -104,7 +104,6 @@ datasetController.ListDataset = function(param){
 	}
 
 	function FindDataset(query,sort){
-		console.log(query);
 		var limit = 8;
 		var skip = (param.page||0)*limit;
 		Dataset.find(query,{"__v":0},{limit:limit+1, skip:skip})

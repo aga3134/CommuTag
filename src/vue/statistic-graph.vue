@@ -201,10 +201,13 @@ export default {
 					this.dataTime.max = t.clone().next("day");
 				}
 			}
-			this.dataTime.rangeMin = 0;
-			this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day")+1;
-			this.tagFilter.time.min = this.dataTime.rangeMin;
-			this.tagFilter.time.max = this.dataTime.rangeMax;
+			if(this.dataTime.min && this.dataTime.max){
+				this.dataTime.rangeMin = 0;
+				this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day")+1;
+				this.tagFilter.time.min = this.dataTime.rangeMin;
+				this.tagFilter.time.max = this.dataTime.rangeMax;
+			}
+			
 		},
 		SetGraphData: function(dataset,imageArr){
 			this.dataset = dataset;
@@ -674,10 +677,12 @@ export default {
 	},
 	computed:{
 		minTimeLabel: function(){
+			if(!this.dataTime.min) return "";
 			var day = this.dataTime.min.add(this.tagFilter.time.min,"day");
 			return day.unixFmt("yyyy-MM-dd");
 		},
 		maxTimeLabel: function(){
+			if(!this.dataTime.min) return "";
 			var day = this.dataTime.min.add(this.tagFilter.time.max,"day");
 			return day.unixFmt("yyyy-MM-dd");
 		}
