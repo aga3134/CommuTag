@@ -447,11 +447,9 @@ export default {
 			switch(this.info.annotationType){
 				case "image":
 					this.downloadFormat.push({label:"依標籤分資料夾",value:"folder"});
-					this.downloadFormat.push({label:"TFRecord",value:"tfrecord"});
 					break;
 				case "bbox":
 					this.downloadFormat.push({label:"VOC",value:"voc"});
-					this.downloadFormat.push({label:"TFRecord",value:"tfrecord"});
 					break;
 			}
 			this.downloadOption.format = this.downloadFormat[0].value;

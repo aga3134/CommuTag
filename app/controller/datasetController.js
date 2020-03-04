@@ -369,7 +369,7 @@ datasetController.BatchDownload = function(param){
 		checkAnnotation: true
 	})
 	.then(function(dataset){
-		var ext = param.format=="tfrecord"?"tfrecords":"zip";
+		var ext = "zip";
 		var path = "/static/file/"+param.dataset;
 		path +="/batchDownload_"+param.filter+"_"+param.format+"."+ext;
 

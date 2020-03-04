@@ -7,7 +7,6 @@ from bson.objectid import ObjectId
 
 from GenFolderClassify import GenFolderClassify
 from GenVOC import GenVOC
-from GenTFRecord import GenTFRecord
 
 if __name__ == "__main__":
 	#load verify condition
@@ -61,8 +60,6 @@ if __name__ == "__main__":
 	if not os.path.exists(outPath):
 		os.makedirs(outPath)
 	ext = "zip"
-	if args.format=="tfrecord":
-		ext = "tfrecords"
 	outFile = outPath+"batchDownload_"+args.filter+"_"+args.format+"."+ext
 	
 	#generate file according to args
@@ -70,8 +67,6 @@ if __name__ == "__main__":
 		genFile = GenFolderClassify()
 	elif args.format == "voc":
 		genFile = GenVOC()
-	elif args.format == "tfrecord":
-		genFile = GenTFRecord()
 
 	if genFile is not None:
 		genFile.GenFile(dataset,filterArr,outFile)
