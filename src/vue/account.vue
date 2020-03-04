@@ -11,15 +11,6 @@
 			content-class="bg-grey-2">
 			<q-scroll-area class="fit">
 				<q-list>
-					<q-item clickable tag="a" href="/">
-						<q-item-section avatar>
-							<q-icon name="home" />
-						</q-item-section>
-						<q-item-section>
-							<q-item-label class="text-subtitle1">首頁</q-item-label>
-						</q-item-section>
-					</q-item>
-
 					<q-item clickable @click="ChangeTab('setting');" :active="tab === 'setting'" active-class="bg-grey-7 text-white">
 						<q-item-section avatar>
 							<q-icon name="settings_applications" />
@@ -88,6 +79,10 @@
 				</q-tab-panel>
 			</q-tab-panels>
 		</q-page-container>
+
+		<q-footer>
+			<q-btn class="full-width bg-grey-8" icon="home" label="回首頁" @click="GoHome();"></q-btn>
+		</q-footer>
 	</q-layout>
 </template>
 
@@ -127,7 +122,10 @@ export default {
 		ChangeTab: function(tab){
 			this.tab = tab;
 			window.location.hash = "#tab="+tab;
-		}
+		},
+		GoHome: function(){
+			window.location.href="/";
+		},
 	}
 }
 </script>

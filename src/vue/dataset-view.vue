@@ -17,9 +17,9 @@
 			</div>
 
 			<div class="row q-px-md q-gutter-sm">
-				<q-select dense class="col-1" v-model="filterKey" :options="filterOption" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
+				<q-select dense class="col-1" v-model="filterKey" :options="viewFilter" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
 				<q-btn v-if="info && info.enableUpload" icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
-				<q-btn v-if="info && info.enableDownload" icon="cloud_download" label="整包下載" flat></q-btn>
+				<q-btn v-if="info && info.enableDownload && user" icon="cloud_download" label="整包下載" flat @click="OpenBatchDownload();"></q-btn>
 				<q-btn v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
 				<q-btn v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
 				<q-btn icon="bar_chart" label="資料統計" flat @click="GoToStatistic();"></q-btn>
@@ -89,6 +89,28 @@
 				</div>
 			</q-dialog>
 
+			<q-dialog v-model="openBatchDownload">
+				<q-card class="full-width">
+					<q-card-section>
+						<div class="text-h6 text-center">整包下載</div>
+						
+						<div class="row items-center">
+							<div class="col-shrink text-subtitle2">影像篩選</div>
+							<q-select class="col q-pa-sm" dense v-model="downloadOption.filter" :options="downloadFilter" option-value="value" option-label="label" emit-value map-options></q-select>
+						</div>
+						<div class="row items-center">
+							<div class="col-shrink text-subtitle2">下載格式</div>
+							<q-select class="col q-pa-sm" dense v-model="downloadOption.format" :options="downloadFormat" option-value="value" option-label="label" emit-value map-options></q-select>
+						</div>
+						
+					</q-card-section>
+					<q-card-actions align="center">
+						<q-btn flat label="下載" @click="BatchDownload();"></q-btn>
+						<q-btn flat label="取消" v-close-popup></q-btn>
+					</q-card-actions>
+				</q-card>
+			</q-dialog>
+
 			<q-dialog maximized persistent v-model="openAnnotator" v-if="info">
 				<annotator :user="user" :dataset="info" :image="targetImage" @done="FinishAnnotation();" @skip="openAnnotator = false;"></annotator>
 				<div>
@@ -151,11 +173,21 @@ export default {
 			tab: "",
 			user: null,
 			filterKey: "all",
-			filterOption: [
+			viewFilter: [
 				{label: "全部",value:"all"},
 				{label: "已標註",value:"withTag"},
 				{label: "未標註",value:"withoutTag"},
 			],
+			downloadFilter: [
+				{label: "全部",value:"all"},
+				{label: "標註完成",value:"annotateFinish"},
+				{label: "驗證完成",value:"verifyFinish"},
+			],
+			downloadFormat: [],
+			downloadOption: {
+				filter: "all",
+				format: ""
+			},
 			datasetID: null,
 			info: null,
 			badgeArr: [],
@@ -169,6 +201,7 @@ export default {
 			openDatasetEditor: false,
 			openLocationView: false,
 			openInfoEdit: false,
+			openBatchDownload: false,
 			editInfo: null,
 			favorite: false,
 			verifyCond: null
@@ -406,6 +439,37 @@ export default {
 				if(result.status != "ok") return alert("取消收藏失敗");
 				this.favorite = false;
 				this.$q.notify("取消收藏成功");
+			}.bind(this));
+		},
+		OpenBatchDownload: function(){
+			this.openBatchDownload = true;
+			this.downloadFormat = [];
+			switch(this.info.annotationType){
+				case "image":
+					this.downloadFormat.push({label:"依標籤分資料夾",value:"folder"});
+					this.downloadFormat.push({label:"TFRecord",value:"tfrecord"});
+					break;
+				case "bbox":
+					this.downloadFormat.push({label:"VOC",value:"voc"});
+					this.downloadFormat.push({label:"TFRecord",value:"tfrecord"});
+					break;
+			}
+			this.downloadOption.format = this.downloadFormat[0].value;
+		},
+		BatchDownload: function(){
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			var data = {};
+			data.dataset = this.datasetID;
+			data.filter = this.downloadOption.filter;
+			data.format = this.downloadOption.format;
+			data._csrf = csrfToken;
+			$.post("/dataset/batch-download",data,function(result){
+				if(result.status != "ok") return alert("整包下載失敗");
+				var link = document.createElement('a');
+		        link.href = result.data;
+		        link.download="";
+		        link.click();
+				this.openBatchDownload = false;
 			}.bind(this));
 		}
 	},

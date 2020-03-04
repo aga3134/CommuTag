@@ -228,3 +228,18 @@ router.post('/add-verification',util.CheckLogin,util.CheckBlacklist,util.CSRF, f
 router.get('/verify-condition', function(req, res) {
 	res.status(200).json({"status":"ok","data": Config.verify});
 });
+
+router.post('/batch-download',util.CheckLogin,util.CheckBlacklist,util.CSRF, function(req, res){
+	var param = {};
+	param.user = req.user;
+	param.dataset = req.body.dataset;
+	param.filter = req.body.filter;
+	param.format = req.body.format;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.BatchDownload(param);
+});

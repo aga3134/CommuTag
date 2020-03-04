@@ -2,6 +2,8 @@ var Config = require('../../config');
 var util = require("./util");
 var Dataset = require('../db/dataset');
 var mongoose = require('mongoose');
+const { exec } = require('child_process');
+var fs   = require("fs-extra");
 
 //每個dataset存成一個collection，必免資料太大存取很慢
 var ImageSchema = require("../db/ImageSchema");
@@ -21,6 +23,9 @@ function CheckDatasetAuth(param){
 			}
 			if(param.checkAnnotation && !result.enableAnnotation){
 				return reject({err:"annotation not enabled"});
+			}
+			if(param.checkDownload && !result.enableDownload){
+				return reject({err:"download not enabled"});
 			}
 			if(param.checkView && !result.isPublic){
 				//不公開的資料集，管理員跟私密成員才能看
@@ -351,6 +356,53 @@ datasetController.AddVerification = function(param){
 		});
 	})
 	.catch(function(err){
+		param.failFunc(err);
+	});
+
+};
+
+datasetController.BatchDownload = function(param){
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkDownload: true,
+		checkAnnotation: true
+	})
+	.then(function(dataset){
+		var ext = param.format=="tfrecord"?"tfrecords":"zip";
+		var path = "/static/file/"+param.dataset;
+		path +="/batchDownload_"+param.filter+"_"+param.format+"."+ext;
+
+		function GenerateZip(){
+			//create another process to avoid blocking
+			var cmd = "python python/batchDownload/BatchDownload.py";
+			cmd += " "+param.dataset;
+			cmd += " "+param.filter;
+			cmd += " "+param.format;
+
+			exec(cmd, function(error, stdout, stderr){
+				console.log(stdout);
+				console.error(stderr);
+				if(error){
+					return console.log(error);
+				}
+				param.succFunc(path);
+			});
+		}
+
+		//check if file exist and up to date
+		/*var dir = __dirname+"/../..";
+		if(fs.existsSync(dir+param.newPath)){
+			var stats = fs.statSync(dir+param.newPath);
+			var mtime = stats.mtime;
+
+		}
+		else GenerateZip();*/
+		GenerateZip();
+
+	})
+	.catch(function(err){
+		console.log(err);
 		param.failFunc(err);
 	});
 
