@@ -6,7 +6,7 @@
 
 		<div class="row">
 			<div class="col-12 col-sm-6 col-md-3 q-pa-md">
-				<q-input v-model="searchKey" label="搜尋資料集" @keyup.enter="ReloadDataset();">
+				<q-input dense v-model="searchKey" label="搜尋資料集" @keyup.enter="ReloadDataset();">
 					<template v-slot:append>
 						<q-btn class="bg-grey-8 text-white" icon="search" @click="ReloadDataset();"></q-btn>
 					</template>
@@ -14,10 +14,10 @@
 			</div>
 
 			<div class="col-12 col-sm-6 col-md-3 q-pa-md">
-				<q-select v-model="sortKey" :options="sortOption" option-value="value" option-label="label" emit-value map-options label="排序" @input="ReloadDataset();"></q-select>
+				<q-select dense v-model="sortKey" :options="sortOption" option-value="value" option-label="label" emit-value map-options label="排序" @input="ReloadDataset();"></q-select>
 			</div>
 			<div class="col-6 col-sm-4 col-md-2 q-pa-md">
-				<q-select v-model="orderType" :options="orderTypeOption" option-value="value" option-label="label" emit-value map-options @input="ReloadDataset();"></q-select>
+				<q-select dense v-model="orderType" :options="orderTypeOption" option-value="value" option-label="label" emit-value map-options @input="ReloadDataset();"></q-select>
 			</div>
 		</div>
 		

@@ -47,6 +47,10 @@ export default {
 	methods: {
 		OpenCameraSelect: function(){
 			//list device
+			if(!navigator.mediaDevices){
+				this.camStatus = "無法讀取裝置列表，請開啟權限";
+				return;
+			}
 			navigator.mediaDevices.enumerateDevices().then(function(devices){
 				this.cameraList = [];
 				for(var i=0;i<devices.length;i++){
