@@ -126,7 +126,8 @@ export default {
 			bboxLayer: null,
 			imageNode: null,
 			annotationArr: [],
-			isDrag: false,
+			gesture: "",
+			lastTouch: null,
 			newRect: null,
 			target: null,
 			labelColor:{}
@@ -187,7 +188,7 @@ export default {
 
 			if(pos.x < imPos.x) pos.x = imPos.x;
 			if(pos.x >= imPos.x+imSize.width*imScale.x) pos.x = imPos.x+imSize.width*imScale.x;
-			if(pos.y < imPos.y) pos.y = imPos.y-offset;
+			if(pos.y < imPos.y) pos.y = imPos.y;
 			if(pos.y >= imPos.y+imSize.height*imScale.y) pos.y = imPos.y+imSize.height*imScale.y;
 			return pos; 
 		},
@@ -278,51 +279,123 @@ export default {
 			}.bind(this));
 
 			this.stage.on('mousedown touchstart', function(e){
-				if(this.tool != "bbox") return;
-				//點到內部的物件，不產生新bbox
-				if(e.target.name() != "") return;
-
-				var mousePt = this.GetRelativeMousePos(this.stage);
-				mousePt = this.BoundInImage(mousePt);
-
-				this.isDrag = true;
-				if(this.newRect){
-					this.newRect.destroy();
+				if(e.type == "touchstart" && e.evt.touches.length == 2){
+					this.gesture = "pinch";
+					this.lastTouch = e;
 				}
-				this.newRect = new Konva.Rect({
-					x: mousePt.x,
-					y: mousePt.y,
-					width: 0,
-					height: 0,
-					fill: "rgba(0,0,0,0)",
-					stroke: "#ffffff",
-				});
-				this.bboxLayer.add(this.newRect);
+				else{
+					this.gesture = "drag";
+					if(this.tool == "bbox"){
+						//點到內部的物件，不產生新bbox
+						if(e.target.name() != "") return;
+						var mousePt = this.GetRelativeMousePos(this.stage);
+						mousePt = this.BoundInImage(mousePt);
+						this.lastTouch = this.stage.getPointerPosition();
+
+						if(this.newRect){
+							this.newRect.destroy();
+						}
+						this.newRect = new Konva.Rect({
+							x: mousePt.x,
+							y: mousePt.y,
+							width: 0,
+							height: 0,
+							fill: "rgba(0,0,0,0)",
+							stroke: "#ffffff",
+						});
+						this.bboxLayer.add(this.newRect);
+					}
+				}
+				//console.log(this.gesture);
 				this.stage.batchDraw();
 			}.bind(this));
 			
 			this.stage.on('mousemove touchmove', function(e){
-				if(this.tool != "bbox") return;
-				if(!this.isDrag || !this.newRect) return;
-				var mousePt = this.GetRelativeMousePos(this.stage);
-				mousePt = this.BoundInImage(mousePt);
-				var origin = this.newRect.position();
-				this.newRect.setAttrs({
-					width: mousePt.x-origin.x,
-					height: mousePt.y-origin.y
-				});
+				if(this.gesture == "pinch"){
+					var p1 = this.lastTouch.evt.touches[0];
+					var p2 = this.lastTouch.evt.touches[1];
+					var t1 = e.evt.touches[0];
+					var t2 = e.evt.touches[1];
+					this.lastTouch = e;
+					if(!p1 || !p2 || !t1 || !t2) return;
+					function ComputeDist(pt1,pt2){
+						var diffX = pt1.clientX-pt2.clientX;
+						var diffY = pt1.clientY-pt2.clientY;
+						return Math.sqrt(diffX*diffX+diffY*diffY);
+					}
+					var dist1 = ComputeDist(p1,p2);
+					var dist2 = ComputeDist(t1,t2);
+					var old = this.stage.scaleX();
+					var scale = dist2/dist1;
+					if(scale > 1.1) scale = 1.1;
+					else if(scale < 0.9) scale = 0.9;
+					var s = old*scale;
+					if(s < 1) s = 1;
+
+					//scale之後，兩指中心點不變
+					var centerPt = {
+						x: (t1.clientX+t2.clientX)*0.5,
+						y: (t1.clientY+t2.clientY)*0.5
+					};
+					var imagePt = {
+						x: (centerPt.x-this.stage.x())/old,
+						y: (centerPt.y-this.stage.y())/old
+					};
+					this.stage.scale({x:s,y:s});
+					var newPos = {
+						x:-imagePt.x*s+centerPt.x,
+						y:-imagePt.y*s+centerPt.y
+					};
+					newPos = this.BoundStage(newPos);
+					this.stage.position(newPos);
+				}
+				else if(this.gesture == "drag"){
+					if(this.tool == "bbox"){	//change bbox size
+						if(!this.newRect) return;
+						var mousePt = this.GetRelativeMousePos(this.stage);
+						mousePt = this.BoundInImage(mousePt);
+						var origin = this.newRect.position();
+						this.newRect.setAttrs({
+							width: mousePt.x-origin.x,
+							height: mousePt.y-origin.y
+						});
+					}
+					else if(this.tool == "move"){	//drag stage
+						var mousePt = this.stage.getPointerPosition();
+						if(!this.lastTouch){
+							this.lastTouch = mousePt;
+							return;
+						}
+						var pos = this.stage.position();
+						var newPos = {
+							x:pos.x+mousePt.x-this.lastTouch.x,
+							y:pos.y+mousePt.y-this.lastTouch.y
+						};
+						this.lastTouch = mousePt;
+						newPos = this.BoundStage(newPos);
+						this.stage.position(newPos);
+					}
+				}
 				this.stage.batchDraw();
+				
 			}.bind(this));
 
 			this.stage.on('mouseup touchend', function(e){
-				if(this.tool != "bbox") return;
-				if(!this.isDrag || !this.newRect) return;
-				this.isDrag = false;
-				var size = this.newRect.size();
-				if(Math.abs(size.width) < 10 || Math.abs(size.height) < 10){
-					return this.CancelTagSelect();
+				this.lastTouch = null;
+				if(this.gesture == "pinch"){
+					this.gesture = "";
 				}
-				this.openTagSelect = true;
+				else if(this.gesture == "drag"){
+					this.gesture = "";
+					if(this.tool != "bbox") return;
+					if(!this.newRect) return;
+					var size = this.newRect.size();
+					if(Math.abs(size.width) < 10 || Math.abs(size.height) < 10){
+						return this.CancelTagSelect();
+					}
+					this.openTagSelect = true;
+				}
+
 			}.bind(this));
 
 			this.imageLayer = new Konva.Layer();
@@ -334,11 +407,11 @@ export default {
 			switch(this.tool){
 				case "move":
 					this.container.style.cursor = "grab";
-					this.stage.setAttr("draggable",true);
+					//this.stage.setAttr("draggable",true);
 					break;
 				case "bbox":
 					this.container.style.cursor = "default";
-					this.stage.setAttr("draggable",false);
+					//this.stage.setAttr("draggable",false);
 					break;
 			}
 		},
