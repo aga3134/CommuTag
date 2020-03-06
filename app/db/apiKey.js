@@ -4,7 +4,7 @@ var ApiKeySchema = new mongoose.Schema({
 	key: String,
 	desc: String,
 },{
-	collection: "apiKeys",
+	collection: "apiKey",
 });
 
-module.exports = mongoose.model('apiKeys', ApiKeySchema);
+module.exports = mongoose.model('apiKey', ApiKeySchema);

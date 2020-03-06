@@ -22,6 +22,7 @@ mongoose.connect("mongodb://localhost:27017/commutag",{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
+mongoose.pluralize(null);
 
 //setup view & static file
 var rootDir = __dirname;

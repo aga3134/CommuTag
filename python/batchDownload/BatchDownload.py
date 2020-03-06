@@ -24,7 +24,7 @@ if __name__ == "__main__":
 	#get image data
 	conn = MongoClient()
 	db = conn["commutag"]
-	dataset = db["datasets"].find_one({"_id": ObjectId(args.dataset)})
+	dataset = db["dataset"].find_one({"_id": ObjectId(args.dataset)})
 	if dataset is None:
 		print("dataset "+args.dataset+" not found")
 

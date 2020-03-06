@@ -4,8 +4,8 @@ var FavoriteSchema = new mongoose.Schema({
 	userID: String,
 	datasetID: String,
 },{
-	collection: "favorites",
+	collection: "favorite",
 	timestamps: {createdAt:"createdAt", updatedAt:"updatedAt"} 
 });
 
-module.exports = mongoose.model('favorites', FavoriteSchema);
+module.exports = mongoose.model('favorite', FavoriteSchema);

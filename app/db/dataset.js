@@ -50,8 +50,8 @@ var DatasetSchema = new mongoose.Schema({
 	},
 	member:[mongoose.Schema.Types.Mixed]
 },{
-	collection: "datasets",
+	collection: "dataset",
 	timestamps: {createdAt:"createdAt", updatedAt:"updatedAt"} 
 });
 
-module.exports = mongoose.model("datasets", DatasetSchema);
+module.exports = mongoose.model("dataset", DatasetSchema);
