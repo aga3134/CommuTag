@@ -144,8 +144,13 @@ auth.ForgetPassword = function(req, res, next){
 			var token = jwt.sign({id: user.id, email: user.signupEmail}, Config.jwt.secret, {
 				expiresIn: "1h"
 			});
-			emailer.SendResetPasswordEmail(user,token);
-			res.json({status: "ok", message: 'reset password email sent'});
+			if(Config.elasticEmail.enable){
+				emailer.SendResetPasswordEmail(user,token);
+				res.json({status: "ok", message: 'reset password email sent'});
+			}
+			else{
+				res.json({status: "fail", message: 'send email not enabled'});
+			}
 		}
 	});
 }

@@ -82,6 +82,34 @@
 			</div>
 		</form>
 
+		<form ref="resetForm" class="q-pa-xl" v-show="mode === 'resetPassword'">
+			<div class="column">
+				<div class="text-h5 text-center">重設密碼</div>
+				<q-input name="password" class="q-my-sm" type="password" outlined dense v-model="password" placeholder="請輸入新密碼">
+					<template v-slot:before>
+						新密碼
+					</template>
+				</q-input>
+				<q-input class="q-my-sm" type="password" outlined dense v-model="passwordConfirm" placeholder="請再次確認密碼" @keyup.enter="ResetPassword();">
+					<template v-slot:before>
+						確認密碼
+					</template>
+				</q-input>
+
+				<q-btn class="q-ma-sm q-pa-xs full-width" color="grey-9" label="重設密碼" @click="ResetPassword();"></q-btn>
+
+				<q-item clickable @click="ChangeMode('login');">
+					<q-item-section avatar>
+						<q-icon name="keyboard_backspace" />
+					</q-item-section>
+					<q-item-section>
+						<q-item-label class="text-subtitle1">返回登入</q-item-label>
+					</q-item-section>
+				</q-item>
+			</div>
+			
+		</form>
+
 	</div>
 </template>
 
@@ -120,7 +148,6 @@ export default {
 		}
 
 		$.get("/auth/method",function(result){
-			console.log(result);
 			if(result.status != "ok") return;
 			this.method = result.data;
 		}.bind(this));
@@ -156,7 +183,7 @@ export default {
 			this.$refs.signupForm.submit();
 		},
 		ForgetPassword: function(){
-			if(this.email == "") return alert("請輸入電子信箱");
+			if(this.email == "") return alert("請在帳號欄位輸入電子信箱");
 			else if(!util.ValidateEmail(this.email))  return alert("請輸入正確的電子信箱");
 
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -165,13 +192,23 @@ export default {
 			data._csrf = csrfToken;
 			$.post("/auth/forget-password", data, function(data){
 				//console.log(data);
-				if(data.status == "ok"){
-					this.$q.notify("修改密碼的連結已寄至您的信箱，請點擊連結並更新密碼");
+				if(data.status != "ok"){
+					switch(data.message){
+						case "send email not enabled":
+							alert("網站尚未開啟自動寄信功能，請聯絡管理員協助處理");
+							break;
+						default:
+							alert("忘記密碼處理失敗");
+							break;
+					}
+					return;
 				}
-			});
+				alert("修改密碼的連結已寄至您的信箱，請點擊連結並更新密碼");
+				
+			}.bind(this));
 		},
 		ResetPassword: function(){
-			if(this.password == "") return alert("請輸入密碼");
+			if(this.password == "") return alert("請輸入新密碼");
 			else if(this.password != this.passwordConfirm) return alert("請確認密碼一致");
 
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -182,7 +219,7 @@ export default {
 			$.post("/auth/reset-password", data, function(data){
 				//console.log(data);
 				if(data.status == "ok"){
-					this.$q.notify("密碼已更新，請重新登入");
+					alert("密碼已更新，請重新登入");
 				}
 				else{
 					//console.log(data.message);
@@ -192,7 +229,7 @@ export default {
 					}
 				}
 				window.location.href="/login";
-			});
+			}.bind(this));
 		}
 	}
 }

@@ -12,6 +12,8 @@ var url = Config.elasticEmail.url;
 var method = "POST";
 
 emailer.SendSignupConfirmEmail = function(user){
+	if(!Config.elasticEmail.enable) return;
+
 	ejs.renderFile('view/email/signupConfirm.ejs', {
 		user: user,
 		hostname: Config.hostname,
@@ -44,6 +46,8 @@ emailer.SendSignupConfirmEmail = function(user){
 };
 
 emailer.SendResetPasswordEmail = function(user,token){
+	if(!Config.elasticEmail.enable) return;
+	
 	var resetUrl = Config.hostname+"/login?reset=1&token="+token;
 	ejs.renderFile('view/email/resetPassword.ejs', {
 		user: user, 
