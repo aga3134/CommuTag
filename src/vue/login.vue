@@ -1,12 +1,14 @@
 <template lang="html">
 	<div class="login">
 		<form ref="loginForm" :action="pwLoginAction" method="POST" class="q-pa-xl" v-show="mode === 'login'">
-			<div class="column">
+			<div class="column" v-if="method.google || method.facebook">
 				<div class="text-h5 text-center">社群登入</div>
-				<q-btn class="q-ma-sm q-pa-xs full-width" color="red" label="Google 登入" @click="LoginByGoogle();"></q-btn>
-				<q-btn class="q-ma-sm q-pa-xs full-width" color="blue-9" label="Facebook 登入" @click="LoginByFacebook();"></q-btn>
+				<q-btn v-if="method.google" class="q-ma-sm q-pa-xs full-width" color="red" label="Google 登入" @click="LoginByGoogle();"></q-btn>
+				<q-btn v-if="method.facebook" class="q-ma-sm q-pa-xs full-width" color="blue-9" label="Facebook 登入" @click="LoginByFacebook();"></q-btn>
 			</div>
-			<q-separator class="q-my-md"></q-separator>
+
+			<q-separator v-if="method.google || method.facebook" class="q-my-md"></q-separator>
+			
 			<div class="column">
 				<div class="text-h5 text-center">信箱登入</div>
 				<q-input name="email" class="q-my-sm" outlined dense v-model="email" placeholder="請輸入電子信箱">
@@ -38,12 +40,12 @@
 		</form>
 
 		<form ref="signupForm" :action="pwSignupAction" method="POST" class="q-pa-xl" v-show="mode === 'signup'">
-			<div class="column">
+			<div class="column" v-if="method.google || method.facebook">
 				<div class="text-h5 text-center">快速註冊</div>
-				<q-btn class="q-ma-sm q-pa-xs full-width" color="red" label="Google 登入" @click="LoginByGoogle();"></q-btn>
-				<q-btn class="q-ma-sm q-pa-xs full-width" color="blue-9" label="Facebook 登入" @click="LoginByFacebook();"></q-btn>
+				<q-btn v-if="method.google" class="q-ma-sm q-pa-xs full-width" color="red" label="Google 登入" @click="LoginByGoogle();"></q-btn>
+				<q-btn v-if="method.facebook" class="q-ma-sm q-pa-xs full-width" color="blue-9" label="Facebook 登入" @click="LoginByFacebook();"></q-btn>
 			</div>
-			<q-separator class="q-my-md"></q-separator>
+			<q-separator v-if="method.google || method.facebook" class="q-my-md"></q-separator>
 			<div class="column">
 				<div class="text-h5 text-center">信箱登入</div>
 				<q-input name="email" class="q-my-sm" outlined dense v-model="email" placeholder="請輸入電子信箱">
@@ -99,7 +101,8 @@ export default {
 		    token: "",
 		    mode: "login",
 		    pwLoginAction: "/auth/login-by-password",
-		    pwSignupAction: "/auth/signup-by-password"
+		    pwSignupAction: "/auth/signup-by-password",
+		    method: {}
 		};
 	},
 	created: function(){
@@ -115,6 +118,12 @@ export default {
 		if(urlParam.message){
 			alert(decodeURIComponent(urlParam.message));
 		}
+
+		$.get("/auth/method",function(result){
+			console.log(result);
+			if(result.status != "ok") return;
+			this.method = result.data;
+		}.bind(this));
 	},
 	methods: {
 		ChangeMode: function(mode){

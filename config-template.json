@@ -1,31 +1,27 @@
 {
-	"mysqlAuth": {
-		"host": "127.0.0.1",
-		"port": "3306",
-		"dbName": "YOUR_DB_NAME",
-    	"username": "YOUR_DB_USER_NAME",
-    	"password": "YOUR_DB_PASSWORD"
-	},
 	"facebookAuth": {
+		"enable": true,
 		"clientID": "YOUR_FACEBOOK_CLIENT_ID",
 		"clientSecret" : "YOUR_FACEBOOK_CLIENT_SECRET",
 		"callbackURL" : "YOUR_FACEBOOK_LOGIN_CALLBACK"
 	},
 	"googleAuth": {
+		"enable": true,
 		"clientID": "YOUR_GOOGLE_CLIENT_ID",
 		"clientSecret": "YOUR_GOOGLE_CLIENT_SECRET",
 		"callbackURL": "YOUR_GOOGLE_LOGIN_CALLBACK"
+	},
+	"elasticEmail":{
+		"enable": true,
+		"apiKey":"YOUR_ELASTIC_EMAIL_API_KEY",
+		"sender":"YOUR_ELASTIC_EMAIL_SENDER",
+		"url":"https://api.elasticemail.com/v2/email/send"
 	},
 	"session":{
 		"secret": "YOUR_SESSION_SECRET"
 	},
 	"jwt":{
 		"secret": "YOUR_JWT_SECRET"
-	},
-	"elasticEmail":{
-		"apiKey":"YOUR_ELASTIC_EMAIL_API_KEY",
-		"sender":"YOUR_ELASTIC_EMAIL_SENDER",
-		"url":"https://api.elasticemail.com/v2/email/send"
 	},
 	"hostname": "http://localhost",
 	"siteName": "CommuTag",
