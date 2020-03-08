@@ -61,7 +61,6 @@ passport.use(new FacebookStrategy({
 	callbackURL     : Config.facebookAuth.callbackURL,
 	profileFields: ['id', 'email', 'name']},
 	function(token, refreshToken, profile, done) {
-		console.log(111);
 		User.findOne({"provider": "facebook", "oauthID": profile.id},function(err, user) {
 			if(err) console.log(err);
 			if(user) {
