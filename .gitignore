@@ -1,8 +1,8 @@
 config.json
 *.txt
 *.log
+*.map
 node_modules/
-dist/
 imageSrc/
 python/data/
 __pycache__/
