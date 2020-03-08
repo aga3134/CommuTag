@@ -8,4 +8,3 @@ python/data/
 __pycache__/
 static/file/
 static/upload/
-package-lock.json
