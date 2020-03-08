@@ -5,7 +5,7 @@ var Dataset = require('../db/dataset');
 var mongoose = require('mongoose');
 
 //每個dataset存成一個collection，必免資料太大存取很慢
-var ImageSchema = require("../db/ImageSchema");
+var ImageSchema = require("../db/imageSchema");
 
 var util = {};
 
