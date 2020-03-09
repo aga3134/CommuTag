@@ -1,0 +1,11 @@
+.git
+config.json
+*.txt
+*.log
+*.map
+node_modules/
+imageSrc/
+python/data/
+__pycache__/
+static/file/
+static/upload/
