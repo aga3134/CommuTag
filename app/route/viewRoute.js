@@ -12,7 +12,7 @@ router.get('/', util.CSRF, function(req, res) {
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("index.ejs",{meta: meta, user:req.user});
+	res.render("index.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 router.get('/admin', util.CheckAdmin, util.CSRF, function(req, res) {
@@ -20,7 +20,7 @@ router.get('/admin', util.CheckAdmin, util.CSRF, function(req, res) {
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("admin.ejs",{meta: meta, user:req.user});
+	res.render("admin.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 router.get('/login', util.CSRF, function(req, res) {
@@ -28,7 +28,7 @@ router.get('/login', util.CSRF, function(req, res) {
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("login.ejs",{meta: meta, user:req.user});
+	res.render("login.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 router.get('/account', util.CheckLogin, util.CSRF, function(req, res) {
@@ -36,7 +36,7 @@ router.get('/account', util.CheckLogin, util.CSRF, function(req, res) {
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("account.ejs",{meta: meta, user:req.user});
+	res.render("account.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 router.get('/view', util.CSRF, function(req, res) {
@@ -44,7 +44,7 @@ router.get('/view', util.CSRF, function(req, res) {
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("view.ejs",{meta: meta, user:req.user});
+	res.render("view.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 router.get('/statistic', util.CSRF, function(req, res) {
@@ -52,7 +52,7 @@ router.get('/statistic', util.CSRF, function(req, res) {
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("statistic.ejs",{meta: meta, user:req.user});
+	res.render("statistic.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 module.exports = router;

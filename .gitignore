@@ -1,7 +1,6 @@
 config.json
 *.txt
 *.log
-*.map
 node_modules/
 imageSrc/
 python/data/

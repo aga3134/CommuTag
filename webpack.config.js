@@ -3,9 +3,10 @@ var path = require("path");
 var webpack = require("webpack");
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+var Config = require("./config.json");
 
 module.exports = {
-	mode: "production", // "production" | "development" | "none"
+	mode: Config.mode, // "production" | "development" | "none"
 	entry: {
 		"js/main": ["./src/js/main.js"],
 		"js/login": ["./src/js/login.js"],
@@ -14,9 +15,9 @@ module.exports = {
 		"js/statistic": ["./src/js/statistic.js"]
 	},
 	output:{
-		path: path.resolve(__dirname,'dist'),
+		path: path.resolve(__dirname,"dist/"+Config.mode),
 		filename: "[name].js",
-		publicPath: "/dist"
+		publicPath: "/dist/"+Config.mode
 	},
 	module:{
 		rules: [
@@ -49,5 +50,5 @@ module.exports = {
 			chunkFilename: "css/[id].css"
 		})
 	],
-	//devtool: "source-map"
+	devtool: Config.mode=="development"?"source-map":"none"
 };
