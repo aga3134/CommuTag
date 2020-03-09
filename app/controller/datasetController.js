@@ -19,6 +19,9 @@ function CheckDatasetAuth(param){
 				console.log(err);
 				return reject({err:"find dataset fail"});
 			}
+			if(!result){
+				return reject({err:"dataset not found"});
+			}
 			if(param.checkUpload && !result.enableUpload){
 				return reject({err:"upload not enabled"});
 			}

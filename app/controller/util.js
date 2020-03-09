@@ -78,6 +78,8 @@ util.UpdateDatasetStatistic = function(param){
 			}},
 			{$project:{ _id:0}}
 		],function(err, result){
+			if(!result) return reject({err:"aggregate image statistic fail"});
+			
 			Dataset.updateOne({_id:param.dataset},result[0],function(err,dataset){
 				if(err){
 					console.log(err);
