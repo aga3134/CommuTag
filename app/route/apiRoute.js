@@ -44,8 +44,6 @@ router.get('/list-key', util.CheckAdmin, function(req, res){
 });
 
 router.post('/upload-image', upload.UploadImageToMem, function(req, res){
-	console.log(req.headers);
-	console.log(req.body);	
 	var param = {};
 	param.dataset = req.body.dataset;
 	param.lat = req.body.lat;

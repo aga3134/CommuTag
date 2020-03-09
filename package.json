@@ -2,7 +2,7 @@
   "name": "CommuTag",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js > stdout.txt 2> stderr.txt &",
+    "start": "node server.js > log/stdout.txt 2> log/stderr.txt &",
     "start-watch": "nodemon server.js",
     "build": "webpack",
     "build-watch": "webpack --watch",

@@ -40,7 +40,11 @@ var options = {
 };
 var sessionStore = new MongoDBStore(options);
 
-var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+var logPath = path.join(__dirname, 'log/')
+if (!fs.existsSync(logPath)){
+	fs.mkdirpSync(logPath);
+}
+var accessLogStream = fs.createWriteStream(logPath+"access.log", { flags: 'a' })
 app.use(morgan("short",{ stream: accessLogStream }));
 
 app.use(session({
