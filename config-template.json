@@ -1,4 +1,7 @@
 {
+	"mongodb":{
+		"url": "mongodb://localhost:27017/commutag"
+	},
 	"facebookAuth": {
 		"enable": true,
 		"clientID": "YOUR_FACEBOOK_CLIENT_ID",

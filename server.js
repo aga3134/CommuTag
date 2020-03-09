@@ -18,7 +18,7 @@ var DatasetRoute = require("./app/route/datasetRoute.js");
 var FavoriteRoute = require("./app/route/favoriteRoute.js");
 var ApiRoute = require("./app/route/apiRoute.js");
 
-mongoose.connect("mongodb://localhost:27017/commutag",{
+mongoose.connect(Config.mongodb.url || "mongodb://localhost:27017/commutag",{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
