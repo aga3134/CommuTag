@@ -18,7 +18,7 @@ var DatasetRoute = require("./app/route/datasetRoute.js");
 var FavoriteRoute = require("./app/route/favoriteRoute.js");
 var ApiRoute = require("./app/route/apiRoute.js");
 
-mongoose.connect(Config.mongodb.url || "mongodb://localhost:27017/commutag",{
+mongoose.connect(Config.mongodb.url,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -35,7 +35,7 @@ app.use('/static',express.static(rootDir + '/static'));
 
 //setup auth
 var options = {
-    uri: "mongodb://localhost:27017/commutag",
+    uri: Config.mongodb.url,
     collection: 'user_session'
 };
 var sessionStore = new MongoDBStore(options);
