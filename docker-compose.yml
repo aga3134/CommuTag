@@ -1,20 +1,30 @@
 version: '3'
 services:
     mongo:
-        image: mongo:3.2
+        image: mongo:3.6
         volumes:
             - mongo-data:/data/db
         expose:
             - "27017"
-        network_mode: host
+        networks:
+            - myapp
+        #network_mode: host
     commutag:
         image: aga3134/commutag:1.0.0
         volumes:
             - ./config.json:/CommuTag/config.json
+            - ./log:/CommuTag/log
+            - ./static/upload:/CommuTag/static/upload
+            - ./static/file:/CommuTag/static/file
         ports:
             - "8011:8011"
         depends_on:
             - mongo
-        network_mode: host
+        networks:
+            - myapp
+        #network_mode: host
 volumes:
     mongo-data:
+networks:
+    myapp:
+        driver: bridge
