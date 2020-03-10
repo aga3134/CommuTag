@@ -15,14 +15,6 @@ router.get('/', util.CSRF, function(req, res) {
 	res.render("index.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
-router.get('/admin', util.CheckAdmin, util.CSRF, function(req, res) {
-	meta.title = Config.siteName;
-	meta.desc = Config.desc;
-	meta.path = req.originalUrl;
-	meta.csrfToken = req.csrfToken();
-	res.render("admin.ejs",{meta: meta, user:req.user,mode:Config.mode});
-});
-
 router.get('/login', util.CSRF, function(req, res) {
 	meta.title = Config.siteName;
 	meta.desc = Config.desc;

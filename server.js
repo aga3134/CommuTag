@@ -18,7 +18,7 @@ var DatasetRoute = require("./app/route/datasetRoute.js");
 var FavoriteRoute = require("./app/route/favoriteRoute.js");
 var ApiRoute = require("./app/route/apiRoute.js");
 
-mongoose.connect(Config.mongodb.url,{
+mongoose.connect(Config.mongodb[Config.mode],{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -28,14 +28,13 @@ mongoose.pluralize(null);
 var rootDir = __dirname;
 var app = express();
 app.port = Config.serverPort || 8001;
-app.host = "0.0.0.0";
 app.set('view engine', 'ejs');
 app.set("views", rootDir + "/view");
 app.use('/static',express.static(rootDir + '/static'));
 
 //setup auth
 var options = {
-    uri: Config.mongodb.url,
+    uri: Config.mongodb[Config.mode],
     collection: 'user_session'
 };
 var sessionStore = new MongoDBStore(options);
@@ -70,5 +69,8 @@ app.use("/favorite", FavoriteRoute);
 app.use("/api", ApiRoute);
 
 
-app.listen(app.port, app.host);
-console.log("CommuTag started");
+app.listen(app.port);
+console.log("CommuTag started in "+Config.mode+" mode");
+console.log("use database "+Config.mongodb[Config.mode]);
+
+module.exports = app;
