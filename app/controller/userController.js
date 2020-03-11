@@ -8,7 +8,6 @@ var userController = {};
 userController.EditUserInfo = function(param){
 	var modify = {};
 	modify.name = param.body.name;
-	modify.contactEmail = param.body.contactEmail;
 
 	User.updateOne({"_id": param.userID}, modify, function(err, result) {
 		if(err){

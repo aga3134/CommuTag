@@ -40,14 +40,9 @@
 		<q-dialog v-model="openInputPanel">
 			<q-card class="full-width">
 				<q-card-section>
-				  <div class="text-h6">修改資料</div>
-				</q-card-section>
-
-				<q-card-section>
+					<div class="text-h6">修改資料</div>
 					<q-form>
 						<q-input class="q-my-sm" v-model="editInfo.name" label="姓名">
-						</q-input>
-						<q-input class="q-my-sm" v-model="editInfo.contactEmail" label="Email">
 						</q-input>
 					</q-form>
 				</q-card-section>
@@ -87,7 +82,6 @@ export default {
 		EditUserInfo: function(){
 			this.openInputPanel = true;
 			this.editInfo.name = this.user.name;
-			this.editInfo.contactEmail = this.user.contactEmail;
 		},
 		ChangePhoto: function(){
 			if(this.uploadPhoto) return;
@@ -118,12 +112,6 @@ export default {
 		SubmitUserInfo: function(){
 			if(!this.editInfo.name){
 				return alert("請輸入您的姓名");
-			}
-			if(!this.editInfo.contactEmail){
-				return alert("請輸入您的Email");
-			}
-			else if(!util.ValidateEmail(this.editInfo.contactEmail)){
-				return alert("請輸入正確的Email格式");
 			}
 
 			//console.log(this.user.profession);
