@@ -65,10 +65,15 @@ upload.SaveImage = function(param){
 		.then(function(info){
 			//console.log(info);
 			if(param.thumb){
-				resizeImage.resize(param.thumb.w,param.thumb.h)
+				resizeImage.resize({
+					width:param.thumb.w,
+					height:param.thumb.h,
+					fit:sharp.fit.cover,
+					position:sharp.strategy.entropy
+				})
 				.toFile(dir+thumbName)
 				.then(function(info){
-					//console.log(info);
+					console.log(info);
 					param.succFunc({newName: newName, thumbName: thumbName});
 				}).catch(function(err){
 					console.log(err);

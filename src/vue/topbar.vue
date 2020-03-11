@@ -21,7 +21,7 @@
 	
 			<q-item v-else clickable tag="a" href="/account">
 				<q-avatar size="lg">
-					<img :src="user.photo">
+					<img style="object-fit:cover;" :src="user.icon">
 				</q-avatar>
 				<q-item-section class="q-px-sm">
 					<q-item-label class="text-h6">{{user.name}}</q-item-label>

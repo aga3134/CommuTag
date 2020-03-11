@@ -3,7 +3,7 @@
 		<q-card flat class="q-ma-md transparent">
 			<div class="row q-pa-md justify-center">
 					<q-avatar size="200px">
-						<img :src="user.photo"/>
+						<img style="object-fit:cover;" :src="user.photo"/>
 					</q-avatar>
 
 					<div class="row items-end">

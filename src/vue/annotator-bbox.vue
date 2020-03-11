@@ -240,7 +240,7 @@ export default {
 				container: this.container,
 				width: this.container.clientWidth,
 				height: this.container.clientHeight,
-				draggable: this.task=="annotate"?false:true,
+				draggable: false,
 				dragBoundFunc: this.BoundStage
 			});
 			//make konva center align

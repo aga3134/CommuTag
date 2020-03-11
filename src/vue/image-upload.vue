@@ -26,7 +26,8 @@ export default {
 			OnProgress: null,
 			OnChange: null,
 			maxW: 1024,
-			maxH: 1024
+			maxH: 1024,
+			uploading: false
 		};
 	},
 	created: function(){
@@ -125,6 +126,9 @@ export default {
 			return dstCanvas;
 		},
 		UploadImage: function(){
+			if(this.uploading) return;
+
+			this.uploading = true;
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var formData = new FormData();
 			for(var key in this.additionData){
@@ -146,6 +150,7 @@ export default {
 					return xhr;
 				}.bind(this),
 				success: function(result) {
+					this.uploading = false;
 					if(result.status != "ok"){
 						switch(result.message){
 							case "blacklist":
@@ -158,7 +163,8 @@ export default {
 						return this.OnSucc(result);
 					}
 				}.bind(this),
-				error: function(jqXHR, textStatus, errorMessage) {
+				error: function(jqXHR, textStatus, errorMessage){
+					this.uploading = false;
 					if(this.OnFail){
 						return this.OnFail(errorMessage);
 					}

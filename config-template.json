@@ -1,8 +1,7 @@
 {
 	"mode": "development or production",
 	"mongodb":{
-		"production": "mongodb://localhost:27017/commutag",
-		"development": "mongodb://localhost:27017/commutag_dev"
+		"url": "mongodb://localhost:27017/commutag"
 	},
 	"facebookAuth": {
 		"enable": true,

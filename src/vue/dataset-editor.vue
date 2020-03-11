@@ -9,7 +9,7 @@
 				<q-item>
 					<div class="cover-container bg-grey-7">
 						<image-upload :src="info.picCover || '/static/image/logo-16-9.png' " showPreview :maxResW="parseInt(info.maxWidth)" :maxResH="parseInt(info.maxHeight)" ref="uploader"></image-upload>
-						<q-btn class="change-bt" flat label="變更封面" @click="ChangeCover();"></q-btn>
+						<q-btn :loading="uploadCover" class="change-bt" flat label="變更封面" @click="ChangeCover();"></q-btn>
 					</div>
 					
 				</q-item>
@@ -59,7 +59,7 @@
 		
 		<q-card-actions align="right">
 			<q-btn flat label="儲存" color="primary" @click="UpdateDataset();" />
-			<q-btn flat label="取消" color="primary" v-close-popup />
+			<q-btn flat label="取消" color="primary" @click="$emit('cancel');" />
 		</q-card-actions>
 	</q-card>
 </template>
@@ -98,7 +98,7 @@ export default {
 			uploader.OnSucc = function(result){
 				if(result.status != "ok") return alert("更新圖片失敗");
 				this.uploadCover = false;
-				this.$emit("reload");
+				this.$emit("updateCover");
 			}.bind(this);
 
 			uploader.OnFail = function(errorMessage){
@@ -161,7 +161,7 @@ export default {
 			$.post("/dataset/update-dataset", data, function(result){
 				if(result.status != "ok") return alert("修改失敗");
 				this.$q.notify("修改成功");
-				this.$emit("reload",true);
+				this.$emit("confirm");
 			}.bind(this));
 		},
 		AddTag: function(){

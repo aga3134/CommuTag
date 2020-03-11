@@ -17,13 +17,13 @@
 			</div>
 
 			<div class="row q-px-md q-gutter-sm">
-				<q-select dense class="col-1" v-model="filterKey" :options="viewFilter" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
-				<q-btn v-if="info && info.enableUpload" icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
-				<q-btn v-if="info && info.enableDownload && user" icon="cloud_download" label="整包下載" flat @click="OpenBatchDownload();"></q-btn>
-				<q-btn v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
-				<q-btn v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
-				<q-btn icon="bar_chart" label="資料統計" flat @click="GoToStatistic();"></q-btn>
-				<q-btn v-if="user && user.authType =='admin' " icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
+				<q-select dense class="col-shrink" v-model="filterKey" :options="viewFilter" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
+				<q-btn dense v-if="info && info.enableUpload" icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
+				<q-btn dense v-if="info && info.enableDownload && user" icon="cloud_download" label="整包下載" flat @click="OpenBatchDownload();"></q-btn>
+				<q-btn dense v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
+				<q-btn dense v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
+				<q-btn dense icon="bar_chart" label="資料統計" flat @click="GoToStatistic();"></q-btn>
+				<q-btn dense v-if="user && user.authType =='admin' " icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 
 			
@@ -119,7 +119,7 @@
 			</q-dialog>
 
 			<q-dialog v-model="openDatasetEditor">
-				<dataset-editor :info="editInfo" @reload="ReloadDataset"></dataset-editor>
+				<dataset-editor :info="editInfo" @confirm="ReloadDataset();" @cancel="openDatasetEditor=false;"></dataset-editor>
 			</q-dialog>
 
 			<q-dialog v-model="openInfoEdit" v-if="targetImage">
