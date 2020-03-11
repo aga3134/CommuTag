@@ -32,7 +32,7 @@
 - 後端: nodejs + express
 - 資料庫: mongodb
 - 編譯工具: webpack
-- 打包處理: python3
+- 資料集打包處理: python3
 
 ### 一般安裝(ubuntu)
 - [安裝nodejs](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/)
@@ -53,6 +53,58 @@
 - 開啟瀏覽器網址 http://localhost:8001 即可看到網站
 
 ## config設定
+config中含有機密資訊，請勿將其對外公開。
+架設專案時請將config-template.json複製一份成config.json，並修改裡面的內容。各欄位說明如下：
+
+- mode: 可為development或production，設為development時錯誤會有較多debug資訊，但相對速度較慢，上線使用時請設為production。
+
+- mongodb: mongodb連線資訊
+    - url: mongodb連線位置。
+        - 一般安裝請設為 mongodb://localhost:27017/commutag
+        - docker安裝請設為 mongodb://mongo:27017/commutag
+        
+- facebookAuth: 以facebook帳號登入的功能設定，要使用需先[取得facebook開發者金鑰](https://www.techcoke.com/2014/05/register-facebook-application-api-key-app-id.html)
+    - enable: 若不使用facebook登入功能可設為false關閉，反之設true
+    - clientID: 你申請取得的應用程式ID
+    - clientSecret: 你申請取得的應用程式密鑰
+    - callbackURL: 使用者登入成功後返回的網址，需設定為 {{你的伺服器網址}}/auth/facebook/callback
+    
+- googleAuth: 以google帳號登入的功能設定，要使用需先[取得google開發者金鑰](https://blog.gtwang.org/programming/obtaining-api-key-from-google-developers-console/)
+    - enable: 若不使用google登入功能可設為false關閉，反之設true
+    - clientID: 你申請取得的應用程式ID
+    - clientSecret: 你申請取得的應用程式密鑰
+    - callbackURL: 使用者登入成功後返回的網址，需設定為 {{你的伺服器網址}}/auth/google/callback
+    
+- elasticEmail: 自動寄信功能設定，本專案使用[elasticEmail服務](https://elasticemail.com/email-api)，請先申請帳號並取得API金鑰，若要串接其他email服務請修改 app/controller/emailer.js裡面的程式
+    - enable: 若不使用自動寄信功能可設為false關閉，反之設true。本專案只在使用者註冊時與重設密碼時使用自動寄信功能
+    - apiKey: 你申請取得的api金鑰
+    - sender: 寄信時寄件人顯示的email
+    - url: 寄信api網址，若使用elasticEmail api 請設為 https://api.elasticemail.com/v2/email/send
+    
+- session: 用來記住使用者的登入資訊
+    - secret: session加密金鑰，可隨意輸入字串
+    
+- jwt: 重設密碼時用來驗證修改權限
+    - secret: jwt加密金鑰，可隨意輸入字串
+    
+- hostname: 你的伺服器網址
+
+- siteName: 顯示出來的網站名稱
+
+- desc: 分享網站網址時顯示出來的簡介
+
+- serverPort: 程式使用的port，若設為8001則在本機可用 http://localhost:8001 看到網站
+
+- version: 程式版本
+
+- defaultAdmin: 預設的管理員帳號
+    - provider: 可為google、facebook、local 分別對應到gooele帳號登入、facebook帳號登入、密碼登入
+    - email: 管理員帳號的email
+    
+- verify: 標註驗證時判斷是否驗證完成的條件設定
+    - sample: 至少需有幾人驗證
+    - accept: 驗證人數超過sample且認同率大於此值時視為驗證完成 (值為0~1)
+    - reject: 驗證人數超過sample且認同率小於此值時視為不合格的標註，需重新標註 (值為0~1)
 
 ## API上傳
 
