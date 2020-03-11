@@ -27,8 +27,32 @@
 
 
 ## 安裝架設
-### 一般安裝
+### 程式架構：
+- 前端: vue.js + quasar.js
+- 後端: nodejs + express
+- 資料庫: mongodb
+- 編譯工具: webpack
+- 打包處理: python3
+
+### 一般安裝(ubuntu)
+- [安裝nodejs](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/)
+- [安裝mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)
+- 下載本專案程式 git clone https://github.com/aga3134/CommuTag.git
+- 進入CommuTag資料夾，將config-template.json複製為config.json並修改裡面的資料(細節見下方config設定)
+- 安裝node函式庫 npm install
+- 安裝python函式庫 pip install -r requirements.txt
+- 執行程式 node server.js
+- 開啟瀏覽器網址 http://localhost:8001 即可看到網站
+
 ### 使用docker
+- [安裝docker](https://phoenixnap.com/kb/how-to-install-docker-on-ubuntu-18-04)
+- [安裝docker-compose](https://linuxize.com/post/how-to-install-and-use-docker-compose-on-ubuntu-18-04/)
+- 下載本專案程式 git clone https://github.com/aga3134/CommuTag.git
+- 進入CommuTag資料夾，將config-template.json複製為config.json並修改裡面的資料(細節見下方config設定)
+- 開啟服務 sudo docker-compose up
+- 開啟瀏覽器網址 http://localhost:8001 即可看到網站
+
+## config設定
 
 ## API上傳
 
