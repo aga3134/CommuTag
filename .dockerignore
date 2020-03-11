@@ -1,6 +1,5 @@
 .git
 config.json
-*.txt
 *.log
 node_modules/
 imageSrc/

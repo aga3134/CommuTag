@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	#get image data
-	conn = MongoClient()
+	conn = MongoClient(host=[config["mongodb"]["url"]])
 	db = conn["commutag"]
 	dataset = db["dataset"].find_one({"_id": ObjectId(args.dataset)})
 	if dataset is None:
