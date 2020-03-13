@@ -76,7 +76,7 @@ datasetController.DeleteDataset = function(param){
 			console.log(err);
 			return param.failFunc({err:"delete dataset fail"});
 		}
-		mongoose.connection.db.dropCollection("image"+param.dataset);
+		mongoose.connection.db.dropCollection("image"+param.id);
 		param.succFunc({_id:param.id});
 	});
 };
