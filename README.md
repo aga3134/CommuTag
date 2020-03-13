@@ -25,10 +25,99 @@
 
 - **新增、刪除API金鑰**：API金鑰用來讓程式上傳影像，可搭配無人載具用來收集場域資料。
 
+## API上傳
+要使用API上傳影像時需先請管理員在後台新增並提供API金鑰。
+
+使用時用 http POST 到網址 {{你的伺服器網址}}/api/upload-image
+
+POST資料包括下列欄位:
+- dataset: 資料集id，當你點選資料集進入觀看影像時會顯示在網址列
+- lat: 影像位置的緯度，若資料集不接受位置資訊就無需傳輸此欄位
+- lng: 影像位置的經度，若資料集不接受位置資訊就無需傳輸此欄位
+- remark: 影像的備註
+- dataTime: 取得影像的時間
+- apiKey: 跟管理員拿到的api key
+
+上傳範列請見python/apiUpload/apiUpload.py
+
 
 ## 安裝架設
-### 一般安裝
-### 使用docker
+### 程式架構：
+- 前端: vue.js + quasar.js
+- 後端: nodejs + express
+- 資料庫: mongodb
+- 編譯工具: webpack
+- 資料集打包處理: python3
 
-## API上傳
+### 一般安裝(ubuntu)
+- [安裝nodejs](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/)
+- [安裝mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)
+- 下載本專案程式 git clone https://github.com/aga3134/CommuTag.git
+- 進入CommuTag資料夾，將config-template.json複製為config.json並修改裡面的資料(細節見下方config設定)
+- 安裝node函式庫 npm install
+- 安裝python函式庫 pip install -r requirements.txt
+- 執行程式 node server.js
+- 開啟瀏覽器網址 http://localhost:8001 即可看到網站
+
+### 使用docker
+- [安裝docker](https://phoenixnap.com/kb/how-to-install-docker-on-ubuntu-18-04)
+- [安裝docker-compose](https://linuxize.com/post/how-to-install-and-use-docker-compose-on-ubuntu-18-04/)
+- 下載本專案程式 git clone https://github.com/aga3134/CommuTag.git
+- 進入CommuTag資料夾，將config-template.json複製為config.json並修改裡面的資料(細節見下方config設定)
+- 開啟服務 sudo docker-compose up
+- 開啟瀏覽器網址 http://localhost:8001 即可看到網站
+
+## config設定
+config中含有機密資訊，請勿將其對外公開。
+架設專案時請將config-template.json複製一份成config.json，並修改裡面的內容。各欄位說明如下：
+
+- mode: 可為development或production，設為development時錯誤會有較多debug資訊，但相對速度較慢，上線使用時請設為production。
+
+- mongodb: mongodb連線資訊
+    - url: mongodb連線位置。
+        - 一般安裝請設為 mongodb://localhost:27017/commutag
+        - docker安裝請設為 mongodb://mongo:27017/commutag
+        
+- facebookAuth: 以facebook帳號登入的功能設定，要使用需先[取得facebook開發者金鑰](https://www.techcoke.com/2014/05/register-facebook-application-api-key-app-id.html)
+    - enable: 若不使用facebook登入功能可設為false關閉，反之設true
+    - clientID: 你申請取得的應用程式ID
+    - clientSecret: 你申請取得的應用程式密鑰
+    - callbackURL: 使用者登入成功後返回的網址，需設定為 {{你的伺服器網址}}/auth/facebook/callback
+    
+- googleAuth: 以google帳號登入的功能設定，要使用需先[取得google開發者金鑰](https://blog.gtwang.org/programming/obtaining-api-key-from-google-developers-console/)
+    - enable: 若不使用google登入功能可設為false關閉，反之設true
+    - clientID: 你申請取得的應用程式ID
+    - clientSecret: 你申請取得的應用程式密鑰
+    - callbackURL: 使用者登入成功後返回的網址，需設定為 {{你的伺服器網址}}/auth/google/callback
+    
+- elasticEmail: 自動寄信功能設定，本專案使用[elasticEmail服務](https://elasticemail.com/email-api)，請先申請帳號並取得API金鑰，若要串接其他email服務請修改 app/controller/emailer.js裡面的程式
+    - enable: 若不使用自動寄信功能可設為false關閉，反之設true。本專案只在使用者註冊時與重設密碼時使用自動寄信功能
+    - apiKey: 你申請取得的api金鑰
+    - sender: 寄信時寄件人顯示的email
+    - url: 寄信api網址，若使用elasticEmail api 請設為 https://api.elasticemail.com/v2/email/send
+    
+- session: 用來記住使用者的登入資訊
+    - secret: session加密金鑰，可隨意輸入字串
+    
+- jwt: 重設密碼時用來驗證修改權限
+    - secret: jwt加密金鑰，可隨意輸入字串
+    
+- hostname: 你的伺服器網址
+
+- siteName: 顯示出來的網站名稱
+
+- desc: 分享網站網址時顯示出來的簡介
+
+- serverPort: 程式使用的port，若設為8001則在本機可用 http://localhost:8001 看到網站
+
+- version: 程式版本
+
+- defaultAdmin: 預設的管理員帳號
+    - provider: 可為google、facebook、local 分別對應到gooele帳號登入、facebook帳號登入、密碼登入
+    - email: 管理員帳號的email
+    
+- verify: 標註驗證時判斷是否驗證完成的條件設定
+    - sample: 至少需有幾人驗證
+    - accept: 驗證人數超過sample且認同率大於此值時視為驗證完成 (值為0~1)
+    - reject: 驗證人數超過sample且認同率小於此值時視為不合格的標註，需重新標註 (值為0~1)
 
