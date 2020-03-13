@@ -93,10 +93,12 @@ export default {
 					this.dataTime.max = t.clone().next("day");
 				}
 			}
-			this.dataTime.rangeMin = 0;
-			this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day")+1;
-			this.locFilter.time.min = this.dataTime.rangeMin;
-			this.locFilter.time.max = this.dataTime.rangeMax;
+			if(this.dataTime.min && this.dataTime.max){
+				this.dataTime.rangeMin = 0;
+				this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day")+1;
+				this.locFilter.time.min = this.dataTime.rangeMin;
+				this.locFilter.time.max = this.dataTime.rangeMax;
+			}
 		},
 		InitTagSelect: function(){
 			this.locFilter.tagSelect = [];
@@ -181,8 +183,8 @@ export default {
 					case "bbox":
 						var bboxArr = d.annotation.annotation;
 						var info = {};
-						for(var i=0;i<bboxArr.length;i++){
-							var tag = bboxArr[i].tag;
+						for(var j=0;j<bboxArr.length;j++){
+							var tag = bboxArr[j].tag;
 							if(!info[tag]) info[tag] = 1;
 							else info[tag]++;
 						}

@@ -70,6 +70,7 @@ userController.ListUser = function(param){
 };
 
 userController.ListName = function(param){
+	if(!param.id) return param.failFunc({err:"no id"});
 	var query = {};
 	query._id = param.id.split(",");
 	User.find(query,{"name":1},function(err, user) {
