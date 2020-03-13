@@ -355,7 +355,7 @@ __webpack_require__.r(__webpack_exports__);
         container: this.container,
         width: this.container.clientWidth,
         height: this.container.clientHeight,
-        draggable: this.task == "annotate" ? false : true,
+        draggable: false,
         dragBoundFunc: this.BoundStage
       }); //make konva center align
 
@@ -1137,22 +1137,58 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
     GenerateTask: function () {
+      this.imageSelect = null;
+
       if (!this.datasetSelect) {
         this.status = "請選擇資料集";
         return;
       }
 
-      var GetRandomImage = function () {
-        if (this.imageArr.length == 0) return null;
-        var index = Math.floor(Math.random() * this.imageArr.length);
-        return this.imageArr[index];
-      }.bind(this);
+      if (this.image) {
+        //有指定標註影像
+        if (this.image.annotation) {
+          var myVerify = this.image.verification.filter(function (d) {
+            return d.user == this.user._id;
+          }.bind(this));
 
-      this.imageSelect = this.image || GetRandomImage();
+          if (myVerify.length > 0) {
+            this.status = "您已驗證過此影像，感謝您的協助";
+            return;
+          }
+        }
 
-      if (!this.imageSelect) {
-        this.status = "此資料集影像皆已標註完成";
-        return;
+        this.imageSelect = this.image;
+      } else {
+        //沒指定標註影像，隨機選擇
+        if (this.imageArr.length == 0) {
+          this.status = "此資料集影像皆已標註完成";
+          return;
+        }
+
+        var activeArr = [];
+
+        for (var i = 0; i < this.imageArr.length; i++) {
+          var image = this.imageArr[i];
+          if (!image.annotation) activeArr.push(image);else {
+            var myVerify = image.verification.filter(function (d) {
+              return d.user == this.user._id;
+            }.bind(this));
+            if (myVerify.length == 0) activeArr.push(image);
+          }
+        }
+
+        if (activeArr.length == 0) {
+          this.status = "您已驗證過此資料集所有資料，感謝您的協助";
+          return;
+        }
+
+        var GetRandomImage = function () {
+          if (activeArr.length == 0) return null;
+          var index = Math.floor(Math.random() * activeArr.length);
+          return activeArr[index];
+        }.bind(this);
+
+        this.imageSelect = GetRandomImage();
       }
 
       var CheckTask = function () {
@@ -1211,6 +1247,10 @@ __webpack_require__.r(__webpack_exports__);
           }
         }
 
+        this.imageSelect.annotation = {
+          user: this.user._id,
+          annotation: data.annotation
+        };
         this.$q.notify("標註成功");
 
         if (this.autoTask) {
@@ -1245,6 +1285,11 @@ __webpack_require__.r(__webpack_exports__);
               break;
           }
         } else this.$q.notify("驗證成功");
+
+        this.imageSelect.verification.push({
+          user: this.user._id,
+          agree: data.agree
+        });
 
         if (this.autoTask) {
           this.GenerateTask();
@@ -1518,7 +1563,7 @@ __webpack_require__.r(__webpack_exports__);
       uploader.OnSucc = function (result) {
         if (result.status != "ok") return alert("更新圖片失敗");
         this.uploadCover = false;
-        this.$emit("reload");
+        this.$emit("updateCover");
       }.bind(this);
 
       uploader.OnFail = function (errorMessage) {
@@ -1592,7 +1637,7 @@ __webpack_require__.r(__webpack_exports__);
       $.post("/dataset/update-dataset", data, function (result) {
         if (result.status != "ok") return alert("修改失敗");
         this.$q.notify("修改成功");
-        this.$emit("reload", true);
+        this.$emit("confirm");
       }.bind(this));
     },
     AddTag: function () {
@@ -2518,7 +2563,8 @@ __webpack_require__.r(__webpack_exports__);
       OnProgress: null,
       OnChange: null,
       maxW: 1024,
-      maxH: 1024
+      maxH: 1024,
+      uploading: false
     };
   },
   created: function () {
@@ -2624,6 +2670,8 @@ __webpack_require__.r(__webpack_exports__);
       return dstCanvas;
     },
     UploadImage: function () {
+      if (this.uploading) return;
+      this.uploading = true;
       var csrfToken = $("meta[name='csrf-token']").attr("content");
       var formData = new FormData();
 
@@ -2651,6 +2699,8 @@ __webpack_require__.r(__webpack_exports__);
           return xhr;
         }.bind(this),
         success: function (result) {
+          this.uploading = false;
+
           if (result.status != "ok") {
             switch (result.message) {
               case "blacklist":
@@ -2666,6 +2716,8 @@ __webpack_require__.r(__webpack_exports__);
           }
         }.bind(this),
         error: function (jqXHR, textStatus, errorMessage) {
+          this.uploading = false;
+
           if (this.OnFail) {
             return this.OnFail(errorMessage);
           }
@@ -5667,7 +5719,11 @@ var render = function() {
                     _vm._v(" "),
                     _c("q-btn", {
                       staticClass: "change-bt",
-                      attrs: { flat: "", label: "變更封面" },
+                      attrs: {
+                        loading: _vm.uploadCover,
+                        flat: "",
+                        label: "變更封面"
+                      },
                       on: {
                         click: function($event) {
                           return _vm.ChangeCover()
@@ -5965,8 +6021,12 @@ var render = function() {
           }),
           _vm._v(" "),
           _c("q-btn", {
-            directives: [{ name: "close-popup", rawName: "v-close-popup" }],
-            attrs: { flat: "", label: "取消", color: "primary" }
+            attrs: { flat: "", label: "取消", color: "primary" },
+            on: {
+              click: function($event) {
+                return _vm.$emit("cancel")
+              }
+            }
           })
         ],
         1
@@ -6232,7 +6292,7 @@ var render = function() {
             { staticClass: "row q-px-md q-gutter-sm" },
             [
               _c("q-select", {
-                staticClass: "col-1",
+                staticClass: "col-shrink",
                 attrs: {
                   dense: "",
                   options: _vm.viewFilter,
@@ -6259,6 +6319,7 @@ var render = function() {
               _vm.info && _vm.info.enableUpload
                 ? _c("q-btn", {
                     attrs: {
+                      dense: "",
                       icon: "add_photo_alternate",
                       label: "新增照片",
                       flat: ""
@@ -6274,6 +6335,7 @@ var render = function() {
               _vm.info && _vm.info.enableDownload && _vm.user
                 ? _c("q-btn", {
                     attrs: {
+                      dense: "",
                       icon: "cloud_download",
                       label: "整包下載",
                       flat: ""
@@ -6288,7 +6350,12 @@ var render = function() {
               _vm._v(" "),
               _vm.favorite
                 ? _c("q-btn", {
-                    attrs: { icon: "star", label: "取消收藏", flat: "" },
+                    attrs: {
+                      dense: "",
+                      icon: "star",
+                      label: "取消收藏",
+                      flat: ""
+                    },
                     on: {
                       click: function($event) {
                         return _vm.RemoveFavorite()
@@ -6296,7 +6363,12 @@ var render = function() {
                     }
                   })
                 : _c("q-btn", {
-                    attrs: { icon: "star_border", label: "收藏", flat: "" },
+                    attrs: {
+                      dense: "",
+                      icon: "star_border",
+                      label: "收藏",
+                      flat: ""
+                    },
                     on: {
                       click: function($event) {
                         return _vm.AddFavorite()
@@ -6305,7 +6377,12 @@ var render = function() {
                   }),
               _vm._v(" "),
               _c("q-btn", {
-                attrs: { icon: "bar_chart", label: "資料統計", flat: "" },
+                attrs: {
+                  dense: "",
+                  icon: "bar_chart",
+                  label: "資料統計",
+                  flat: ""
+                },
                 on: {
                   click: function($event) {
                     return _vm.GoToStatistic()
@@ -6315,7 +6392,7 @@ var render = function() {
               _vm._v(" "),
               _vm.user && _vm.user.authType == "admin"
                 ? _c("q-btn", {
-                    attrs: { icon: "edit", label: "修改", flat: "" },
+                    attrs: { dense: "", icon: "edit", label: "修改", flat: "" },
                     on: {
                       click: function($event) {
                         return _vm.ModifyDataset()
@@ -6840,7 +6917,14 @@ var render = function() {
             [
               _c("dataset-editor", {
                 attrs: { info: _vm.editInfo },
-                on: { reload: _vm.ReloadDataset }
+                on: {
+                  confirm: function($event) {
+                    return _vm.ReloadDataset()
+                  },
+                  cancel: function($event) {
+                    _vm.openDatasetEditor = false
+                  }
+                }
               })
             ],
             1
@@ -7467,7 +7551,10 @@ var render = function() {
                 { attrs: { clickable: "", tag: "a", href: "/account" } },
                 [
                   _c("q-avatar", { attrs: { size: "lg" } }, [
-                    _c("img", { attrs: { src: _vm.user.photo } })
+                    _c("img", {
+                      staticStyle: { "object-fit": "cover" },
+                      attrs: { src: _vm.user.icon }
+                    })
                   ]),
                   _vm._v(" "),
                   _c(

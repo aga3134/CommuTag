@@ -86,21 +86,51 @@ export default {
 			
 		},
 		GenerateTask: function(){
+			this.imageSelect = null;
 			if(!this.datasetSelect){
 				this.status = "請選擇資料集";
 				return;
 			}
-			
-			var GetRandomImage = function(){
-				if(this.imageArr.length == 0) return null;
-				var index = Math.floor(Math.random()*this.imageArr.length);
-				return this.imageArr[index];
-			}.bind(this);
+			if(this.image){	//有指定標註影像
+				if(this.image.annotation){
+					var myVerify = this.image.verification.filter(function(d){
+						return d.user == this.user._id;
+					}.bind(this));
+					if(myVerify.length > 0){
+						this.status = "您已驗證過此影像，感謝您的協助";
+						return;
+					}
+				}
+				this.imageSelect = this.image;
+			}
+			else{	//沒指定標註影像，隨機選擇
+				if(this.imageArr.length == 0){
+					this.status = "此資料集影像皆已標註完成";
+					return;
+				}
 
-			this.imageSelect = this.image || GetRandomImage();
-			if(!this.imageSelect){
-				this.status = "此資料集影像皆已標註完成";
-				return;
+				var activeArr = [];
+				for(var i=0;i<this.imageArr.length;i++){
+					var image = this.imageArr[i];
+					if(!image.annotation) activeArr.push(image);
+					else{
+						var myVerify = image.verification.filter(function(d){
+							return d.user == this.user._id;
+						}.bind(this));
+						if(myVerify.length == 0) activeArr.push(image);
+					}
+				}
+				if(activeArr.length == 0){
+					this.status = "您已驗證過此資料集所有資料，感謝您的協助";
+					return;
+				}
+				var GetRandomImage = function(){
+					if(activeArr.length == 0) return null;
+					var index = Math.floor(Math.random()*activeArr.length);
+					return activeArr[index];
+				}.bind(this);
+
+				this.imageSelect = GetRandomImage();
 			}
 
 			var CheckTask = function(){
@@ -159,6 +189,10 @@ export default {
 							return alert("標註失敗");
 					}
 				}
+				this.imageSelect.annotation = {
+					user: this.user._id,
+					annotation: data.annotation
+				};
 				this.$q.notify("標註成功");
 				if(this.autoTask){
 					this.GenerateTask();
@@ -193,6 +227,10 @@ export default {
 					}
 				}
 				else this.$q.notify("驗證成功");
+				this.imageSelect.verification.push({
+					user: this.user._id,
+					agree: data.agree
+				});
 
 				if(this.autoTask){
 					this.GenerateTask();

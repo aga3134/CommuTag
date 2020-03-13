@@ -2959,7 +2959,10 @@ var render = function() {
                 { attrs: { clickable: "", tag: "a", href: "/account" } },
                 [
                   _c("q-avatar", { attrs: { size: "lg" } }, [
-                    _c("img", { attrs: { src: _vm.user.photo } })
+                    _c("img", {
+                      staticStyle: { "object-fit": "cover" },
+                      attrs: { src: _vm.user.icon }
+                    })
                   ]),
                   _vm._v(" "),
                   _c(
