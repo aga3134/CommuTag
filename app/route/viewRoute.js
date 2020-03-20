@@ -47,4 +47,13 @@ router.get('/statistic', util.CSRF, function(req, res) {
 	res.render("statistic.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
+router.get('/site-info', function(req, res) {
+	var info = {
+		title: Config.siteName,
+		host: Config.hostname,
+		desc: Config.desc
+	};
+	res.status(200).json({"status":"ok","data": info});
+});
+
 module.exports = router;

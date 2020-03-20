@@ -3,11 +3,11 @@
 		<q-toolbar square class="q-px-md">
 			<q-btn flat round icon="menu" v-if="useMenu" @click="ToggleMenu();"></q-btn>
 			<a href="/">
-				<q-btn flat>
+				<q-btn flat no-caps>
 					<q-avatar size="md" square >
 						<img src="/static/image/logo.png">
 					</q-avatar>
-					<q-toolbar-title class="text-white">{{title}}</q-toolbar-title>
+					<div class="gt-xs q-px-md text-white text-h5 inline">{{title}}</div>
 				</q-btn>
 			</a>
 
@@ -42,11 +42,14 @@ export default {
 	},
 	data: function () {
 		return {
-			title: "群眾標註",
+			title: "",
 		};
 	},
 	created: function(){
-		
+		$.get("/site-info", function(result){
+			if(result.status != "ok") return;
+			this.title = result.data.title;
+		}.bind(this));
 	},
 	methods: {
 		ToggleMenu: function(){

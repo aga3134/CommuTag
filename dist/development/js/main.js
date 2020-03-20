@@ -2681,10 +2681,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
-      title: "群眾標註"
+      title: ""
     };
   },
-  created: function () {},
+  created: function () {
+    $.get("/site-info", function (result) {
+      if (result.status != "ok") return;
+      this.title = result.data.title;
+    }.bind(this));
+  },
   methods: {
     ToggleMenu: function () {
       this.$emit("toggleMenu");
@@ -6170,147 +6175,152 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "image-edit bg-grey-9" }, [
-    _c("img", { ref: "image", attrs: { src: _vm.imageData } }),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "absolute-top row justify-center q-gutter-sm q-pa-sm" },
-      [
-        _c(
-          "q-btn",
-          {
-            attrs: { dense: "", color: "primary", icon: "rotate_left" },
-            on: {
-              click: function($event) {
-                return _vm.cropper.rotate(-90)
+  return _c(
+    "div",
+    { staticClass: "image-edit bg-grey-9" },
+    [
+      _c("img", { ref: "image", attrs: { src: _vm.imageData } }),
+      _vm._v(" "),
+      _c(
+        "q-page-sticky",
+        { attrs: { position: "top", offset: [9, 9] } },
+        [
+          _c(
+            "q-btn",
+            {
+              attrs: { dense: "", color: "primary", icon: "rotate_left" },
+              on: {
+                click: function($event) {
+                  return _vm.cropper.rotate(-90)
+                }
               }
-            }
-          },
-          [
-            _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
-              _vm._v("逆時針旋轉90°")
-            ])
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "q-btn",
-          {
-            attrs: { dense: "", color: "primary", icon: "rotate_right" },
-            on: {
-              click: function($event) {
-                return _vm.cropper.rotate(90)
-              }
-            }
-          },
-          [
-            _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
-              _vm._v("順時針旋轉90°")
-            ])
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "q-btn",
-          {
-            directives: [
-              {
-                name: "show",
-                rawName: "v-show",
-                value: _vm.mode == "move",
-                expression: "mode=='move' "
-              }
+            },
+            [
+              _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
+                _vm._v("逆時針旋轉90°")
+              ])
             ],
-            attrs: { dense: "", color: "primary", icon: "crop" },
-            on: {
-              click: function($event) {
-                return _vm.ChangeMode("crop")
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-btn",
+            {
+              attrs: { dense: "", color: "primary", icon: "rotate_right" },
+              on: {
+                click: function($event) {
+                  return _vm.cropper.rotate(90)
+                }
               }
-            }
-          },
-          [
-            _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
-              _vm._v("框選裁切")
-            ])
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "q-btn",
-          {
-            directives: [
-              {
-                name: "show",
-                rawName: "v-show",
-                value: _vm.mode == "crop",
-                expression: "mode=='crop' "
-              }
+            },
+            [
+              _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
+                _vm._v("順時針旋轉90°")
+              ])
             ],
-            attrs: { dense: "", color: "primary", icon: "gamepad" },
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-btn",
+            {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: _vm.mode == "move",
+                  expression: "mode=='move' "
+                }
+              ],
+              attrs: { dense: "", color: "primary", icon: "crop" },
+              on: {
+                click: function($event) {
+                  return _vm.ChangeMode("crop")
+                }
+              }
+            },
+            [
+              _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
+                _vm._v("框選裁切")
+              ])
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-btn",
+            {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: _vm.mode == "crop",
+                  expression: "mode=='crop' "
+                }
+              ],
+              attrs: { dense: "", color: "primary", icon: "gamepad" },
+              on: {
+                click: function($event) {
+                  return _vm.ChangeMode("move")
+                }
+              }
+            },
+            [
+              _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
+                _vm._v("移動影像")
+              ])
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-btn",
+            {
+              attrs: { dense: "", color: "primary", icon: "clear" },
+              on: {
+                click: function($event) {
+                  return _vm.ClearEdit()
+                }
+              }
+            },
+            [
+              _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
+                _vm._v("重設影像")
+              ])
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "q-page-sticky",
+        { attrs: { position: "bottom", offset: [9, 9] } },
+        [
+          _c("q-btn", {
+            attrs: { color: "primary", label: "確定" },
             on: {
               click: function($event) {
-                return _vm.ChangeMode("move")
+                return _vm.ConfirmEdit()
               }
             }
-          },
-          [
-            _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
-              _vm._v("移動影像")
-            ])
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "q-btn",
-          {
-            attrs: { dense: "", color: "primary", icon: "clear" },
+          }),
+          _vm._v(" "),
+          _c("q-btn", {
+            attrs: { color: "primary", label: "取消" },
             on: {
               click: function($event) {
-                return _vm.ClearEdit()
+                return _vm.CancelEdit()
               }
             }
-          },
-          [
-            _c("q-tooltip", { attrs: { "content-class": "bg-primary" } }, [
-              _vm._v("重設影像")
-            ])
-          ],
-          1
-        )
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "absolute-bottom row justify-center q-gutter-sm q-pa-sm" },
-      [
-        _c("q-btn", {
-          attrs: { color: "primary", label: "確定" },
-          on: {
-            click: function($event) {
-              return _vm.ConfirmEdit()
-            }
-          }
-        }),
-        _vm._v(" "),
-        _c("q-btn", {
-          attrs: { color: "primary", label: "取消" },
-          on: {
-            click: function($event) {
-              return _vm.CancelEdit()
-            }
-          }
-        })
-      ],
-      1
-    )
-  ])
+          })
+        ],
+        1
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -6747,15 +6757,17 @@ var render = function() {
             [
               _c(
                 "q-btn",
-                { attrs: { flat: "" } },
+                { attrs: { flat: "", "no-caps": "" } },
                 [
                   _c("q-avatar", { attrs: { size: "md", square: "" } }, [
                     _c("img", { attrs: { src: "/static/image/logo.png" } })
                   ]),
                   _vm._v(" "),
-                  _c("q-toolbar-title", { staticClass: "text-white" }, [
-                    _vm._v(_vm._s(_vm.title))
-                  ])
+                  _c(
+                    "div",
+                    { staticClass: "gt-xs q-px-md text-white text-h5 inline" },
+                    [_vm._v(_vm._s(_vm.title))]
+                  )
                 ],
                 1
               )

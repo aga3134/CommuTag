@@ -3,7 +3,7 @@
 		
 		<img ref="image" :src="imageData"></img>
 
-		<div class="absolute-top row justify-center q-gutter-sm q-pa-sm">
+		<q-page-sticky position="top" :offset="[9, 9]">
 			<q-btn dense color="primary" icon="rotate_left" @click="cropper.rotate(-90);">
 				<q-tooltip content-class="bg-primary">逆時針旋轉90°</q-tooltip>
 			</q-btn>
@@ -19,14 +19,14 @@
 			<q-btn dense color="primary" icon="clear" @click="ClearEdit();">
 				<q-tooltip content-class="bg-primary">重設影像</q-tooltip>
 			</q-btn>
-		</div>
+		</q-page-sticky>
 
-		<div class="absolute-bottom row justify-center q-gutter-sm q-pa-sm">
+		<q-page-sticky position="bottom" :offset="[9, 9]">
 			<q-btn color="primary" label="確定" @click="ConfirmEdit();">
 			</q-btn>
 			<q-btn color="primary" label="取消" @click="CancelEdit();">
 			</q-btn>
-		</div>
+		</q-page-sticky>
 
 	</div>
 </template>

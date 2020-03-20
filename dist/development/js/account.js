@@ -1316,10 +1316,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
-      title: "群眾標註"
+      title: ""
     };
   },
-  created: function () {},
+  created: function () {
+    $.get("/site-info", function (result) {
+      if (result.status != "ok") return;
+      this.title = result.data.title;
+    }.bind(this));
+  },
   methods: {
     ToggleMenu: function () {
       this.$emit("toggleMenu");
@@ -4104,15 +4109,17 @@ var render = function() {
             [
               _c(
                 "q-btn",
-                { attrs: { flat: "" } },
+                { attrs: { flat: "", "no-caps": "" } },
                 [
                   _c("q-avatar", { attrs: { size: "md", square: "" } }, [
                     _c("img", { attrs: { src: "/static/image/logo.png" } })
                   ]),
                   _vm._v(" "),
-                  _c("q-toolbar-title", { staticClass: "text-white" }, [
-                    _vm._v(_vm._s(_vm.title))
-                  ])
+                  _c(
+                    "div",
+                    { staticClass: "gt-xs q-px-md text-white text-h5 inline" },
+                    [_vm._v(_vm._s(_vm.title))]
+                  )
                 ],
                 1
               )
