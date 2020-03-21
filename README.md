@@ -64,7 +64,9 @@ POST資料包括下列欄位:
 
 ### 上傳整個資料集的影像及標註
 - 本專案網站UI的使用情境比較像是場域調查，使用者或無人載具固定時間在場域裡面調查拍照，然後就一邊上傳。之後資料集就由社群一起標註。如果要一次上傳自己電腦裡整個資料集的影像跟標註，請使用api的方式上傳。
-- 資料集上傳範例請見 **python/batchUpload/** 中的程式，將 **batchUpload.py** 中的參數跟資料夾位置修改之後執行即可。
+- 資料集上傳範例請見 **python/batchUpload/** 中的程式
+- 其中**batchUpload.py**為主程式，會呼叫 **batchUploadAnnotateImage.py** 和 **batchUploadAnnotateBBox.py** 中的function，而 **batchUploadAnnotateImage.py** 和 **batchUploadAnnotateBBox.py** 是繼承 **batchUploadAnnotateBase.py**
+- 使用時將 **batchUpload.py** 中的參數跟資料夾位置修改之後執行，即可上傳資料集與標註 (程式內有各參數說明的註解)。
 
 ## 安裝架設
 ### 程式架構：
