@@ -1368,7 +1368,7 @@ __webpack_require__.r(__webpack_exports__);
     OpenCameraSelect: function () {
       //list device
       if (!navigator.mediaDevices) {
-        this.camStatus = "無法讀取裝置列表，請開啟權限";
+        this.camStatus = "無法讀取裝置列表，請開啟權限或使用右下角的檔案上傳功能";
         return;
       }
 
@@ -2318,6 +2318,14 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return str;
+    },
+    CheckAnnotationDelete: function () {
+      if (!this.user) return false;
+      if (!this.targetImage) return false;
+      if (!this.targetImage.annotation) return false;
+      if (this.user.authType == "admin") return true;
+      if (this.targetImage.annotation.user == this.user._id) return true;
+      return false;
     }
   }
 });
@@ -5521,7 +5529,13 @@ var render = function() {
                 "q-btn",
                 {
                   staticClass: "bg-primary text-white",
-                  attrs: { flat: "", round: "", size: "md", icon: "help" },
+                  attrs: {
+                    flat: "",
+                    round: "",
+                    size: "md",
+                    icon: "help",
+                    disable: _vm.imageSelect == null
+                  },
                   on: {
                     click: function($event) {
                       return _vm.OpenHelp()
@@ -6622,9 +6636,7 @@ var render = function() {
                             }
                           }),
                           _vm._v(" "),
-                          _vm.user &&
-                          _vm.user.authType == "admin" &&
-                          _vm.targetImage.annotation
+                          _vm.CheckAnnotationDelete
                             ? _c("q-btn", {
                                 attrs: { flat: "", label: "刪除標註" },
                                 on: {

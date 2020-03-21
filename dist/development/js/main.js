@@ -1323,7 +1323,7 @@ __webpack_require__.r(__webpack_exports__);
     OpenCameraSelect: function () {
       //list device
       if (!navigator.mediaDevices) {
-        this.camStatus = "無法讀取裝置列表，請開啟權限";
+        this.camStatus = "無法讀取裝置列表，請開啟權限或使用右下角的檔案上傳功能";
         return;
       }
 
@@ -5148,7 +5148,13 @@ var render = function() {
                 "q-btn",
                 {
                   staticClass: "bg-primary text-white",
-                  attrs: { flat: "", round: "", size: "md", icon: "help" },
+                  attrs: {
+                    flat: "",
+                    round: "",
+                    size: "md",
+                    icon: "help",
+                    disable: _vm.imageSelect == null
+                  },
                   on: {
                     click: function($event) {
                       return _vm.OpenHelp()

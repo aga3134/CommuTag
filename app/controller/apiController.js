@@ -61,6 +61,9 @@ function CheckApiAuth(param){
 				if(param.checkUpload && !result.enableUpload){
 					return reject({err:"upload not enabled"});
 				}
+				if(param.checkAnnotation && !result.enableAnnotation){
+					return reject({err:"annotation not enabled"});
+				}
 				
 				return resolve(result);
 			});
@@ -91,6 +94,44 @@ apiController.UploadImage = function(param){
 			util.UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc(result);
 		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
+	});
+
+};
+
+apiController.SetAnnotation = function(param){
+	CheckApiAuth({
+		dataset: param.dataset,
+		apiKey: param.apiKey,
+		checkAnnotation: true
+	})
+	.then(function(dataset){
+		if(!param.annotation) return param.failFunc({err:"no annotation"});
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		var data = null;
+
+		data = {};
+		data.user = "api";
+		data.annotation = param.annotation;
+		
+		var update = {
+			annotation:data,
+			verification: [],
+			verifyNum:0,
+			agreeNum:0
+		}
+		//update annotation
+		Image.updateOne({_id:param.image},update,function(err, result){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"update annotation fail"});
+			}
+			util.UpdateDatasetStatistic({dataset: param.dataset});
+			param.succFunc(result);
+		});
+		
 	})
 	.catch(function(err){
 		param.failFunc(err);

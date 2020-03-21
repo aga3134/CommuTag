@@ -71,3 +71,18 @@ router.post('/upload-image', upload.UploadImageToMem, function(req, res){
 	};
 	apiController.UploadImage(param);
 });
+
+router.post('/set-annotation', function(req, res){
+	var param = {};
+	param.dataset = req.body.dataset;
+	param.image = req.body.image;
+	param.annotation = req.body.annotation;
+	param.apiKey = req.body.apiKey;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	apiController.SetAnnotation(param);
+});
