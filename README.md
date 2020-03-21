@@ -2,7 +2,7 @@
 群眾標註是讓公民科學社群分享影像資訊與知識的工具，產出的資料集可以提供機器學習(AI訓練)，也可以提供社群學習(新手訓練)。 凡舉生態調查、資源盤點、汙染回報、動植物辨識、病蟲害辨識、垃圾分類等，跟影像辨識相關的議題都可以利用此工具協助收集、分析資料。
 
 ### 基本功能demo影片
-[![基本功能demo](http://img.youtube.com/vi/AMNkxphmoNU/0.jpg)](https://www.youtube.com/watch?v=AMNkxphmoNU)
+[![基本功能demo](http://img.youtube.com/vi/PKVwInFUcRQ/0.jpg)](https://www.youtube.com/watch?v=PKVwInFUcRQ)
 
 
 ## 一般功能
