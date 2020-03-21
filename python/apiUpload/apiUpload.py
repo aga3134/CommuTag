@@ -5,9 +5,15 @@ import json
 import base64
 
 #upload parameter
+#請改為你要上傳的網址網址
 host = "http://localhost"
+
+#請改為你要上傳的資料集id (在網站上點選資料集進入觀看，網址列後段顯示的id=xxx即為資料集id)
 dataset = "5e58b5f3cef07131c403d007"
+
+#請跟網站管理員取得該站使用的 api key
 apiKey = "uy066y4bopl0nrqqvzg5q"
+
 
 #prepare image
 img = cv2.imread("pi.jpg")
