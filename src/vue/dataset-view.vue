@@ -69,7 +69,7 @@
 					<q-card-actions>
 						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 						<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
-						<q-btn v-if="user && user.authType=='admin' && targetImage.annotation " flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
+						<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
 						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
@@ -478,6 +478,14 @@ export default {
 				str +=' ('+(100*this.targetImage.agreeNum/this.targetImage.verifyNum).toFixed(0)+'%)';
 			}
 			return str;
+		},
+		CheckAnnotationDelete: function(){
+			if(!this.user) return false;
+			if(!this.targetImage) return false;
+			if(!this.targetImage.annotation) return false;
+			if(this.user.authType == "admin") return true;
+			if(this.targetImage.annotation.user == this.user._id) return true;
+			return false;
 		}
 	}
 }

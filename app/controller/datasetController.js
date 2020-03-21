@@ -326,14 +326,34 @@ datasetController.SetAnnotation = function(param){
 			verifyNum:0,
 			agreeNum:0
 		}
-		Image.updateOne({_id:param.image},update,function(err, image){
+		Image.findOne({_id:param.image},function(err, image){
 			if(err){
 				console.log(err);
-				return param.failFunc({err:"update annotation fail"});
+				return param.failFunc({err:"find image fail"});
 			}
-			util.UpdateDatasetStatistic({dataset: param.dataset});
-			param.succFunc(image);
+			if(!image) return param.failFunc({err:"no image"});
+
+			//check if user can modify annotation
+			var editable = !image.annotation;
+			if(image.annotation){
+				if(param.user.authType == "admin") editable = true;
+				else if(param.user._id.toString() == image.annotation.user){
+					editable = true;
+				}
+			}
+			if(!editable) return param.failFunc({err:"auth fail"});
+			
+			//update annotation
+			Image.updateOne({_id:param.image},update,function(err, result){
+				if(err){
+					console.log(err);
+					return param.failFunc({err:"update annotation fail"});
+				}
+				util.UpdateDatasetStatistic({dataset: param.dataset});
+				param.succFunc(result);
+			});
 		});
+		
 	})
 	.catch(function(err){
 		param.failFunc(err);

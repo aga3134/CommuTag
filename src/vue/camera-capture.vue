@@ -48,7 +48,7 @@ export default {
 		OpenCameraSelect: function(){
 			//list device
 			if(!navigator.mediaDevices){
-				this.camStatus = "無法讀取裝置列表，請開啟權限";
+				this.camStatus = "無法讀取裝置列表，請開啟權限或使用右下角的檔案上傳功能";
 				return;
 			}
 			navigator.mediaDevices.enumerateDevices().then(function(devices){

@@ -14,7 +14,7 @@
 
 		<q-page-sticky position="top-left" :offset="[18, 18]">
 			<div class="column q-gutter-sm">
-				<q-btn flat round class="bg-primary text-white" size="md" icon="help" @click="OpenHelp();">
+				<q-btn flat round class="bg-primary text-white" size="md" icon="help" :disable="imageSelect == null" @click="OpenHelp();">
 					<q-tooltip content-class="bg-primary">如何標註</q-tooltip>
 				</q-btn>
 				<q-btn flat round class="bg-primary text-white" size="md" icon="view_quilt" :disable="dataset != null" @click="openDatasetSelect = true;">
