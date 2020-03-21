@@ -29,7 +29,7 @@
 
 - **設定、取消黑名單**：黑名單使用者將無法使用上傳、標註、驗證影像，與打包下載功能。
 
-- **新增、刪除API金鑰**：API金鑰用來讓程式上傳影像，可搭配無人載具用來收集場域資料。
+- **新增、刪除API金鑰**：API金鑰用來讓程式上傳影像及標註，可搭配無人載具用來收集場域資料或是用程式將整個資料集上傳至server。
 
 <p align="center">
 <img width=200 height=150 alt="土砲1號" src="https://raw.githubusercontent.com/aga3134/CommuTag/master/photo/topower_v1.jpg"> <img width=200 height=150 alt="mini farmbot" src="https://raw.githubusercontent.com/aga3134/CommuTag/master/photo/minifarmbot.jpg"> <img width=200 height=150 alt="無人機" src="https://raw.githubusercontent.com/aga3134/CommuTag/master/photo/drone.jpg">
@@ -38,6 +38,7 @@
 ## API上傳
 要使用API上傳影像時需先請管理員在後台新增並提供API金鑰。
 
+### 上傳影像
 使用時用 http POST 到網址 **{{你的伺服器網址}}/api/upload-image**
 
 POST資料包括下列欄位:
@@ -50,6 +51,20 @@ POST資料包括下列欄位:
 
 上傳範列請見 **python/apiUpload/apiUpload.py**
 
+### 上傳標註
+使用時用 http POST 到網址 **{{你的伺服器網址}}/api/set-annotation**
+
+POST資料包括下列欄位:
+- dataset: 資料集id，當你點選資料集進入觀看影像時會顯示在網址列
+- image: 要標註的影像id
+- annotation: 影像標註資訊
+- apiKey: 跟管理員拿到的api key
+
+上傳範列請見 **python/batchUpload/** 中的程式
+
+### 上傳整個資料集的影像及標註
+- 本專案網站UI的使用情境比較像是場域調查，使用者或無人載具固定時間在場域裡面調查拍照，然後就一邊上傳。之後資料集就由社群一起標註。如果要一次上傳自己電腦裡整個資料集的影像跟標註，請使用api的方式上傳。
+- 資料集上傳範例請見 **python/batchUpload/** 中的程式，將 **batchUpload.py** 中的參數跟資料夾位置修改之後執行即可。
 
 ## 安裝架設
 ### 程式架構：
