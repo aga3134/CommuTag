@@ -32,13 +32,18 @@ function CheckDatasetAuth(param){
 				return reject({err:"download not enabled"});
 			}
 			if(param.checkView && !result.isPublic){
-				//不公開的資料集，管理員跟私密成員才能看
+				//不公開的資料集，管理員、版主跟私密成員才能看
 				if(!param.user) return reject({err:"view not allowed"});
 				if(param.user.authType != "admin"){
 					var isMember = result.member.filter(function(m){
-						return m.id == param.user._id.toString();
+						return m._id.toString() == param.user._id.toString();
 					});
-					if(isMember.length == 0) return reject({err:"view not allowed"});
+					var isMaster = result.master.filter(function(m){
+						return m._id.toString() == param.user._id.toString();
+					});
+					if(isMember.length == 0 && isMaster.length == 0){
+						return reject({err:"view not allowed"});
+					}
 				}
 			}
 			return resolve(result);
@@ -61,6 +66,9 @@ datasetController.UpdateDataset = function(param){
 	if(!param.info.member){
 		param.info.member = [];
 	}
+	if(!param.info.master){
+		param.info.master = [];
+	}
 	Dataset.updateOne({_id:param.info._id},param.info,function(err, dataset){
 		if(err){
 			console.log(err);
@@ -82,25 +90,32 @@ datasetController.DeleteDataset = function(param){
 };
 
 datasetController.ListDataset = function(param){
-	var queryOption = {};
+	var condition = [];
 	if(param.keyword){
-		queryOption.name = {"$regex": param.keyword,"$options": "i"};
+		var regex = {"$regex": param.keyword,"$options": "i"};
+		condition.push({"$or":[
+			{name: regex},
+			{desc: regex}
+		]});
 	}
 	if(!param.user){
-		queryOption.isPublic = true;
+		condition.push({isPublic:true});
 	}
 	else if(param.user.authType != "admin"){
-		queryOption["$or"] = [
+		condition.push({"$or":[
 			{isPublic: true},
-			{isPublic: false, "member.id": param.user._id.toString()}
-		];
+			{isPublic: false, "member._id": param.user._id.toString()},
+			{isPublic: false, "master._id": param.user._id.toString()}
+		]});
 	}
 	if(param.enableUpload){
-		queryOption.enableUpload = param.enableUpload=="1"?true:false;
+		condition.push({enableUpload:param.enableUpload=="1"?true:false});
 	}
 	if(param.enableAnnotation){
-		queryOption.enableAnnotation = param.enableAnnotation=="1"?true:false;
+		condition.push({enableAnnotation:param.enableAnnotation=="1"?true:false});
 	}
+	var queryOption = condition.length==0?{}:{"$and":condition};
+
 	var sortOption = {};
 	if(param.sort){
 		sortOption[param.sort] = param.orderType=="desc"?-1:1;

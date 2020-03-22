@@ -48,6 +48,33 @@ util.CheckAdmin = function (req, res, next) {
 	else res.redirect("/?message="+encodeURIComponent("權限不足"));
 };
 
+util.CheckMaster = function (req, res, next) {
+	function PermissionDenied(){
+		var isAjax = req.xhr;
+		if(isAjax) res.send({"status":"fail","message":"permission denied"});
+		else res.redirect("/?message="+encodeURIComponent("權限不足"));
+	}
+	if(req.user){
+		if (req.user.authType == "admin") return next();
+		var id = req.query.dataset || req.body.dataset;
+		if(!id) return PermissionDenied();
+
+		Dataset.findOne({"_id": id}, function(err, dataset) {
+			if(err){
+				console.log(err);
+				return PermissionDenied();
+			}
+			var isMaster = dataset.master.filter(function(master){
+				return req.user._id.toString() == master._id.toString();
+			});
+			if(isMaster.length > 0) return next();
+			else return PermissionDenied();
+		});
+	}
+	else PermissionDenied();
+	
+};
+
 util.CheckBlacklist = function (req, res, next) {
 	if(req.user){
 		if (req.user.status != "blacklist") return next();

@@ -11,12 +11,15 @@
 						<image-upload :src="info.picCover || '/static/image/logo-16-9.png' " showPreview :maxResW="parseInt(info.maxWidth)" :maxResH="parseInt(info.maxHeight)" ref="uploader"></image-upload>
 						<q-btn :loading="uploadCover" class="change-bt" flat label="變更封面" @click="ChangeCover();"></q-btn>
 					</div>
-					
 				</q-item>
+
 				<div class="row">
 					<q-input class="col-12 q-pa-sm" v-model="info.name" label="資料集名稱" ref="name" :rules="[
 						val => !!val || '資料集名稱不能空白'
 					]"/>
+
+					<q-input class="full-width q-px-sm" v-model="info.desc" label="資料集簡介" filled type="textarea"></q-input>
+
 					<q-input class="col-12 col-sm-6 q-pa-sm" type="number"  ref="maxWidth" v-model="info.maxWidth" label="最大寬度" :rules="[
 						val => !!val || '最大寬度不能空白',
 						val => val >= 32 || '最大寬度不能小於32',
@@ -51,6 +54,14 @@
 						<div class="text-subtitle2">不公開的資料集只有管理員跟私密成員能看到</div>
 						
 						<user-list ref="memberList" enableAdd enableRemove :list="info.member" @add="AddMember" @remove="RemoveMember"></user-list>
+						
+					</div>
+
+					<div class="full-width q-pa-md">
+						<div class="text-h6">資料集版主</div>
+						<div class="text-subtitle2">版主擁有修改此資料集的完整權限</div>
+						
+						<user-list ref="masterList" enableAdd enableRemove :list="info.master" @add="AddMaster" @remove="RemoveMaster"></user-list>
 						
 					</div>
 				</div>
@@ -156,6 +167,7 @@ export default {
 
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var data = {};
+			data.dataset = this.info._id;
 			data.info = this.info;
 			data._csrf = csrfToken;
 			$.post("/dataset/update-dataset", data, function(result){
@@ -188,6 +200,20 @@ export default {
 		},
 		RemoveMember: function(i){
 			this.info.member.splice(i,1);
+		},
+		AddMaster: function(user){
+			var duplicate = this.info.master.filter(function(master){
+				return master._id == user._id;
+			});
+			if(duplicate.length == 0){
+				this.info.master.unshift(user);
+			}
+			else{
+				this.$q.notify("此使用者已是私密成員");
+			}
+		},
+		RemoveMaster: function(i){
+			this.info.master.splice(i,1);
 		}
 	}
 }

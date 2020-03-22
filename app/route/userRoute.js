@@ -15,7 +15,7 @@ router.get('/info', util.CheckLogin, function(req, res) {
 	res.status(200).json({"status":"ok","data": req.user});
 });
 
-router.get('/list-user', util.CheckAdmin, function(req, res) {
+router.get('/list-user', util.CheckLogin, function(req, res) {
 	var param = {};
 	param.keyword = req.query.keyword;
 	param.authType = req.query.authType;

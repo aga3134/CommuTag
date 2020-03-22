@@ -1530,6 +1530,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1632,6 +1643,7 @@ __webpack_require__.r(__webpack_exports__);
 
       var csrfToken = $("meta[name='csrf-token']").attr("content");
       var data = {};
+      data.dataset = this.info._id;
       data.info = this.info;
       data._csrf = csrfToken;
       $.post("/dataset/update-dataset", data, function (result) {
@@ -1665,6 +1677,20 @@ __webpack_require__.r(__webpack_exports__);
     },
     RemoveMember: function (i) {
       this.info.member.splice(i, 1);
+    },
+    AddMaster: function (user) {
+      var duplicate = this.info.master.filter(function (master) {
+        return master._id == user._id;
+      });
+
+      if (duplicate.length == 0) {
+        this.info.master.unshift(user);
+      } else {
+        this.$q.notify("此使用者已是私密成員");
+      }
+    },
+    RemoveMaster: function (i) {
+      this.info.master.splice(i, 1);
     }
   }
 });
@@ -1808,6 +1834,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dataset_editor_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./dataset-editor.vue */ "./src/vue/dataset-editor.vue");
 /* harmony import */ var _location_select_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./location-select.vue */ "./src/vue/location-select.vue");
 /* harmony import */ var _image_info_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./image-info.vue */ "./src/vue/image-info.vue");
+//
+//
 //
 //
 //
@@ -2323,8 +2351,26 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.user) return false;
       if (!this.targetImage) return false;
       if (!this.targetImage.annotation) return false;
-      if (this.user.authType == "admin") return true;
-      if (this.targetImage.annotation.user == this.user._id) return true;
+      if (this.user.authType == "admin") return true; //使用者可以刪除自己的標註
+
+      if (this.targetImage.annotation.user == this.user._id) return true; //確認目前使用者是不是在master list裡
+
+      if (!this.info) return false;
+      var isMaster = this.info.master.filter(function (master) {
+        return master._id == this.user._id;
+      }.bind(this));
+      if (isMaster.length > 0) return true;
+      return false;
+    },
+    CheckMasterAuth: function () {
+      if (!this.user) return false;
+      if (this.user.authType == "admin") return true; //確認目前使用者是不是在master list裡
+
+      if (!this.info) return false;
+      var isMaster = this.info.master.filter(function (master) {
+        return master._id == this.user._id;
+      }.bind(this));
+      if (isMaster.length > 0) return true;
       return false;
     }
   }
@@ -5779,6 +5825,22 @@ var render = function() {
                   }),
                   _vm._v(" "),
                   _c("q-input", {
+                    staticClass: "full-width q-px-sm",
+                    attrs: {
+                      label: "資料集簡介",
+                      filled: "",
+                      type: "textarea"
+                    },
+                    model: {
+                      value: _vm.info.desc,
+                      callback: function($$v) {
+                        _vm.$set(_vm.info, "desc", $$v)
+                      },
+                      expression: "info.desc"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("q-input", {
                     ref: "maxWidth",
                     staticClass: "col-12 col-sm-6 q-pa-sm",
                     attrs: {
@@ -6015,7 +6077,32 @@ var render = function() {
                         ],
                         1
                       )
-                    : _vm._e()
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "full-width q-pa-md" },
+                    [
+                      _c("div", { staticClass: "text-h6" }, [
+                        _vm._v("資料集版主")
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "text-subtitle2" }, [
+                        _vm._v("版主擁有修改此資料集的完整權限")
+                      ]),
+                      _vm._v(" "),
+                      _c("user-list", {
+                        ref: "masterList",
+                        attrs: {
+                          enableAdd: "",
+                          enableRemove: "",
+                          list: _vm.info.master
+                        },
+                        on: { add: _vm.AddMaster, remove: _vm.RemoveMaster }
+                      })
+                    ],
+                    1
+                  )
                 ],
                 1
               )
@@ -6285,7 +6372,16 @@ var render = function() {
                           staticClass: "q-ma-xs",
                           attrs: { outline: "", color: "primary", label: badge }
                         })
-                      })
+                      }),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "text-subtitle2 q-ma-sm",
+                          staticStyle: { "white-space": "pre-line" }
+                        },
+                        [_vm._v(_vm._s(_vm.info.desc))]
+                      )
                     ],
                     2
                   ),
@@ -6409,7 +6505,7 @@ var render = function() {
                 }
               }),
               _vm._v(" "),
-              _vm.user && _vm.user.authType == "admin"
+              _vm.CheckMasterAuth
                 ? _c("q-btn", {
                     attrs: { dense: "", icon: "edit", label: "修改", flat: "" },
                     on: {
@@ -6647,7 +6743,7 @@ var render = function() {
                               })
                             : _vm._e(),
                           _vm._v(" "),
-                          _vm.user && _vm.user.authType == "admin"
+                          _vm.CheckMasterAuth
                             ? _c("q-btn", {
                                 attrs: { flat: "", label: "編輯資訊" },
                                 on: {
@@ -6658,7 +6754,7 @@ var render = function() {
                               })
                             : _vm._e(),
                           _vm._v(" "),
-                          _vm.user && _vm.user.authType == "admin"
+                          _vm.CheckMasterAuth
                             ? _c("q-btn", {
                                 attrs: { flat: "", label: "刪除影像" },
                                 on: {

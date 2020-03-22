@@ -22,7 +22,7 @@ router.post('/create-dataset', util.CheckAdmin,util.CSRF, function(req, res){
 	datasetController.CreateDataset(param);
 });
 
-router.post('/update-dataset', util.CheckAdmin,util.CSRF, function(req, res){
+router.post('/update-dataset', util.CheckMaster,util.CSRF, function(req, res){
 	var param = {};
 	param.info = req.body.info;
 	param.succFunc = function(result){
@@ -80,7 +80,7 @@ router.get('/view-dataset', function(req, res) {
 	datasetController.ViewDataset(param);
 });
 
-router.post('/change-cover', util.CheckAdmin, util.CSRF, upload.UploadImageToMem, function(req, res){	
+router.post('/change-cover', util.CheckMaster, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
 	param.id = req.body.dataset;
 	var newPath = "/static/upload/dataset/"+req.body.dataset+"/";
@@ -150,7 +150,7 @@ router.get('/list-image', function(req, res) {
 	datasetController.ListImage(param);
 });
 
-router.post('/update-image-info', util.CheckAdmin, util.CSRF, function(req, res) {
+router.post('/update-image-info', util.CheckMaster, util.CSRF, function(req, res) {
 	var param = {};
 	param.dataset = req.body.dataset;
 	param.image = req.body.image;
@@ -167,7 +167,7 @@ router.post('/update-image-info', util.CheckAdmin, util.CSRF, function(req, res)
 	datasetController.UpdateImageInfo(param);
 });
 
-router.post('/delete-image', util.CheckAdmin, util.CSRF, function(req, res) {
+router.post('/delete-image', util.CheckMaster, util.CSRF, function(req, res) {
 	var param = {};
 	param.dataset = req.body.data.dataset;
 	param.image = req.body.data.image;

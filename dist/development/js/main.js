@@ -1485,6 +1485,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1587,6 +1598,7 @@ __webpack_require__.r(__webpack_exports__);
 
       var csrfToken = $("meta[name='csrf-token']").attr("content");
       var data = {};
+      data.dataset = this.info._id;
       data.info = this.info;
       data._csrf = csrfToken;
       $.post("/dataset/update-dataset", data, function (result) {
@@ -1620,6 +1632,20 @@ __webpack_require__.r(__webpack_exports__);
     },
     RemoveMember: function (i) {
       this.info.member.splice(i, 1);
+    },
+    AddMaster: function (user) {
+      var duplicate = this.info.master.filter(function (master) {
+        return master._id == user._id;
+      });
+
+      if (duplicate.length == 0) {
+        this.info.master.unshift(user);
+      } else {
+        this.$q.notify("此使用者已是私密成員");
+      }
+    },
+    RemoveMaster: function (i) {
+      this.info.master.splice(i, 1);
     }
   }
 });
@@ -5398,6 +5424,22 @@ var render = function() {
                   }),
                   _vm._v(" "),
                   _c("q-input", {
+                    staticClass: "full-width q-px-sm",
+                    attrs: {
+                      label: "資料集簡介",
+                      filled: "",
+                      type: "textarea"
+                    },
+                    model: {
+                      value: _vm.info.desc,
+                      callback: function($$v) {
+                        _vm.$set(_vm.info, "desc", $$v)
+                      },
+                      expression: "info.desc"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("q-input", {
                     ref: "maxWidth",
                     staticClass: "col-12 col-sm-6 q-pa-sm",
                     attrs: {
@@ -5634,7 +5676,32 @@ var render = function() {
                         ],
                         1
                       )
-                    : _vm._e()
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "full-width q-pa-md" },
+                    [
+                      _c("div", { staticClass: "text-h6" }, [
+                        _vm._v("資料集版主")
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "text-subtitle2" }, [
+                        _vm._v("版主擁有修改此資料集的完整權限")
+                      ]),
+                      _vm._v(" "),
+                      _c("user-list", {
+                        ref: "masterList",
+                        attrs: {
+                          enableAdd: "",
+                          enableRemove: "",
+                          list: _vm.info.master
+                        },
+                        on: { add: _vm.AddMaster, remove: _vm.RemoveMaster }
+                      })
+                    ],
+                    1
+                  )
                 ],
                 1
               )

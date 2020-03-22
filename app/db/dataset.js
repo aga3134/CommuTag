@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 var DatasetSchema = new mongoose.Schema({
 	name: String,
+	desc: String,
 	maxWidth: {
 		type: Number,
 		min: 32,
@@ -48,7 +49,8 @@ var DatasetSchema = new mongoose.Schema({
 		type: Number,
 		default: 0
 	},
-	member:[mongoose.Schema.Types.Mixed]
+	member:[mongoose.Schema.Types.Mixed],	//私密成員
+	master:[mongoose.Schema.Types.Mixed]	//版主
 },{
 	collection: "dataset",
 	timestamps: {createdAt:"createdAt", updatedAt:"updatedAt"} 

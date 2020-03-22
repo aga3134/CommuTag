@@ -9,7 +9,9 @@
 				<div class="text-h4 q-ma-sm">
 					{{info.name}}
 					<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
+					<div class="text-subtitle2 q-ma-sm" style="white-space:pre-line;">{{info.desc}}</div>
 				</div>
+				
 
 				<q-chip icon="image">影像數: {{info.picNum}}</q-chip>
 				<q-chip icon="aspect_ratio">標註數: {{info.annotationNum}}</q-chip>
@@ -23,7 +25,7 @@
 				<q-btn dense v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
 				<q-btn dense v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
 				<q-btn dense icon="bar_chart" label="資料統計" flat @click="GoToStatistic();"></q-btn>
-				<q-btn dense v-if="user && user.authType =='admin' " icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
+				<q-btn dense v-if="CheckMasterAuth" icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 
 			
@@ -70,8 +72,8 @@
 						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 						<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
 						<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
-						<q-btn v-if="user && user.authType=='admin' " flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
-						<q-btn v-if="user && user.authType=='admin' " flat label="刪除影像" @click="DeleteImage();"></q-btn>
+						<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
+						<q-btn v-if="CheckMasterAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</q-dialog>
@@ -484,7 +486,25 @@ export default {
 			if(!this.targetImage) return false;
 			if(!this.targetImage.annotation) return false;
 			if(this.user.authType == "admin") return true;
+			//使用者可以刪除自己的標註
 			if(this.targetImage.annotation.user == this.user._id) return true;
+			//確認目前使用者是不是在master list裡
+			if(!this.info) return false;
+			var isMaster = this.info.master.filter(function(master){
+				return master._id == this.user._id;
+			}.bind(this));
+			if(isMaster.length > 0) return true;
+			return false;
+		},
+		CheckMasterAuth: function(){
+			if(!this.user) return false;
+			if(this.user.authType == "admin") return true;
+			//確認目前使用者是不是在master list裡
+			if(!this.info) return false;
+			var isMaster = this.info.master.filter(function(master){
+				return master._id == this.user._id;
+			}.bind(this));
+			if(isMaster.length > 0) return true;
 			return false;
 		}
 	}
