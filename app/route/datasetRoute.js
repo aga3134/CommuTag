@@ -169,8 +169,8 @@ router.post('/update-image-info', util.CheckMaster, util.CSRF, function(req, res
 
 router.post('/delete-image', util.CheckMaster, util.CSRF, function(req, res) {
 	var param = {};
-	param.dataset = req.body.data.dataset;
-	param.image = req.body.data.image;
+	param.dataset = req.body.dataset;
+	param.image = req.body.image;
 	param.succFunc = function(result){
 		upload.DeletePath("static/upload/dataset/"+param.dataset+"/image/"+param.image+".jpg", function(){
 			res.status(200).json({"status":"ok","data": result});
