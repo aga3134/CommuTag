@@ -1,4 +1,5 @@
 import zipfile
+import os
 
 class GenFolderClassify:
 	def __init__(self):
@@ -16,6 +17,8 @@ class GenFolderClassify:
 						tag = image["annotation"]["annotation"]
 
 					imageFile = imagePath+str(image["_id"])+".jpg"
+					if not os.path.isfile(imageFile):
+						continue
 					outputZip.write(imageFile, tag+"/"+str(serial).zfill(5)+".jpg")
 					serial+=1
 

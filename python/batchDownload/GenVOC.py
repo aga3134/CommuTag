@@ -1,6 +1,7 @@
 from pascal_voc_writer import Writer
 import zipfile
 import cv2
+import os
 
 class GenVOC:
 	def __init__(self):
@@ -13,6 +14,8 @@ class GenVOC:
 				serial = 1
 				for image in imageArr:
 					imageFile = imagePath+str(image["_id"])+".jpg"
+					if not os.path.isfile(imageFile):
+						continue
 					outImageName = "image/"+str(serial).zfill(5)+".jpg"
 					outputZip.write(imageFile, outImageName)
 

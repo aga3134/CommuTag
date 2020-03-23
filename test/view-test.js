@@ -3,10 +3,12 @@ var chai = require('chai');
 var chaiHttp = require('chai-http');
 
 chai.use(chaiHttp);
-var agent = chai.request.agent(Config.hostname+":"+Config.serverPort);
+var app = require("../server.js");
+var agent = chai.request.agent(app);
 var expect = chai.expect;
 
-describe("View Route 測試", function() { 
+describe("View Route 測試", function() {
+	this.timeout(5000);
 	it("get /", function(done){ 
 		agent.get("/")
 		.end(function(err,res){
@@ -41,5 +43,10 @@ describe("View Route 測試", function() {
 			expect(res.status).to.equal(200); 
 			done(); 
 		}); 
+	});
+
+	after(function(done){
+		agent.close();
+		done();
 	});
 });

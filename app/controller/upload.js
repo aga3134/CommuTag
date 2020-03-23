@@ -73,7 +73,6 @@ upload.SaveImage = function(param){
 				})
 				.toFile(dir+thumbName)
 				.then(function(info){
-					console.log(info);
 					param.succFunc({newName: newName, thumbName: thumbName});
 				}).catch(function(err){
 					console.log(err);

@@ -55,7 +55,8 @@ class BatchUploadAnnotateBBox(BatchUploadAnnotateBase):
 			imageID = imageUrl[imageUrl.rfind("/")+1:imageUrl.rfind(".")]
 
 			annotatePath = os.path.splitext(self.annotationFolder+"/"+filename)[0]+".xml"
-
+			if not os.path.isfile(annotatePath):
+				continue
 			annotation = self.GetAnnotation(annotatePath)
 
 			result = self.UploadAnnotation(imageID,annotation)

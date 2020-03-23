@@ -84,7 +84,13 @@ datasetController.DeleteDataset = function(param){
 			console.log(err);
 			return param.failFunc({err:"delete dataset fail"});
 		}
-		mongoose.connection.db.dropCollection("image"+param.id);
+		//delete related image collection
+		mongoose.connection.db.listCollections({name: "image"+param.id})
+		.next(function(err, info) {
+			if(info) {
+				mongoose.connection.db.dropCollection("image"+param.id);
+			}
+		});
 		param.succFunc({_id:param.id});
 	});
 };
@@ -427,7 +433,6 @@ datasetController.BatchDownload = function(param){
 		dataset: param.dataset,
 		user: param.user,
 		checkDownload: true,
-		checkAnnotation: true
 	})
 	.then(function(dataset){
 		var ext = "zip";
@@ -467,7 +472,6 @@ datasetController.BatchDownload = function(param){
 
 	})
 	.catch(function(err){
-		console.log(err);
 		param.failFunc(err);
 	});
 

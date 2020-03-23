@@ -64,6 +64,7 @@ util.CheckMaster = function (req, res, next) {
 				console.log(err);
 				return PermissionDenied();
 			}
+			if(!dataset) return PermissionDenied();
 			var isMaster = dataset.master.filter(function(master){
 				return req.user._id.toString() == master._id.toString();
 			});
