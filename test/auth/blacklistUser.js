@@ -23,11 +23,12 @@ mongoose.connect(Config.mongodb.url,{
 mongoose.pluralize(null);
 
 var userAdd = {
-	normal: {
+	blacklist: {
 		provider: "local",
-		signupEmail: "normalUser@test.com",
-		password: "normalUser",
-	},
+		signupEmail: "blacklistUser@test.com",
+		password: "blacklistUser",
+		status: "blacklist"
+	}
 };
 
 var datasetAdd = {
@@ -58,18 +59,18 @@ var dataset = {};
 var image = {};
 var csrfToken = null;
 
-describe("一般使用者權限測試", function() { 
+describe("黑名單權限測試", function() { 
 	this.timeout(5000);
 	var saltRounds = 10;
 
 	before(function(done){
 		async.series([
 			function(next){
-				var newUser = Object.assign({},userAdd.normal);
+				var newUser = Object.assign({},userAdd.blacklist);
 				newUser.password = bcrypt.hashSync(newUser.password, saltRounds);
 				User.create(newUser, function(err,result){
 					if(err) console.log(err);
-					user.normal = result;
+					user.blacklist = result;
 					next();
 				});
 			},
@@ -124,8 +125,8 @@ describe("一般使用者權限測試", function() {
 	it("login", function(done){ 
 		agent.post("/auth/login-by-password")
 		.send({
-			"email": userAdd.normal.signupEmail,
-			"password": userAdd.normal.password
+			"email": userAdd.blacklist.signupEmail,
+			"password": userAdd.blacklist.password
 		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
@@ -150,7 +151,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("ok");
-			expect(result.data._id).to.equal(user.normal._id.toString());
+			expect(result.data._id).to.equal(user.blacklist._id.toString());
 			done(); 
 		}); 
 	});
@@ -169,7 +170,7 @@ describe("一般使用者權限測試", function() {
 	it("list name", function(done){ 
 		agent.get("/user/list-name")
 		.set("x-requested-with","XMLHttpRequest")
-		.query({id:user.normal._id.toString()})
+		.query({id:user.blacklist._id.toString()})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
@@ -367,7 +368,8 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("ok");
+			expect(result.status).to.equal("fail");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -384,7 +386,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("upload not enabled");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -485,7 +487,8 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("ok");
+			expect(result.status).to.equal("fail");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -502,7 +505,8 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("ok");
+			expect(result.status).to.equal("fail");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -520,7 +524,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("auth fail");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -538,7 +542,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("annotation not enabled");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -555,7 +559,8 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("ok");
+			expect(result.status).to.equal("fail");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -573,7 +578,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("verification duplicate");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -591,7 +596,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("annotation not enabled");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -619,7 +624,8 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("ok");
+			expect(result.status).to.equal("fail");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});
@@ -637,7 +643,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("download not enabled");
+			expect(result.message).to.equal("blacklist");
 			done(); 
 		}); 
 	});

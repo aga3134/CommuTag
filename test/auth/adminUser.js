@@ -49,7 +49,7 @@ var datasetAdd = {
 		enableDownload: false,
 		enableGPS: false,
 		enableAnnotation: false,
-	}
+	},
 };
 
 var testImage = "data:image/jpeg;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7";
@@ -285,7 +285,10 @@ describe("管理員權限測試", function() {
 		agent.post("/dataset/update-dataset")
 		.set("x-requested-with","XMLHttpRequest")
 		.set("csrf-token",csrfToken)
-		.send({info:{_id:newDataset}})
+		.send({
+			dataset:dataset.allOn._id.toString(),
+			info:{}
+		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
@@ -669,7 +672,7 @@ describe("管理員權限測試", function() {
 					mongoose.connection.db.listCollections({name: "image"+idArr[i]})
 					.next(function(err, info) {
 						if(info) {
-							mongoose.connection.db.dropCollection("image"+idArr[i]);
+							mongoose.connection.db.dropCollection(info.name);
 						}
 					});
 				}

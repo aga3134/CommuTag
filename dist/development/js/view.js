@@ -2237,10 +2237,8 @@ __webpack_require__.r(__webpack_exports__);
         var data = {};
         data.dataset = this.datasetID;
         data.image = this.targetImage._id;
-        $.post("/dataset/delete-image", {
-          data: data,
-          _csrf: csrfToken
-        }, function (result) {
+        data._csrf = csrfToken;
+        $.post("/dataset/delete-image", data, function (result) {
           if (result.status != "ok") return alert("刪除失敗");
           this.ReloadImage();
           this.$q.notify("刪除成功");

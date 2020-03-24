@@ -357,7 +357,11 @@ datasetController.SetAnnotation = function(param){
 			//check if user can modify annotation
 			var editable = !image.annotation;
 			if(image.annotation){
+				var isMaster = dataset.master.filter(function(master){
+					return param.user._id.toString() == master._id.toString();
+				});
 				if(param.user.authType == "admin") editable = true;
+				else if(isMaster.length > 0) editable = true;
 				else if(param.user._id.toString() == image.annotation.user){
 					editable = true;
 				}

@@ -206,7 +206,10 @@ describe("未登入權限測試", function() {
 	it("update dataset", function(done){ 
 		agent.post("/dataset/update-dataset")
 		.set("x-requested-with","XMLHttpRequest")
-		.send({info:{}})
+		.send({
+			dataset:dataset.allOn._id.toString(),
+			info:{}
+		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
@@ -524,7 +527,7 @@ describe("未登入權限測試", function() {
 					mongoose.connection.db.listCollections({name: "image"+idArr[i]})
 					.next(function(err, info) {
 						if(info) {
-							mongoose.connection.db.dropCollection("image"+idArr[i]);
+							mongoose.connection.db.dropCollection(info.name);
 						}
 					});
 				}

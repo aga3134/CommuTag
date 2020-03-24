@@ -23,10 +23,10 @@ mongoose.connect(Config.mongodb.url,{
 mongoose.pluralize(null);
 
 var userAdd = {
-	normal: {
+	master: {
 		provider: "local",
-		signupEmail: "normalUser@test.com",
-		password: "normalUser",
+		signupEmail: "masterUser@test.com",
+		password: "masterUser"
 	},
 };
 
@@ -48,7 +48,7 @@ var datasetAdd = {
 		enableDownload: false,
 		enableGPS: false,
 		enableAnnotation: false,
-	}
+	},
 };
 
 var testImage = "data:image/jpeg;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7";
@@ -58,22 +58,23 @@ var dataset = {};
 var image = {};
 var csrfToken = null;
 
-describe("一般使用者權限測試", function() { 
+describe("版主權限測試", function() { 
 	this.timeout(5000);
 	var saltRounds = 10;
 
 	before(function(done){
 		async.series([
 			function(next){
-				var newUser = Object.assign({},userAdd.normal);
+				var newUser = Object.assign({},userAdd.master);
 				newUser.password = bcrypt.hashSync(newUser.password, saltRounds);
 				User.create(newUser, function(err,result){
 					if(err) console.log(err);
-					user.normal = result;
+					user.master = result;
 					next();
 				});
 			},
 			function(next){
+				datasetAdd.allOn.master = [user.master];
 				Dataset.create(datasetAdd.allOn, function(err,result){
 					if(err) console.log(err);
 					dataset.allOn = result;
@@ -81,6 +82,7 @@ describe("一般使用者權限測試", function() {
 				});
 			},
 			function(next){
+				datasetAdd.allOff.master = [user.master];
 				Dataset.create(datasetAdd.allOff, function(err,result){
 					if(err) console.log(err);
 					dataset.allOff = result;
@@ -110,6 +112,14 @@ describe("一般使用者權限測試", function() {
 					image.hasAnnotation = result;
 					next();
 				});
+			},
+			function(next){
+				var Image = mongoose.model("image"+dataset.allOn._id.toString(), ImageSchema);
+				Image.create({},function(err, result){
+					if(err) console.log(err);
+					image.forDelete = result;
+					next();
+				});
 			}
 		],
 		function(err,results){
@@ -124,8 +134,8 @@ describe("一般使用者權限測試", function() {
 	it("login", function(done){ 
 		agent.post("/auth/login-by-password")
 		.send({
-			"email": userAdd.normal.signupEmail,
-			"password": userAdd.normal.password
+			"email": userAdd.master.signupEmail,
+			"password": userAdd.master.password
 		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
@@ -150,7 +160,7 @@ describe("一般使用者權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("ok");
-			expect(result.data._id).to.equal(user.normal._id.toString());
+			expect(result.data._id).to.equal(user.master._id.toString());
 			done(); 
 		}); 
 	});
@@ -169,7 +179,7 @@ describe("一般使用者權限測試", function() {
 	it("list name", function(done){ 
 		agent.get("/user/list-name")
 		.set("x-requested-with","XMLHttpRequest")
-		.query({id:user.normal._id.toString()})
+		.query({id:user.master._id.toString()})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
@@ -209,9 +219,9 @@ describe("一般使用者權限測試", function() {
 		.set("x-requested-with","XMLHttpRequest")
 		.set("csrf-token",csrfToken)
 		.send({
-			id:mongoose.Types.ObjectId().toString(),
-			authType: "user",
-			status: "blacklist"
+			id:user.master._id.toString(),
+			authType: "admin",
+			status: "valid"
 		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
@@ -283,8 +293,7 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("permission denied");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -293,7 +302,7 @@ describe("一般使用者權限測試", function() {
 		agent.post("/dataset/delete-dataset")
 		.set("x-requested-with","XMLHttpRequest")
 		.set("csrf-token",csrfToken)
-		.send({id:mongoose.Types.ObjectId().toString()})
+		.send({id:dataset.allOn._id.toString()})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
@@ -333,8 +342,7 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("view not allowed");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -350,8 +358,7 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("permission denied");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -408,8 +415,7 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("view not allowed");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -419,14 +425,13 @@ describe("一般使用者權限測試", function() {
 		.set("x-requested-with","XMLHttpRequest")
 		.set("csrf-token",csrfToken)
 		.send({
-			"dataset": mongoose.Types.ObjectId().toString(),
-			"image": mongoose.Types.ObjectId().toString()
+			"dataset": dataset.allOn._id.toString(),
+			"image": image.allOn._id.toString()
 		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("permission denied");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -436,14 +441,13 @@ describe("一般使用者權限測試", function() {
 		.set("x-requested-with","XMLHttpRequest")
 		.set("csrf-token",csrfToken)
 		.send({
-			"dataset": mongoose.Types.ObjectId().toString(),
-			"image": mongoose.Types.ObjectId().toString()
+			"dataset": dataset.allOn._id.toString(),
+			"image": image.forDelete._id.toString()
 		})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("permission denied");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -467,8 +471,7 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("view not allowed");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
@@ -519,8 +522,7 @@ describe("一般使用者權限測試", function() {
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
-			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("auth fail");
+			expect(result.status).to.equal("ok");
 			done(); 
 		}); 
 	});
