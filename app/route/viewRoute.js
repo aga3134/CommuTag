@@ -6,6 +6,7 @@ var util = require("../controller/util");
 var meta = {};
 meta.version = Config.version;
 meta.hostname = Config.hostname;
+meta.logo = Config.logo;
 
 router.get('/', util.CSRF, function(req, res) {
 	meta.title = Config.siteName;
@@ -51,7 +52,8 @@ router.get('/site-info', function(req, res) {
 	var info = {
 		title: Config.siteName,
 		host: Config.hostname,
-		desc: Config.desc
+		desc: Config.desc,
+		logo: Config.logo
 	};
 	res.status(200).json({"status":"ok","data": info});
 });

@@ -5,7 +5,7 @@
 			<a href="/">
 				<q-btn flat no-caps>
 					<q-avatar size="md" square >
-						<img src="/static/image/logo.png">
+						<img :src="logo">
 					</q-avatar>
 					<div class="gt-xs q-px-md text-white text-h5 inline">{{title}}</div>
 				</q-btn>
@@ -43,12 +43,14 @@ export default {
 	data: function () {
 		return {
 			title: "",
+			logo: "/static/image/logo.png"
 		};
 	},
 	created: function(){
 		$.get("/site-info", function(result){
 			if(result.status != "ok") return;
 			this.title = result.data.title;
+			this.logo = result.data.logo;
 		}.bind(this));
 	},
 	methods: {

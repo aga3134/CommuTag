@@ -30,6 +30,7 @@
 	"hostname": "http://localhost",
 	"siteName": "CommuTag",
 	"desc": "一個讓社群分享、共同協作的圖片標註系統",
+	"logo": "/static/image/logo.png",
 	"serverPort": 8001,
 	"version": "1.0.0",
 	"defaultAdmin": {
