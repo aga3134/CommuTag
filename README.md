@@ -138,6 +138,8 @@ POST資料包括下列欄位:
 
 - desc: 分享網站網址時顯示出來的簡介
 
+- logo: 取代網站的logo，把影像複製進 static/image 資料夾裡，並把檔名寫在這邊即可
+
 - serverPort: 程式使用的port，若設為8001則在本機可用 http://localhost:8001 看到網站
 
 - version: 程式版本
