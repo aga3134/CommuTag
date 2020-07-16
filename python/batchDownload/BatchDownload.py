@@ -18,7 +18,7 @@ if __name__ == "__main__":
 	parser = ArgumentParser()
 	parser.add_argument("dataset", help="dataset id")
 	parser.add_argument("filter", help="image filter type, the value could be one of ['all','annotateFinish','verifyFinish'] ")
-	parser.add_argument("format", help="output format, the value could be one of ['folder','tfrecord'] if annotationType=='image', ['voc','yolo','tfrecord'] is annotationType=='bbox' ")
+	parser.add_argument("format", help="output format, the value could be one of ['folder'] if annotationType=='image', ['voc'] is annotationType=='bbox' ")
 	args = parser.parse_args()
 
 	#get image data

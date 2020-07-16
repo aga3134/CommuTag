@@ -2,22 +2,25 @@ from pascal_voc_writer import Writer
 import zipfile
 import cv2
 import os
+from GenInfo import GenInfo
 
 class GenVOC:
 	def __init__(self):
-		pass
+		self.genInfo = GenInfo()
 		
 	def GenFile(self,dataset,imageArr,outFile):
 		if dataset["annotationType"] == "bbox":
 			imagePath = "static/upload/dataset/"+str(dataset["_id"])+"/image/"
 			with zipfile.ZipFile(outFile,"w") as outputZip:
 				serial = 1
+
 				for image in imageArr:
 					imageFile = imagePath+str(image["_id"])+".jpg"
 					if not os.path.isfile(imageFile):
 						continue
 					outImageName = "image/"+str(serial).zfill(5)+".jpg"
 					outputZip.write(imageFile, outImageName)
+					image["imageName"] = outImageName
 
 					if image["annotation"] is not None:
 						bboxArr = image["annotation"]["annotation"]
@@ -28,6 +31,13 @@ class GenVOC:
 						outputZip.writestr(vocName,content)
 					
 					serial+=1
+
+				csvStr = self.genInfo.GenCSVString(imageArr)
+				outputZip.writestr("info.csv",csvStr)
+
+				kmlStr = self.genInfo.GenKMLString(dataset,imageArr)
+				outputZip.writestr("info.kml",kmlStr)
+
 
 	def CreateContent(self,imageName,w,h,bboxArr):
 		writer = Writer(imageName,w,h)
