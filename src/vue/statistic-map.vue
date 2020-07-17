@@ -193,15 +193,39 @@ export default {
 						}).join("<br>");
 						break;
 				}
-				var content = "<img src='"+d.url+"' class='popup-image' />";
-				content += "<div>"+tagInfo+"</div>";
+				var content = "";
+				var t = spacetime(d.dataTime).goto(s.timezone().name);
+				t = t.subtract(t.minute()%10, "minute");
+				switch(this.dataset.externalLink){
+					case "riverlog":
+						var link="https://riverlog.lass-net.org/";
+						link += "#year="+t.year();
+						link += "&date="+t.unixFmt("MM-dd");
+						link += "&time="+t.unixFmt("HH:mm");
+						link += "&lat="+d.lat;
+						link += "&lng="+d.lng;
+						link += "&zoom=12";
+						content += "<div class='popup-bt' onclick=\"window.open('"+link+"','_blank');\">前往山河事件簿</div>";
+						break;
+					case "purbao":
+						var link="https://purbao.lass-net.org/";
+						link += "?year="+t.year();
+						link += "&date="+t.unixFmt("M/d");
+						link += "&lat="+d.lat;
+						link += "&lng="+d.lng;
+						link += "&zoom=12";
+						content += "<div class='popup-bt'  onclick=\"window.open('"+link+"','_blank');\">前往紫豹在哪裡</div>";
+						break;
+				}
+				content += "<img src='"+d.url+"' class='popup-image' />";
+				content += "<div class='popup-info'>"+tagInfo+"</div>";
 				var marker = L.marker({lat:d.lat,lng:d.lng}).bindPopup(content);
 				this.markerGroup.addLayer(marker);
 			}
 		},
 		ClearMarker: function(){
 			this.markerGroup.clearLayers();
-		}
+		},
 	},
 	computed:{
 		minTimeLabel: function(){
@@ -233,8 +257,22 @@ export default {
 		overflow: auto;
 	}
 	.popup-image{
+		display: block;
 		width: 150px;
 		object-fit: contain;
+		border-radius: 3px;
+	}
+	.popup-info{
+		margin: 5px 0px;
+	}
+	.popup-bt{
+		display: inline-block;
+		margin: 5px 0px;
+		padding: 5px 10px;
+		background-color: #555555;
+		color: #ffffff;
+		border-radius: 3px;
+		cursor: pointer;
 	}
 }
 </style>

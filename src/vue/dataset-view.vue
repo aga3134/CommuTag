@@ -32,7 +32,7 @@
 			<q-infinite-scroll @load="LoadMoreImage" ref="imageScroll">
 				<div class="row q-pa-md q-col-gutter-md">
 					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in filterArr" :key="i" transition="scale">
-						<q-card class="bg-grey-7 text-white" @click="ViewImage(image);">
+						<q-card class="bg-grey-7 text-white" @click="ViewImage(image,i);">
 							<q-img :src="image.url" :ratio="16/9">
 								<div v-if="image.verifyFinish" class="absolute-bottom">
 									驗證完成
@@ -59,7 +59,7 @@
 			<q-dialog v-model="openViewImage" v-if="targetImage">
 				<q-card class="full-width">
 					<div style="height: 400px;">
-						<annotator-view :dataset="info" :image="targetImage"></annotator-view>
+						<annotator-view :dataset="info" :image="targetImage" @goToPrev="GoToPrev();" @goToNext="GoToNext();"></annotator-view>
 					</div>
 					<q-card-section>
 						<q-chip class="transparent" dense v-if="targetImage.time" icon="access_time">{{targetImage.time}}</q-chip>
@@ -74,6 +74,9 @@
 						<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 						<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
 						<q-btn v-if="CheckMasterAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
+
+						<q-btn v-if="info && info.externalLink=='riverlog' " flat label="前往山河事件簿" @click="GoToExternalLink();"></q-btn>
+						<q-btn v-if="info && info.externalLink=='purbao' " flat label="前往紫豹在哪裡" @click="GoToExternalLink();"></q-btn>
 					</q-card-actions>
 				</q-card>
 			</q-dialog>
@@ -196,6 +199,7 @@ export default {
 			imageArr: [],
 			filterArr: [],
 			targetImage: null,
+			targetIndex: -1,
 			openViewImage: false,
 			hasMore: true,
 			openUploader: false,
@@ -348,9 +352,20 @@ export default {
 				else image.verifyFinish = false;
 			}
 		},
-		ViewImage: function(image){
+		ViewImage: function(image,index){
 			this.targetImage = image;
+			this.targetIndex = index;
 			this.openViewImage = true;
+		},
+		GoToPrev: function(){
+			this.targetIndex--;
+			if(this.targetIndex < 0) this.targetIndex = 0;
+			this.targetImage = this.filterArr[this.targetIndex];
+		},
+		GoToNext: function(){
+			this.targetIndex++;
+			if(this.targetIndex >= this.filterArr.length) this.targetIndex = this.filterArr.length-1;
+			this.targetImage = this.filterArr[this.targetIndex];
 		},
 		UpdateImageInfo: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -472,6 +487,32 @@ export default {
 		        link.click();
 				this.openBatchDownload = false;
 			}.bind(this));
+		},
+		GoToExternalLink: function(){
+			var s = spacetime.now();
+			var t = spacetime(this.targetImage.dataTime).goto(s.timezone().name);
+			t = t.subtract(t.minute()%10, "minute");
+			switch(this.info.externalLink){
+				case "riverlog":
+					var link="https://riverlog.lass-net.org/";
+					link += "#year="+t.year();
+					link += "&date="+t.unixFmt("MM-dd");
+					link += "&time="+t.unixFmt("HH:mm");
+					link += "&lat="+this.targetImage.lat;
+					link += "&lng="+this.targetImage.lng;
+					link += "&zoom=12";
+					window.open(link,"_blank");
+					break;
+				case "purbao":
+					var link="https://purbao.lass-net.org/";
+					link += "?year="+t.year();
+					link += "&date="+t.unixFmt("M/d");
+					link += "&lat="+this.targetImage.lat;
+					link += "&lng="+this.targetImage.lng;
+					link += "&zoom=12";
+					window.open(link,"_blank");
+					break;
+			}
 		}
 	},
 	computed: {

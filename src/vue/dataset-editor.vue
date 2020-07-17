@@ -64,6 +64,8 @@
 						<user-list ref="masterList" enableAdd enableRemove :list="info.master" @add="AddMaster" @remove="RemoveMaster"></user-list>
 						
 					</div>
+
+					<q-select class="col-12 col-sm-6 q-pa-sm" v-model="info.externalLink" :options="externalLinkOption" option-value="value" option-label="label" emit-value map-options label="外部連結" ref="annotationType"></q-select>
 				</div>
 			</q-form>
 		</q-card-section>
@@ -93,6 +95,11 @@ export default {
 			annotationTypeOption: [
 				{"label":"框選標註","value":"bbox"},
 				{"label":"整張標註","value":"image"}
+			],
+			externalLinkOption: [
+				{"label":"無","value":""},
+				{"label":"山河事件簿","value":"riverlog"},
+				{"label":"紫豹在哪裡","value":"purbao"},
 			],
 			tagName: "",
 			uploadCover: false

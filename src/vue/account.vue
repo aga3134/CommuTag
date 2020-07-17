@@ -137,7 +137,7 @@ export default {
 		return {
 			tab: "setting",
 			user: {},
-			openLeftPanel: false,
+			openLeftPanel: $(window).width()>=1024?true:false,
 		};
 	},
 	created: function(){

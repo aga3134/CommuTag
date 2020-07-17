@@ -685,14 +685,14 @@ export default {
 				//add annotation label
 				var label = new Konva.Label({
 					x:lt.x,
-					y:lt.y-20,
+					y:lt.y-18,
 				});
 				label.add(new Konva.Tag({
 					fill: this.labelColor[annotation.tag],
 				}));
 				label.add(new Konva.Text({
 					text: annotation.tag,
-					padding: 5,
+					padding: 3,
 					fill: "#ffffff",
 					name: "BBoxLabel"
 				}));
