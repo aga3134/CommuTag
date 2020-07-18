@@ -8,9 +8,12 @@
 			<q-card class="full-width">
 				
 				<div class="text-h6 q-pa-md">選擇相機</div>
-				
+				<div class="q-px-md" v-if="lastCamera">
+					<div class="text-subtitle2">上次使用</div>
+					<q-item clickable @click="SelectCamera(lastCamera);">{{lastCamera.name}}</q-item>
+				</div>
 				<q-list bordered separator>
-					<q-item clickable v-for="camera in cameraList" :key="camera.id" v-on:click="SelectCamera(camera.id);">{{camera.name}}</q-item>
+					<q-item clickable v-for="camera in cameraList" :key="camera.id" v-on:click="SelectCamera(camera);">{{camera.name}}</q-item>
 				</q-list>
 
 			</q-card>
@@ -39,12 +42,20 @@ export default {
 		};
 	},
 	created: function(){
-		
+		this.GetLastCamera();
 	},
 	beforeDestroy: function(){
 		this.StopCamera();
 	},
 	methods: {
+		GetLastCamera: function(){
+			var storage = window.localStorage;
+			this.lastCamera = JSON.parse(localStorage.getItem("lastCamera"));
+		},
+		SetLastCamera: function(camera){
+			var storage = window.localStorage;
+			localStorage.setItem("lastCamera",JSON.stringify(camera));
+		},
 		OpenCameraSelect: function(){
 			//list device
 			if(!navigator.mediaDevices){
@@ -67,8 +78,9 @@ export default {
 				this.openCameraSelect = true;
 			}.bind(this));
 		},
-		SelectCamera(id){
-			this.selectCamera = id;
+		SelectCamera(camera){
+			this.SetLastCamera(camera);
+			this.selectCamera = camera.id;
 			this.StartCamera();
 			if(this.OnCamSelect) this.OnCamSelect();
 		},

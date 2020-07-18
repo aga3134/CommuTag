@@ -65,6 +65,9 @@ export default {
 		$.get("/dataset/view-dataset?id="+param.id, function(result){
 			if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法取得資料集資訊");
 			this.info = result.data;
+			if(this.info.enableGPS && !hash.tab){
+				this.tab = "map";
+			}
 
 			$.get("/dataset/list-image?all=1&dataset="+param.id, function(result){
 				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法取得影像資訊");

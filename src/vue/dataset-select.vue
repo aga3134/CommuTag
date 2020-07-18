@@ -2,7 +2,20 @@
 	<q-card class="dataset-select full-width q-pa-sm">
 		<q-card-section>
 			<div class="text-h6">選擇資料集</div>
-	
+			<div v-if="lastDataset">
+				<div class="text-subtitle2">上次使用</div>
+				<q-item clickable :active="selectIndex == -1" active-class="bg-green-2" @click="SelectItem(-1);" @dblclick="ConfirmSelect();">
+					<q-item-section avatar>
+						<q-avatar square rounded>
+							<img style="object-fit:cover;" :src="lastDataset.picCover || '/static/image/logo-16-9.png' ">
+						</q-avatar>
+					</q-item-section>
+					<q-item-section>
+						<q-item-label>{{lastDataset.name}}</q-item-label>
+					</q-item-section>
+				</q-item>
+			</div>
+
 			<q-scroll-area style="height: 300px;">
 				<q-infinite-scroll @load="LoadMoreDataset" ref="datasetScroll">
 					<q-input placeholder="輸入篩選文字" outlined dense square v-model="searchKey" @change="ReloadDataset();"></q-input>
@@ -54,13 +67,22 @@ export default {
 			searchKey:"",
 			datasetArr: [],
 			hasMore: true,
-			selectIndex: -1
+			selectIndex: -1,
+			lastDataset: {}
 		};
 	},
 	created: function(){
-		
+		this.GetLastDataset();
 	},
 	methods: {
+		GetLastDataset: function(){
+			var storage = window.localStorage;
+			this.lastDataset = JSON.parse(localStorage.getItem("lastDataset"));
+		},
+		SetLastDataset: function(dataset){
+			var storage = window.localStorage;
+			localStorage.setItem("lastDataset",JSON.stringify(dataset));
+		},
 		LoadMoreDataset: function(index,done){
 			var url = "/dataset/list-dataset";
 			url += "?page="+(index-1);
@@ -90,6 +112,9 @@ export default {
 			this.selectIndex = -1;
 		},
 		GetSelectDataset: function(){
+			if(this.selectIndex == -1 && this.lastDataset){
+				return this.lastDataset;
+			}
 			if(this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return null;
 			else return this.datasetArr[this.selectIndex];
 		},
@@ -98,7 +123,11 @@ export default {
 			this.$emit("change");
 		},
 		ConfirmSelect: function(){
+			if(this.selectIndex == -1 && this.lastDataset){
+				return this.$emit("confirm");
+			}
 			if(this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return alert("請選擇資料集");
+			this.SetLastDataset(this.datasetArr[this.selectIndex]);
 			this.$emit("confirm");
 		},
 		CancelSelect: function(){

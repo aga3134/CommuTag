@@ -15,7 +15,10 @@
 
 				<q-chip icon="image">影像數: {{info.picNum}}</q-chip>
 				<q-chip icon="aspect_ratio">標註數: {{info.annotationNum}}</q-chip>
-				<q-chip icon="turned_in_not">標籤: {{info.tagArr.join(", ")}}</q-chip>
+				<div class="q-pa-sm">
+					<span class="text-bold">標籤:</span>
+					{{info.tagArr.join(", ")}}
+				</div>
 			</div>
 
 			<div class="row q-px-md q-gutter-sm">
@@ -59,7 +62,7 @@
 			<q-dialog v-model="openViewImage" v-if="targetImage">
 				<q-card class="full-width">
 					<div style="height: 400px;">
-						<annotator-view :dataset="info" :image="targetImage" @goToPrev="GoToPrev();" @goToNext="GoToNext();"></annotator-view>
+						<annotator-view :dataset="info" :image="targetImage" @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></annotator-view>
 					</div>
 					<q-card-section>
 						<q-chip class="transparent" dense v-if="targetImage.time" icon="access_time">{{targetImage.time}}</q-chip>
