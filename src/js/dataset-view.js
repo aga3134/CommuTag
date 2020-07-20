@@ -1,7 +1,7 @@
 import datasetView from "../vue/dataset-view.vue"
 
 new Vue({
-  el: "#viewApp",
+  el: "#datasetViewApp",
   components:{
     "dataset-view":datasetView
   }

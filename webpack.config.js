@@ -11,8 +11,9 @@ module.exports = {
 		"js/main": ["./src/js/main.js"],
 		"js/login": ["./src/js/login.js"],
 		"js/account": ["./src/js/account.js"],
-		"js/view": ["./src/js/view.js"],
-		"js/statistic": ["./src/js/statistic.js"]
+		"js/dataset-view": ["./src/js/dataset-view.js"],
+		"js/statistic": ["./src/js/statistic.js"],
+		"js/image-view": ["./src/js/image-view.js"],
 	},
 	output:{
 		path: path.resolve(__dirname,"dist/"+Config.mode),

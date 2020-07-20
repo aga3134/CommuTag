@@ -12,7 +12,6 @@
 					<div class="text-subtitle2 q-ma-sm" style="white-space:pre-line;">{{info.desc}}</div>
 				</div>
 				
-
 				<q-chip icon="image">影像數: {{info.picNum}}</q-chip>
 				<q-chip icon="aspect_ratio">標註數: {{info.annotationNum}}</q-chip>
 				<div class="q-pa-sm">
@@ -60,28 +59,7 @@
 			</div>
 
 			<q-dialog v-model="openViewImage" v-if="targetImage">
-				<q-card class="full-width">
-					<div style="height: 400px;">
-						<annotator-view :dataset="info" :image="targetImage" @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></annotator-view>
-					</div>
-					<q-card-section>
-						<q-chip class="transparent" dense v-if="targetImage.time" icon="access_time">{{targetImage.time}}</q-chip>
-						<q-chip class="transparent" dense clickable v-if="targetImage.lat && targetImage.lng" icon="room" @click="ViewLocation();">觀看地點</q-chip>
-						<q-chip class="transparent" dense v-if="targetImage.annotation">{{'認同數 / 驗證數 : '+AgreeVerifyRatio}}</q-chip>
-						<pre class="q-mx-sm q-my-none" v-if="targetImage.remark && targetImage.remark != '' ">{{targetImage.remark}}</pre>
-					</q-card-section>
-
-					<q-card-actions>
-						<q-btn v-if="info && info.enableAnnotation" flat :label="targetImage.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
-						<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
-						<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
-						<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
-						<q-btn v-if="CheckMasterAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
-
-						<q-btn v-if="info && info.externalLink=='riverlog' " flat label="前往山河事件簿" @click="GoToExternalLink();"></q-btn>
-						<q-btn v-if="info && info.externalLink=='purbao' " flat label="前往紫豹在哪裡" @click="GoToExternalLink();"></q-btn>
-					</q-card-actions>
-				</q-card>
+				<image-control showNavigate editable :user="user" :dataset="info" :image="targetImage" @reload="ReloadImage();"  @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></image-control>
 			</q-dialog>
 
 			<q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="info && info.enableUpload">
@@ -119,32 +97,10 @@
 				</q-card>
 			</q-dialog>
 
-			<q-dialog maximized persistent v-model="openAnnotator" v-if="info">
-				<annotator :user="user" :dataset="info" :image="targetImage" @done="FinishAnnotation();" @skip="openAnnotator = false;"></annotator>
-				<div>
-					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
-				</div>
-			</q-dialog>
-
 			<q-dialog v-model="openDatasetEditor">
 				<dataset-editor :info="editInfo" @confirm="ReloadDataset();" @cancel="openDatasetEditor=false;"></dataset-editor>
 			</q-dialog>
 
-			<q-dialog v-model="openInfoEdit" v-if="targetImage">
-				<image-info ref="imageInfo" :dataset="info" :initDataTime="targetImage.dataTime" :initLat="targetImage.lat" :initLng="targetImage.lng" :initRemark="targetImage.remark" @confirm="UpdateImageInfo();" @cancel="openInfoEdit=false;"></image-info>
-			</q-dialog>
-
-			<q-dialog v-model="openLocationView" v-if="targetImage && targetImage.lat && targetImage.lng">
-
-				<q-card class="full-width q-pa-sm">
-					<div class="text-h6">資料地點</div>
-					<location-select mode="view" ref="locationSelect"></location-select>
-					<div class="text-center">座標: {{targetImage.lat.toFixed(5)+" "+targetImage.lng.toFixed(5)}}</div>
-					<q-card-actions align="center">
-						<q-btn flat label="確定" v-close-popup></q-btn>
-					</q-card-actions>
-				</q-card>
-			</q-dialog>
 		</q-page-container>
 
 		<q-footer>
@@ -159,22 +115,16 @@ import util from "../js/util.js"
 import "../scss/main.scss"
 import topbar from "./topbar.vue"
 import uploader from "./uploader.vue"
-import annotator from "./annotator.vue"
-import annotatorView from "./annotator-view.vue"
 import datasetEditor from "./dataset-editor.vue"
-import locationSelect from "./location-select.vue"
-import imageInfo from "./image-info.vue"
+import imageControl from "./image-control.vue"
 
 export default {
 	name:"dataset-view",
 	components:{
 		"topbar":topbar,
 		"uploader":uploader,
-		"annotator":annotator,
-		"annotator-view":annotatorView,
 		"dataset-editor":datasetEditor,
-		"location-select": locationSelect,
-		"image-info":imageInfo
+		"image-control":imageControl
 	},
 	data: function () {
 		return {
@@ -206,10 +156,7 @@ export default {
 			openViewImage: false,
 			hasMore: true,
 			openUploader: false,
-			openAnnotator: false,
 			openDatasetEditor: false,
-			openLocationView: false,
-			openInfoEdit: false,
 			openBatchDownload: false,
 			editInfo: null,
 			favorite: false,
@@ -370,76 +317,6 @@ export default {
 			if(this.targetIndex >= this.filterArr.length) this.targetIndex = this.filterArr.length-1;
 			this.targetImage = this.filterArr[this.targetIndex];
 		},
-		UpdateImageInfo: function(){
-			var csrfToken = $("meta[name='csrf-token']").attr("content");
-			var info = this.$refs.imageInfo.GetImageInfo();
-			var data = {};
-			data.dataset = this.datasetID;
-			data.image = this.targetImage._id;
-			data.dataTime = info.dataTime;
-			data.remark = info.remark;
-			data.lat = info.loc.lat;
-			data.lng = info.loc.lng;
-			data._csrf = csrfToken;
-			$.post("/dataset/update-image-info", data, function(result){
-				if(result.status != "ok") return alert("更新失敗");
-				this.ReloadImage();
-				this.openInfoEdit = false;
-				this.$q.notify("更新成功");
-			}.bind(this));
-		},
-		ViewLocation: function(){
-			this.openLocationView = true;
-			Vue.nextTick(function(){
-				this.$refs.locationSelect.SetPosition(this.targetImage.lat,this.targetImage.lng);
-			}.bind(this));
-		},
-		DeleteImage: function(){
-			if(confirm("確定刪除此影像?")){
-				var csrfToken = $("meta[name='csrf-token']").attr("content");
-				var data = {};
-				data.dataset = this.datasetID;
-				data.image = this.targetImage._id;
-				data._csrf = csrfToken;
-				$.post("/dataset/delete-image", data, function(result){
-					if(result.status != "ok") return alert("刪除失敗");
-					this.ReloadImage();
-					this.$q.notify("刪除成功");
-				}.bind(this));
-			}
-		},
-		DownloadImage: function(){
-			if(!this.targetImage) return;
-			var a = $("<a>")
-				.attr("href", this.targetImage.url)
-				.attr("download", this.targetImage._id+".jpg")
-				.appendTo("body");
-			a[0].click();
-			a.remove();
-		},
-		AnnotateImage: function(){
-			this.openAnnotator = true;
-		},
-		FinishAnnotation: function(){
-			this.openAnnotator = false;
-			this.openViewImage = false;
-			this.ReloadImage();
-		},
-		DeleteAnnotation: function(){
-			if(confirm("確定刪除此影像的標註?")){
-				this.openViewImage = false;
-				var csrfToken = $("meta[name='csrf-token']").attr("content");
-				var data = {};
-				data.dataset = this.datasetID;
-				data.image = this.targetImage._id;
-				data._csrf = csrfToken;
-				$.post("/dataset/set-annotation",data,function(result){
-					if(result.status != "ok") return alert("刪除標註失敗");
-					this.$q.notify("刪除標註成功");
-					this.ReloadImage();
-				}.bind(this));
-			}
-		},
 		AddFavorite: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var data = {};
@@ -519,28 +396,6 @@ export default {
 		}
 	},
 	computed: {
-		AgreeVerifyRatio: function(){
-			var str = this.targetImage.agreeNum+' / '+this.targetImage.verifyNum;
-			if(this.targetImage.verifyNum > 0){
-				str +=' ('+(100*this.targetImage.agreeNum/this.targetImage.verifyNum).toFixed(0)+'%)';
-			}
-			return str;
-		},
-		CheckAnnotationDelete: function(){
-			if(!this.user) return false;
-			if(!this.targetImage) return false;
-			if(!this.targetImage.annotation) return false;
-			if(this.user.authType == "admin") return true;
-			//使用者可以刪除自己的標註
-			if(this.targetImage.annotation.user == this.user._id) return true;
-			//確認目前使用者是不是在master list裡
-			if(!this.info) return false;
-			var isMaster = this.info.master.filter(function(master){
-				return master._id == this.user._id;
-			}.bind(this));
-			if(isMaster.length > 0) return true;
-			return false;
-		},
 		CheckMasterAuth: function(){
 			if(!this.user) return false;
 			if(this.user.authType == "admin") return true;

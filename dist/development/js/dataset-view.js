@@ -812,14 +812,14 @@ __webpack_require__.r(__webpack_exports__);
 
         var label = new Konva.Label({
           x: lt.x,
-          y: lt.y - 20
+          y: lt.y - 18
         });
         label.add(new Konva.Tag({
           fill: this.labelColor[annotation.tag]
         }));
         label.add(new Konva.Text({
           text: annotation.tag,
-          padding: 5,
+          padding: 3,
           fill: "#ffffff",
           name: "BBoxLabel"
         }));
@@ -1344,6 +1344,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "camera-capture",
   props: {},
@@ -1360,11 +1363,21 @@ __webpack_require__.r(__webpack_exports__);
       imageData: null
     };
   },
-  created: function () {},
+  created: function () {
+    this.GetLastCamera();
+  },
   beforeDestroy: function () {
     this.StopCamera();
   },
   methods: {
+    GetLastCamera: function () {
+      var storage = window.localStorage;
+      this.lastCamera = JSON.parse(localStorage.getItem("lastCamera"));
+    },
+    SetLastCamera: function (camera) {
+      var storage = window.localStorage;
+      localStorage.setItem("lastCamera", JSON.stringify(camera));
+    },
     OpenCameraSelect: function () {
       //list device
       if (!navigator.mediaDevices) {
@@ -1396,8 +1409,9 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
 
-    SelectCamera(id) {
-      this.selectCamera = id;
+    SelectCamera(camera) {
+      this.SetLastCamera(camera);
+      this.selectCamera = camera.id;
       this.StartCamera();
       if (this.OnCamSelect) this.OnCamSelect();
     },
@@ -1541,6 +1555,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1560,6 +1576,16 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         "label": "整張標註",
         "value": "image"
+      }],
+      externalLinkOption: [{
+        "label": "無",
+        "value": ""
+      }, {
+        "label": "山河事件簿",
+        "value": "riverlog"
+      }, {
+        "label": "紫豹在哪裡",
+        "value": "purbao"
       }],
       tagName: "",
       uploadCover: false
@@ -1746,6 +1772,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "dataset-select",
   props: {
@@ -1758,11 +1797,22 @@ __webpack_require__.r(__webpack_exports__);
       searchKey: "",
       datasetArr: [],
       hasMore: true,
-      selectIndex: -1
+      selectIndex: -1,
+      lastDataset: {}
     };
   },
-  created: function () {},
+  created: function () {
+    this.GetLastDataset();
+  },
   methods: {
+    GetLastDataset: function () {
+      var storage = window.localStorage;
+      this.lastDataset = JSON.parse(localStorage.getItem("lastDataset"));
+    },
+    SetLastDataset: function (dataset) {
+      var storage = window.localStorage;
+      localStorage.setItem("lastDataset", JSON.stringify(dataset));
+    },
     LoadMoreDataset: function (index, done) {
       var url = "/dataset/list-dataset";
       url += "?page=" + (index - 1);
@@ -1797,6 +1847,10 @@ __webpack_require__.r(__webpack_exports__);
       this.selectIndex = -1;
     },
     GetSelectDataset: function () {
+      if (this.selectIndex == -1 && this.lastDataset) {
+        return this.lastDataset;
+      }
+
       if (this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return null;else return this.datasetArr[this.selectIndex];
     },
     SelectItem: function (i) {
@@ -1804,7 +1858,12 @@ __webpack_require__.r(__webpack_exports__);
       this.$emit("change");
     },
     ConfirmSelect: function () {
+      if (this.selectIndex == -1 && this.lastDataset) {
+        return this.$emit("confirm");
+      }
+
       if (this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return alert("請選擇資料集");
+      this.SetLastDataset(this.datasetArr[this.selectIndex]);
       this.$emit("confirm");
     },
     CancelSelect: function () {
@@ -1829,11 +1888,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _scss_main_scss__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_scss_main_scss__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _topbar_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./topbar.vue */ "./src/vue/topbar.vue");
 /* harmony import */ var _uploader_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./uploader.vue */ "./src/vue/uploader.vue");
-/* harmony import */ var _annotator_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./annotator.vue */ "./src/vue/annotator.vue");
-/* harmony import */ var _annotator_view_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./annotator-view.vue */ "./src/vue/annotator-view.vue");
-/* harmony import */ var _dataset_editor_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./dataset-editor.vue */ "./src/vue/dataset-editor.vue");
-/* harmony import */ var _location_select_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./location-select.vue */ "./src/vue/location-select.vue");
-/* harmony import */ var _image_info_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./image-info.vue */ "./src/vue/image-info.vue");
+/* harmony import */ var _dataset_editor_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./dataset-editor.vue */ "./src/vue/dataset-editor.vue");
+/* harmony import */ var _image_control_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./image-control.vue */ "./src/vue/image-control.vue");
 //
 //
 //
@@ -1946,47 +2002,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
 
 
 
@@ -1998,11 +2013,8 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     "topbar": _topbar_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
     "uploader": _uploader_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
-    "annotator": _annotator_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
-    "annotator-view": _annotator_view_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
-    "dataset-editor": _dataset_editor_vue__WEBPACK_IMPORTED_MODULE_6__["default"],
-    "location-select": _location_select_vue__WEBPACK_IMPORTED_MODULE_7__["default"],
-    "image-info": _image_info_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
+    "dataset-editor": _dataset_editor_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
+    "image-control": _image_control_vue__WEBPACK_IMPORTED_MODULE_5__["default"]
   },
   data: function () {
     return {
@@ -2040,13 +2052,11 @@ __webpack_require__.r(__webpack_exports__);
       imageArr: [],
       filterArr: [],
       targetImage: null,
+      targetIndex: -1,
       openViewImage: false,
       hasMore: true,
       openUploader: false,
-      openAnnotator: false,
       openDatasetEditor: false,
-      openLocationView: false,
-      openInfoEdit: false,
       openBatchDownload: false,
       editInfo: null,
       favorite: false,
@@ -2203,76 +2213,20 @@ __webpack_require__.r(__webpack_exports__);
         if (rate > this.verifyCond.accept) image.verifyFinish = true;else image.verifyFinish = false;
       }
     },
-    ViewImage: function (image) {
+    ViewImage: function (image, index) {
       this.targetImage = image;
+      this.targetIndex = index;
       this.openViewImage = true;
     },
-    UpdateImageInfo: function () {
-      var csrfToken = $("meta[name='csrf-token']").attr("content");
-      var info = this.$refs.imageInfo.GetImageInfo();
-      var data = {};
-      data.dataset = this.datasetID;
-      data.image = this.targetImage._id;
-      data.dataTime = info.dataTime;
-      data.remark = info.remark;
-      data.lat = info.loc.lat;
-      data.lng = info.loc.lng;
-      data._csrf = csrfToken;
-      $.post("/dataset/update-image-info", data, function (result) {
-        if (result.status != "ok") return alert("更新失敗");
-        this.ReloadImage();
-        this.openInfoEdit = false;
-        this.$q.notify("更新成功");
-      }.bind(this));
+    GoToPrev: function () {
+      this.targetIndex--;
+      if (this.targetIndex < 0) this.targetIndex = 0;
+      this.targetImage = this.filterArr[this.targetIndex];
     },
-    ViewLocation: function () {
-      this.openLocationView = true;
-      Vue.nextTick(function () {
-        this.$refs.locationSelect.SetPosition(this.targetImage.lat, this.targetImage.lng);
-      }.bind(this));
-    },
-    DeleteImage: function () {
-      if (confirm("確定刪除此影像?")) {
-        var csrfToken = $("meta[name='csrf-token']").attr("content");
-        var data = {};
-        data.dataset = this.datasetID;
-        data.image = this.targetImage._id;
-        data._csrf = csrfToken;
-        $.post("/dataset/delete-image", data, function (result) {
-          if (result.status != "ok") return alert("刪除失敗");
-          this.ReloadImage();
-          this.$q.notify("刪除成功");
-        }.bind(this));
-      }
-    },
-    DownloadImage: function () {
-      if (!this.targetImage) return;
-      var a = $("<a>").attr("href", this.targetImage.url).attr("download", this.targetImage._id + ".jpg").appendTo("body");
-      a[0].click();
-      a.remove();
-    },
-    AnnotateImage: function () {
-      this.openAnnotator = true;
-    },
-    FinishAnnotation: function () {
-      this.openAnnotator = false;
-      this.openViewImage = false;
-      this.ReloadImage();
-    },
-    DeleteAnnotation: function () {
-      if (confirm("確定刪除此影像的標註?")) {
-        this.openViewImage = false;
-        var csrfToken = $("meta[name='csrf-token']").attr("content");
-        var data = {};
-        data.dataset = this.datasetID;
-        data.image = this.targetImage._id;
-        data._csrf = csrfToken;
-        $.post("/dataset/set-annotation", data, function (result) {
-          if (result.status != "ok") return alert("刪除標註失敗");
-          this.$q.notify("刪除標註成功");
-          this.ReloadImage();
-        }.bind(this));
-      }
+    GoToNext: function () {
+      this.targetIndex++;
+      if (this.targetIndex >= this.filterArr.length) this.targetIndex = this.filterArr.length - 1;
+      this.targetImage = this.filterArr[this.targetIndex];
     },
     AddFavorite: function () {
       var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -2333,25 +2287,249 @@ __webpack_require__.r(__webpack_exports__);
         link.click();
         this.openBatchDownload = false;
       }.bind(this));
+    },
+    GoToExternalLink: function () {
+      var s = spacetime.now();
+      var t = spacetime(this.targetImage.dataTime).goto(s.timezone().name);
+      t = t.subtract(t.minute() % 10, "minute");
+
+      switch (this.info.externalLink) {
+        case "riverlog":
+          var link = "https://riverlog.lass-net.org/";
+          link += "#year=" + t.year();
+          link += "&date=" + t.unixFmt("MM-dd");
+          link += "&time=" + t.unixFmt("HH:mm");
+          link += "&lat=" + this.targetImage.lat;
+          link += "&lng=" + this.targetImage.lng;
+          link += "&zoom=12";
+          window.open(link, "_blank");
+          break;
+
+        case "purbao":
+          var link = "https://purbao.lass-net.org/";
+          link += "?year=" + t.year();
+          link += "&date=" + t.unixFmt("M/d");
+          link += "&lat=" + this.targetImage.lat;
+          link += "&lng=" + this.targetImage.lng;
+          link += "&zoom=12";
+          window.open(link, "_blank");
+          break;
+      }
+    }
+  },
+  computed: {
+    CheckMasterAuth: function () {
+      if (!this.user) return false;
+      if (this.user.authType == "admin") return true; //確認目前使用者是不是在master list裡
+
+      if (!this.info) return false;
+      var isMaster = this.info.master.filter(function (master) {
+        return master._id == this.user._id;
+      }.bind(this));
+      if (isMaster.length > 0) return true;
+      return false;
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-control.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _annotator_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./annotator.vue */ "./src/vue/annotator.vue");
+/* harmony import */ var _annotator_view_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./annotator-view.vue */ "./src/vue/annotator-view.vue");
+/* harmony import */ var _location_select_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./location-select.vue */ "./src/vue/location-select.vue");
+/* harmony import */ var _image_info_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./image-info.vue */ "./src/vue/image-info.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "image-control",
+  props: {
+    user: Object,
+    dataset: Object,
+    image: Object,
+    showNavigate: Boolean,
+    editable: Boolean
+  },
+  components: {
+    "annotator": _annotator_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
+    "annotator-view": _annotator_view_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    "location-select": _location_select_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
+    "image-info": _image_info_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+  },
+  data: function () {
+    return {
+      openAnnotator: false,
+      openLocationView: false,
+      openInfoEdit: false
+    };
+  },
+  mounted: function () {},
+  methods: {
+    GoToPrev: function () {
+      this.$emit("goToPrev");
+    },
+    GoToNext: function () {
+      this.$emit("goToNext");
+    },
+    CloseView: function () {
+      this.$emit("closeView");
+    },
+    AnnotateImage: function () {
+      this.openAnnotator = true;
+    },
+    FinishAnnotation: function () {
+      this.openAnnotator = false;
+      this.openViewImage = false;
+      this.$emit("reload");
+    },
+    ViewLocation: function () {
+      this.openLocationView = true;
+      Vue.nextTick(function () {
+        this.$refs.locationSelect.SetPosition(this.image.lat, this.image.lng);
+      }.bind(this));
+    },
+    UpdateImageInfo: function () {
+      var csrfToken = $("meta[name='csrf-token']").attr("content");
+      var info = this.$refs.imageInfo.GetImageInfo();
+      var data = {};
+      data.dataset = this.dataset._id;
+      data.image = this.image._id;
+      data.dataTime = info.dataTime;
+      data.remark = info.remark;
+      data.lat = info.loc.lat;
+      data.lng = info.loc.lng;
+      data._csrf = csrfToken;
+      $.post("/dataset/update-image-info", data, function (result) {
+        if (result.status != "ok") return alert("更新失敗");
+        this.$emit("reload");
+        this.openInfoEdit = false;
+        this.$q.notify("更新成功");
+      }.bind(this));
+    },
+    DeleteImage: function () {
+      if (confirm("確定刪除此影像?")) {
+        var csrfToken = $("meta[name='csrf-token']").attr("content");
+        var data = {};
+        data.dataset = this.dataset._id;
+        data.image = this.image._id;
+        data._csrf = csrfToken;
+        $.post("/dataset/delete-image", data, function (result) {
+          if (result.status != "ok") return alert("刪除失敗");
+          this.$emit("reload");
+          this.$q.notify("刪除成功");
+        }.bind(this));
+      }
+    },
+    GoToImageUrl: function () {
+      if (!this.image) return;
+      window.open("/image?dataset=" + this.dataset._id + "&image=" + this.image._id, "_blank");
+    },
+    DeleteAnnotation: function () {
+      if (confirm("確定刪除此影像的標註?")) {
+        this.openViewImage = false;
+        var csrfToken = $("meta[name='csrf-token']").attr("content");
+        var data = {};
+        data.dataset = this.dataset._id;
+        data.image = this.image._id;
+        data._csrf = csrfToken;
+        $.post("/dataset/set-annotation", data, function (result) {
+          if (result.status != "ok") return alert("刪除標註失敗");
+          this.$q.notify("刪除標註成功");
+          this.$emit("reload");
+        }.bind(this));
+      }
     }
   },
   computed: {
     AgreeVerifyRatio: function () {
-      var str = this.targetImage.agreeNum + ' / ' + this.targetImage.verifyNum;
+      var str = this.image.agreeNum + ' / ' + this.image.verifyNum;
 
-      if (this.targetImage.verifyNum > 0) {
-        str += ' (' + (100 * this.targetImage.agreeNum / this.targetImage.verifyNum).toFixed(0) + '%)';
+      if (this.image.verifyNum > 0) {
+        str += ' (' + (100 * this.image.agreeNum / this.image.verifyNum).toFixed(0) + '%)';
       }
 
       return str;
     },
     CheckAnnotationDelete: function () {
       if (!this.user) return false;
-      if (!this.targetImage) return false;
-      if (!this.targetImage.annotation) return false;
+      if (!this.image) return false;
+      if (!this.image.annotation) return false;
       if (this.user.authType == "admin") return true; //使用者可以刪除自己的標註
 
-      if (this.targetImage.annotation.user == this.user._id) return true; //確認目前使用者是不是在master list裡
+      if (this.image.annotation.user == this.user._id) return true; //確認目前使用者是不是在master list裡
 
       if (!this.info) return false;
       var isMaster = this.info.master.filter(function (master) {
@@ -2364,8 +2542,8 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.user) return false;
       if (this.user.authType == "admin") return true; //確認目前使用者是不是在master list裡
 
-      if (!this.info) return false;
-      var isMaster = this.info.master.filter(function (master) {
+      if (!this.dataset) return false;
+      var isMaster = this.dataset.master.filter(function (master) {
         return master._id == this.user._id;
       }.bind(this));
       if (isMaster.length > 0) return true;
@@ -3051,13 +3229,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
-      title: ""
+      title: "",
+      logo: "/static/image/logo.png"
     };
   },
   created: function () {
     $.get("/site-info", function (result) {
       if (result.status != "ok") return;
       this.title = result.data.title;
+      this.logo = result.data.logo;
     }.bind(this));
   },
   methods: {
@@ -3227,6 +3407,7 @@ __webpack_require__.r(__webpack_exports__);
     DatasetChange: function () {
       if (this.dataset) return;
       this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
+      console.log(this.datasetSelect);
       var uploader = this.$refs.uploader;
       uploader.SetMaxRes(this.datasetSelect.maxWidth, this.datasetSelect.maxHeight);
     },
@@ -3692,6 +3873,24 @@ var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
 exports.push([module.i, ".dataset-view {\n  width: 100%;\n  height: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=style&index=0&lang=scss&":
+/*!*************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-control.vue?vue&type=style&index=0&lang=scss& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".image-control {\n  width: 100%;\n  height: 100%;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -4173,6 +4372,37 @@ module.exports = exported;
 
 var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
             var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-view.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-view.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=style&index=0&lang=scss&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-control.vue?vue&type=style&index=0&lang=scss& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./image-control.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=style&index=0&lang=scss&");
 
             content = content.__esModule ? content.default : content;
 
@@ -5699,6 +5929,32 @@ var render = function() {
                 _vm._v("選擇相機")
               ]),
               _vm._v(" "),
+              _vm.lastCamera
+                ? _c(
+                    "div",
+                    { staticClass: "q-px-md" },
+                    [
+                      _c("div", { staticClass: "text-subtitle2" }, [
+                        _vm._v("上次使用")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "q-item",
+                        {
+                          attrs: { clickable: "" },
+                          on: {
+                            click: function($event) {
+                              return _vm.SelectCamera(_vm.lastCamera)
+                            }
+                          }
+                        },
+                        [_vm._v(_vm._s(_vm.lastCamera.name))]
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
               _c(
                 "q-list",
                 { attrs: { bordered: "", separator: "" } },
@@ -5710,7 +5966,7 @@ var render = function() {
                       attrs: { clickable: "" },
                       on: {
                         click: function($event) {
-                          return _vm.SelectCamera(camera.id)
+                          return _vm.SelectCamera(camera)
                         }
                       }
                     },
@@ -6100,7 +6356,27 @@ var render = function() {
                       })
                     ],
                     1
-                  )
+                  ),
+                  _vm._v(" "),
+                  _c("q-select", {
+                    ref: "annotationType",
+                    staticClass: "col-12 col-sm-6 q-pa-sm",
+                    attrs: {
+                      options: _vm.externalLinkOption,
+                      "option-value": "value",
+                      "option-label": "label",
+                      "emit-value": "",
+                      "map-options": "",
+                      label: "外部連結"
+                    },
+                    model: {
+                      value: _vm.info.externalLink,
+                      callback: function($$v) {
+                        _vm.$set(_vm.info, "externalLink", $$v)
+                      },
+                      expression: "info.externalLink"
+                    }
+                  })
                 ],
                 1
               )
@@ -6169,6 +6445,71 @@ var render = function() {
         "q-card-section",
         [
           _c("div", { staticClass: "text-h6" }, [_vm._v("選擇資料集")]),
+          _vm._v(" "),
+          _vm.lastDataset
+            ? _c(
+                "div",
+                [
+                  _c("div", { staticClass: "text-subtitle2" }, [
+                    _vm._v("上次使用")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "q-item",
+                    {
+                      attrs: {
+                        clickable: "",
+                        active: _vm.selectIndex == -1,
+                        "active-class": "bg-green-2"
+                      },
+                      on: {
+                        click: function($event) {
+                          return _vm.SelectItem(-1)
+                        },
+                        dblclick: function($event) {
+                          return _vm.ConfirmSelect()
+                        }
+                      }
+                    },
+                    [
+                      _c(
+                        "q-item-section",
+                        { attrs: { avatar: "" } },
+                        [
+                          _c(
+                            "q-avatar",
+                            { attrs: { square: "", rounded: "" } },
+                            [
+                              _c("img", {
+                                staticStyle: { "object-fit": "cover" },
+                                attrs: {
+                                  src:
+                                    _vm.lastDataset.picCover ||
+                                    "/static/image/logo-16-9.png"
+                                }
+                              })
+                            ]
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "q-item-section",
+                        [
+                          _c("q-item-label", [
+                            _vm._v(_vm._s(_vm.lastDataset.name))
+                          ])
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            : _vm._e(),
           _vm._v(" "),
           _c(
             "q-scroll-area",
@@ -6392,8 +6733,13 @@ var render = function() {
                     _vm._v("標註數: " + _vm._s(_vm.info.annotationNum))
                   ]),
                   _vm._v(" "),
-                  _c("q-chip", { attrs: { icon: "turned_in_not" } }, [
-                    _vm._v("標籤: " + _vm._s(_vm.info.tagArr.join(", ")))
+                  _c("div", { staticClass: "q-pa-sm" }, [
+                    _c("span", { staticClass: "text-bold" }, [_vm._v("標籤:")]),
+                    _vm._v(
+                      "\n\t\t\t\t" +
+                        _vm._s(_vm.info.tagArr.join(", ")) +
+                        "\n\t\t\t"
+                    )
                   ])
                 ],
                 1
@@ -6563,7 +6909,7 @@ var render = function() {
                           staticClass: "bg-grey-7 text-white",
                           on: {
                             click: function($event) {
-                              return _vm.ViewImage(image)
+                              return _vm.ViewImage(image, i)
                             }
                           }
                         },
@@ -6626,148 +6972,29 @@ var render = function() {
                   }
                 },
                 [
-                  _c(
-                    "q-card",
-                    { staticClass: "full-width" },
-                    [
-                      _c(
-                        "div",
-                        { staticStyle: { height: "400px" } },
-                        [
-                          _c("annotator-view", {
-                            attrs: { dataset: _vm.info, image: _vm.targetImage }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "q-card-section",
-                        [
-                          _vm.targetImage.time
-                            ? _c(
-                                "q-chip",
-                                {
-                                  staticClass: "transparent",
-                                  attrs: { dense: "", icon: "access_time" }
-                                },
-                                [_vm._v(_vm._s(_vm.targetImage.time))]
-                              )
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.targetImage.lat && _vm.targetImage.lng
-                            ? _c(
-                                "q-chip",
-                                {
-                                  staticClass: "transparent",
-                                  attrs: {
-                                    dense: "",
-                                    clickable: "",
-                                    icon: "room"
-                                  },
-                                  on: {
-                                    click: function($event) {
-                                      return _vm.ViewLocation()
-                                    }
-                                  }
-                                },
-                                [_vm._v("觀看地點")]
-                              )
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.targetImage.annotation
-                            ? _c(
-                                "q-chip",
-                                {
-                                  staticClass: "transparent",
-                                  attrs: { dense: "" }
-                                },
-                                [
-                                  _vm._v(
-                                    _vm._s(
-                                      "認同數 / 驗證數 : " +
-                                        _vm.AgreeVerifyRatio
-                                    )
-                                  )
-                                ]
-                              )
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.targetImage.remark && _vm.targetImage.remark != ""
-                            ? _c("pre", { staticClass: "q-mx-sm q-my-none" }, [
-                                _vm._v(_vm._s(_vm.targetImage.remark))
-                              ])
-                            : _vm._e()
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "q-card-actions",
-                        [
-                          _vm.info && _vm.info.enableAnnotation
-                            ? _c("q-btn", {
-                                attrs: {
-                                  flat: "",
-                                  label: _vm.targetImage.annotation
-                                    ? "協助驗證"
-                                    : "協助標註"
-                                },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.AnnotateImage()
-                                  }
-                                }
-                              })
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _c("q-btn", {
-                            attrs: { flat: "", label: "下載影像" },
-                            on: {
-                              click: function($event) {
-                                return _vm.DownloadImage()
-                              }
-                            }
-                          }),
-                          _vm._v(" "),
-                          _vm.CheckAnnotationDelete
-                            ? _c("q-btn", {
-                                attrs: { flat: "", label: "刪除標註" },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.DeleteAnnotation()
-                                  }
-                                }
-                              })
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.CheckMasterAuth
-                            ? _c("q-btn", {
-                                attrs: { flat: "", label: "編輯資訊" },
-                                on: {
-                                  click: function($event) {
-                                    _vm.openInfoEdit = true
-                                  }
-                                }
-                              })
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.CheckMasterAuth
-                            ? _c("q-btn", {
-                                attrs: { flat: "", label: "刪除影像" },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.DeleteImage()
-                                  }
-                                }
-                              })
-                            : _vm._e()
-                        ],
-                        1
-                      )
-                    ],
-                    1
-                  )
+                  _c("image-control", {
+                    attrs: {
+                      showNavigate: "",
+                      editable: "",
+                      user: _vm.user,
+                      dataset: _vm.info,
+                      image: _vm.targetImage
+                    },
+                    on: {
+                      reload: function($event) {
+                        return _vm.ReloadImage()
+                      },
+                      goToPrev: function($event) {
+                        return _vm.GoToPrev()
+                      },
+                      goToNext: function($event) {
+                        return _vm.GoToNext()
+                      },
+                      closeView: function($event) {
+                        _vm.openViewImage = false
+                      }
+                    }
+                  })
                 ],
                 1
               )
@@ -6965,7 +7192,320 @@ var render = function() {
             1
           ),
           _vm._v(" "),
-          _vm.info
+          _c(
+            "q-dialog",
+            {
+              model: {
+                value: _vm.openDatasetEditor,
+                callback: function($$v) {
+                  _vm.openDatasetEditor = $$v
+                },
+                expression: "openDatasetEditor"
+              }
+            },
+            [
+              _c("dataset-editor", {
+                attrs: { info: _vm.editInfo },
+                on: {
+                  confirm: function($event) {
+                    return _vm.ReloadDataset()
+                  },
+                  cancel: function($event) {
+                    _vm.openDatasetEditor = false
+                  }
+                }
+              })
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "q-footer",
+        [
+          _c("q-btn", {
+            staticClass: "full-width bg-grey-8",
+            attrs: { icon: "home", label: "回首頁" },
+            on: {
+              click: function($event) {
+                return _vm.GoHome()
+              }
+            }
+          })
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=template&id=516f5699&lang=html&":
+/*!**********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-control.vue?vue&type=template&id=516f5699&lang=html& ***!
+  \**********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.dataset && _vm.image
+    ? _c(
+        "div",
+        { staticClass: "image-control" },
+        [
+          _c(
+            "q-card",
+            { staticClass: "full-width" },
+            [
+              _c(
+                "div",
+                { staticStyle: { height: "400px" } },
+                [
+                  _c("annotator-view", {
+                    attrs: { dataset: _vm.dataset, image: _vm.image }
+                  }),
+                  _vm._v(" "),
+                  _vm.showNavigate
+                    ? _c(
+                        "div",
+                        [
+                          _c(
+                            "q-page-sticky",
+                            { attrs: { position: "left", offset: [18, 0] } },
+                            [
+                              _c("q-btn", {
+                                attrs: {
+                                  round: "",
+                                  color: "accent",
+                                  icon: "arrow_back"
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.GoToPrev()
+                                  }
+                                }
+                              })
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "q-page-sticky",
+                            { attrs: { position: "right", offset: [18, 0] } },
+                            [
+                              _c("q-btn", {
+                                staticClass: "rotate-90",
+                                attrs: {
+                                  round: "",
+                                  color: "accent",
+                                  icon: "arrow_upward"
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.GoToNext()
+                                  }
+                                }
+                              })
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "q-page-sticky",
+                            {
+                              attrs: {
+                                position: "top-right",
+                                offset: [18, -18]
+                              }
+                            },
+                            [
+                              _c("q-btn", {
+                                attrs: {
+                                  round: "",
+                                  color: "primary",
+                                  icon: "close"
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.CloseView()
+                                  }
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    : _vm._e()
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "q-card-section",
+                [
+                  _vm.image.time
+                    ? _c(
+                        "q-chip",
+                        {
+                          staticClass: "transparent",
+                          attrs: { dense: "", icon: "access_time" }
+                        },
+                        [_vm._v(_vm._s(_vm.image.time))]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.image.lat && _vm.image.lng
+                    ? _c(
+                        "q-chip",
+                        {
+                          staticClass: "transparent",
+                          attrs: { dense: "", clickable: "", icon: "room" },
+                          on: {
+                            click: function($event) {
+                              return _vm.ViewLocation()
+                            }
+                          }
+                        },
+                        [_vm._v("觀看地點")]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.image.annotation
+                    ? _c(
+                        "q-chip",
+                        { staticClass: "transparent", attrs: { dense: "" } },
+                        [
+                          _vm._v(
+                            _vm._s("認同數 / 驗證數 : " + _vm.AgreeVerifyRatio)
+                          )
+                        ]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.image.remark && _vm.image.remark != ""
+                    ? _c("pre", { staticClass: "q-mx-sm q-my-none" }, [
+                        _vm._v(_vm._s(_vm.image.remark))
+                      ])
+                    : _vm._e()
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "q-card-actions",
+                [
+                  _vm.editable
+                    ? _c(
+                        "div",
+                        [
+                          _vm.dataset && _vm.dataset.enableAnnotation
+                            ? _c("q-btn", {
+                                attrs: {
+                                  flat: "",
+                                  label: _vm.image.annotation
+                                    ? "協助驗證"
+                                    : "協助標註"
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.AnnotateImage()
+                                  }
+                                }
+                              })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _c("q-btn", {
+                            attrs: { flat: "", label: "影像網址" },
+                            on: {
+                              click: function($event) {
+                                return _vm.GoToImageUrl()
+                              }
+                            }
+                          }),
+                          _vm._v(" "),
+                          _vm.CheckAnnotationDelete
+                            ? _c("q-btn", {
+                                attrs: { flat: "", label: "刪除標註" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.DeleteAnnotation()
+                                  }
+                                }
+                              })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.CheckMasterAuth
+                            ? _c("q-btn", {
+                                attrs: { flat: "", label: "編輯資訊" },
+                                on: {
+                                  click: function($event) {
+                                    _vm.openInfoEdit = true
+                                  }
+                                }
+                              })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.CheckMasterAuth
+                            ? _c("q-btn", {
+                                attrs: { flat: "", label: "刪除影像" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.DeleteImage()
+                                  }
+                                }
+                              })
+                            : _vm._e()
+                        ],
+                        1
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.dataset && _vm.dataset.externalLink == "riverlog"
+                    ? _c("q-btn", {
+                        attrs: { flat: "", label: "前往山河事件簿" },
+                        on: {
+                          click: function($event) {
+                            return _vm.GoToExternalLink()
+                          }
+                        }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.dataset && _vm.dataset.externalLink == "purbao"
+                    ? _c("q-btn", {
+                        attrs: { flat: "", label: "前往紫豹在哪裡" },
+                        on: {
+                          click: function($event) {
+                            return _vm.GoToExternalLink()
+                          }
+                        }
+                      })
+                    : _vm._e()
+                ],
+                1
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _vm.dataset
             ? _c(
                 "q-dialog",
                 {
@@ -6982,8 +7522,8 @@ var render = function() {
                   _c("annotator", {
                     attrs: {
                       user: _vm.user,
-                      dataset: _vm.info,
-                      image: _vm.targetImage
+                      dataset: _vm.dataset,
+                      image: _vm.image
                     },
                     on: {
                       done: function($event) {
@@ -7014,34 +7554,7 @@ var render = function() {
               )
             : _vm._e(),
           _vm._v(" "),
-          _c(
-            "q-dialog",
-            {
-              model: {
-                value: _vm.openDatasetEditor,
-                callback: function($$v) {
-                  _vm.openDatasetEditor = $$v
-                },
-                expression: "openDatasetEditor"
-              }
-            },
-            [
-              _c("dataset-editor", {
-                attrs: { info: _vm.editInfo },
-                on: {
-                  confirm: function($event) {
-                    return _vm.ReloadDataset()
-                  },
-                  cancel: function($event) {
-                    _vm.openDatasetEditor = false
-                  }
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _vm.targetImage
+          _vm.image
             ? _c(
                 "q-dialog",
                 {
@@ -7057,11 +7570,11 @@ var render = function() {
                   _c("image-info", {
                     ref: "imageInfo",
                     attrs: {
-                      dataset: _vm.info,
-                      initDataTime: _vm.targetImage.dataTime,
-                      initLat: _vm.targetImage.lat,
-                      initLng: _vm.targetImage.lng,
-                      initRemark: _vm.targetImage.remark
+                      dataset: _vm.dataset,
+                      initDataTime: _vm.image.dataTime,
+                      initLat: _vm.image.lat,
+                      initLng: _vm.image.lng,
+                      initRemark: _vm.image.remark
                     },
                     on: {
                       confirm: function($event) {
@@ -7077,7 +7590,7 @@ var render = function() {
               )
             : _vm._e(),
           _vm._v(" "),
-          _vm.targetImage && _vm.targetImage.lat && _vm.targetImage.lng
+          _vm.image && _vm.image.lat && _vm.image.lng
             ? _c(
                 "q-dialog",
                 {
@@ -7107,9 +7620,9 @@ var render = function() {
                         _vm._v(
                           "座標: " +
                             _vm._s(
-                              _vm.targetImage.lat.toFixed(5) +
+                              _vm.image.lat.toFixed(5) +
                                 " " +
-                                _vm.targetImage.lng.toFixed(5)
+                                _vm.image.lng.toFixed(5)
                             )
                         )
                       ]),
@@ -7136,26 +7649,8 @@ var render = function() {
             : _vm._e()
         ],
         1
-      ),
-      _vm._v(" "),
-      _c(
-        "q-footer",
-        [
-          _c("q-btn", {
-            staticClass: "full-width bg-grey-8",
-            attrs: { icon: "home", label: "回首頁" },
-            on: {
-              click: function($event) {
-                return _vm.GoHome()
-              }
-            }
-          })
-        ],
-        1
       )
-    ],
-    1
-  )
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -7628,7 +8123,7 @@ var render = function() {
                 { attrs: { flat: "", "no-caps": "" } },
                 [
                   _c("q-avatar", { attrs: { size: "md", square: "" } }, [
-                    _c("img", { attrs: { src: "/static/image/logo.png" } })
+                    _c("img", { attrs: { src: _vm.logo } })
                   ]),
                   _vm._v(" "),
                   _c(
@@ -8465,6 +8960,26 @@ function normalizeComponent (
 
 /***/ }),
 
+/***/ "./src/js/dataset-view.js":
+/*!********************************!*\
+  !*** ./src/js/dataset-view.js ***!
+  \********************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _vue_dataset_view_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vue/dataset-view.vue */ "./src/vue/dataset-view.vue");
+
+new Vue({
+  el: "#datasetViewApp",
+  components: {
+    "dataset-view": _vue_dataset_view_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  }
+});
+
+/***/ }),
+
 /***/ "./src/js/util.js":
 /*!************************!*\
   !*** ./src/js/util.js ***!
@@ -8517,26 +9032,6 @@ var util = {
   PadLeft: PadLeft
 };
 /* harmony default export */ __webpack_exports__["default"] = (util);
-
-/***/ }),
-
-/***/ "./src/js/view.js":
-/*!************************!*\
-  !*** ./src/js/view.js ***!
-  \************************/
-/*! no exports provided */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _vue_dataset_view_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vue/dataset-view.vue */ "./src/vue/dataset-view.vue");
-
-new Vue({
-  el: "#viewApp",
-  components: {
-    "dataset-view": _vue_dataset_view_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
-  }
-});
 
 /***/ }),
 
@@ -9262,6 +9757,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_view_vue_vue_type_template_id_890bd9c8_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_view_vue_vue_type_template_id_890bd9c8_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/image-control.vue":
+/*!***********************************!*\
+  !*** ./src/vue/image-control.vue ***!
+  \***********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _image_control_vue_vue_type_template_id_516f5699_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./image-control.vue?vue&type=template&id=516f5699&lang=html& */ "./src/vue/image-control.vue?vue&type=template&id=516f5699&lang=html&");
+/* harmony import */ var _image_control_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./image-control.vue?vue&type=script&lang=js& */ "./src/vue/image-control.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./image-control.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/image-control.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _image_control_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _image_control_vue_vue_type_template_id_516f5699_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _image_control_vue_vue_type_template_id_516f5699_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/image-control.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/image-control.vue?vue&type=script&lang=js&":
+/*!************************************************************!*\
+  !*** ./src/vue/image-control.vue?vue&type=script&lang=js& ***!
+  \************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./image-control.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/image-control.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************!*\
+  !*** ./src/vue/image-control.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./image-control.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/image-control.vue?vue&type=template&id=516f5699&lang=html&":
+/*!****************************************************************************!*\
+  !*** ./src/vue/image-control.vue?vue&type=template&id=516f5699&lang=html& ***!
+  \****************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_template_id_516f5699_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./image-control.vue?vue&type=template&id=516f5699&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/image-control.vue?vue&type=template&id=516f5699&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_template_id_516f5699_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_image_control_vue_vue_type_template_id_516f5699_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
@@ -10051,16 +10633,16 @@ __webpack_require__.r(__webpack_exports__);
 /***/ }),
 
 /***/ 3:
-/*!******************************!*\
-  !*** multi ./src/js/view.js ***!
-  \******************************/
+/*!**************************************!*\
+  !*** multi ./src/js/dataset-view.js ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! ./src/js/view.js */"./src/js/view.js");
+module.exports = __webpack_require__(/*! ./src/js/dataset-view.js */"./src/js/dataset-view.js");
 
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=view.js.map
+//# sourceMappingURL=dataset-view.js.map

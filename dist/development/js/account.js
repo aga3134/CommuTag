@@ -521,7 +521,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       tab: "setting",
       user: {},
-      openLeftPanel: false
+      openLeftPanel: $(window).width() >= 1024 ? true : false
     };
   },
   created: function () {
@@ -755,6 +755,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -774,6 +776,16 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         "label": "整張標註",
         "value": "image"
+      }],
+      externalLinkOption: [{
+        "label": "無",
+        "value": ""
+      }, {
+        "label": "山河事件簿",
+        "value": "riverlog"
+      }, {
+        "label": "紫豹在哪裡",
+        "value": "purbao"
       }],
       tagName: "",
       uploadCover: false
@@ -1077,7 +1089,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     GoToDataset: function (dataset) {
-      window.location.href = "/view?id=" + dataset._id;
+      window.location.href = "/dataset?id=" + dataset._id;
     }
   }
 });
@@ -1342,13 +1354,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
-      title: ""
+      title: "",
+      logo: "/static/image/logo.png"
     };
   },
   created: function () {
     $.get("/site-info", function (result) {
       if (result.status != "ok") return;
       this.title = result.data.title;
+      this.logo = result.data.logo;
     }.bind(this));
   },
   methods: {
@@ -3741,7 +3755,27 @@ var render = function() {
                       })
                     ],
                     1
-                  )
+                  ),
+                  _vm._v(" "),
+                  _c("q-select", {
+                    ref: "annotationType",
+                    staticClass: "col-12 col-sm-6 q-pa-sm",
+                    attrs: {
+                      options: _vm.externalLinkOption,
+                      "option-value": "value",
+                      "option-label": "label",
+                      "emit-value": "",
+                      "map-options": "",
+                      label: "外部連結"
+                    },
+                    model: {
+                      value: _vm.info.externalLink,
+                      callback: function($$v) {
+                        _vm.$set(_vm.info, "externalLink", $$v)
+                      },
+                      expression: "info.externalLink"
+                    }
+                  })
                 ],
                 1
               )
@@ -4179,7 +4213,7 @@ var render = function() {
                 { attrs: { flat: "", "no-caps": "" } },
                 [
                   _c("q-avatar", { attrs: { size: "md", square: "" } }, [
-                    _c("img", { attrs: { src: "/static/image/logo.png" } })
+                    _c("img", { attrs: { src: _vm.logo } })
                   ]),
                   _vm._v(" "),
                   _c(

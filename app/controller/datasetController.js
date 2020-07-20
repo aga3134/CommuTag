@@ -187,6 +187,31 @@ datasetController.ViewDataset = function(param){
 	});
 };
 
+datasetController.ViewImage = function(param){
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true
+	})
+	.then(function(result){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		Image.findOne({_id:param.image},{"__v":0})
+		.exec(function(err, image){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"find image fail"});
+			}
+			if(param.all == "1"){
+				param.succFunc(images);
+			}
+			param.succFunc(image);
+		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
+	});
+};
+
 datasetController.ChangeCover = function(param){
 	var randomStr = "?rand="+Math.floor(Math.random()*100);
 	var modify = {};

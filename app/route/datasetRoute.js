@@ -80,6 +80,20 @@ router.get('/view-dataset', function(req, res) {
 	datasetController.ViewDataset(param);
 });
 
+router.get('/view-image', function(req, res) {
+	var param = {};
+	param.user = req.user;
+	param.dataset = req.query.dataset;
+	param.image = req.query.image;
+	param.succFunc = function(result){
+		res.status(200).json({"status":"ok","data": result});
+	};
+	param.failFunc = function(result){
+		res.status(200).json({"status": "fail","message": result.err});
+	};
+	datasetController.ViewImage(param);
+});
+
 router.post('/change-cover', util.CheckMaster, util.CSRF, upload.UploadImageToMem, function(req, res){	
 	var param = {};
 	param.id = req.body.dataset;

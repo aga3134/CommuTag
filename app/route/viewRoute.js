@@ -32,12 +32,20 @@ router.get('/account', util.CheckLogin, util.CSRF, function(req, res) {
 	res.render("account.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
-router.get('/view', util.CSRF, function(req, res) {
+router.get('/dataset', util.CSRF, function(req, res) {
 	meta.title = Config.siteName;
 	meta.desc = Config.desc;
 	meta.path = req.originalUrl;
 	meta.csrfToken = req.csrfToken();
-	res.render("view.ejs",{meta: meta, user:req.user,mode:Config.mode});
+	res.render("dataset-view.ejs",{meta: meta, user:req.user,mode:Config.mode});
+});
+
+router.get('/image', util.CSRF, function(req, res) {
+	meta.title = Config.siteName;
+	meta.desc = Config.desc;
+	meta.path = req.originalUrl;
+	meta.csrfToken = req.csrfToken();
+	res.render("image-view.ejs",{meta: meta, user:req.user,mode:Config.mode});
 });
 
 router.get('/statistic', util.CSRF, function(req, res) {

@@ -3,15 +3,6 @@
 		<div class="fit" v-if="dataset && image">
 			<annotator-image v-if="dataset.annotationType=='image' " :dataset="dataset" :image="image" task="view"></annotator-image>
 			<annotator-bbox v-if="dataset.annotationType=='bbox' " :dataset="dataset" :image="image" task="view"></annotator-bbox>
-			<q-page-sticky position="left" :offset="[18, 0]">
-				<q-btn round color="accent" icon="arrow_back" @click="GoToPrev();"></q-btn>
-			</q-page-sticky>
-			<q-page-sticky position="right" :offset="[18, 0]">
-				<q-btn round color="accent" icon="arrow_upward" class="rotate-90" @click="GoToNext();"></q-btn>
-			</q-page-sticky>
-			<q-page-sticky position="top-right" :offset="[18, -18]">
-				<q-btn round color="primary" icon="close" @click="CloseView();"></q-btn>
-			</q-page-sticky>
 		</div>
 		<div class="fit row justify-center items-center" v-else>
 			<div class="text-h5 text-white">無影像</div>
@@ -44,15 +35,7 @@ export default {
 
 	},
 	methods: {
-		GoToPrev: function(){
-			this.$emit("goToPrev");
-		},
-		GoToNext: function(){
-			this.$emit("goToNext");
-		},
-		CloseView: function(){
-			this.$emit("closeView");
-		}
+		
 	}
 }
 </script>

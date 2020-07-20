@@ -146,7 +146,7 @@ export default {
 			}
 		},
 		GoToDataset: function(dataset){
-			window.location.href="/view?id="+dataset._id;
+			window.location.href="/dataset?id="+dataset._id;
 		}
 	}
 }

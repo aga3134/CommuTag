@@ -812,14 +812,14 @@ __webpack_require__.r(__webpack_exports__);
 
         var label = new Konva.Label({
           x: lt.x,
-          y: lt.y - 20
+          y: lt.y - 18
         });
         label.add(new Konva.Tag({
           fill: this.labelColor[annotation.tag]
         }));
         label.add(new Konva.Text({
           text: annotation.tag,
-          padding: 5,
+          padding: 3,
           fill: "#ffffff",
           name: "BBoxLabel"
         }));
@@ -1299,6 +1299,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "camera-capture",
   props: {},
@@ -1315,11 +1318,21 @@ __webpack_require__.r(__webpack_exports__);
       imageData: null
     };
   },
-  created: function () {},
+  created: function () {
+    this.GetLastCamera();
+  },
   beforeDestroy: function () {
     this.StopCamera();
   },
   methods: {
+    GetLastCamera: function () {
+      var storage = window.localStorage;
+      this.lastCamera = JSON.parse(localStorage.getItem("lastCamera"));
+    },
+    SetLastCamera: function (camera) {
+      var storage = window.localStorage;
+      localStorage.setItem("lastCamera", JSON.stringify(camera));
+    },
     OpenCameraSelect: function () {
       //list device
       if (!navigator.mediaDevices) {
@@ -1351,8 +1364,9 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
 
-    SelectCamera(id) {
-      this.selectCamera = id;
+    SelectCamera(camera) {
+      this.SetLastCamera(camera);
+      this.selectCamera = camera.id;
       this.StartCamera();
       if (this.OnCamSelect) this.OnCamSelect();
     },
@@ -1496,6 +1510,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1515,6 +1531,16 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         "label": "整張標註",
         "value": "image"
+      }],
+      externalLinkOption: [{
+        "label": "無",
+        "value": ""
+      }, {
+        "label": "山河事件簿",
+        "value": "riverlog"
+      }, {
+        "label": "紫豹在哪裡",
+        "value": "purbao"
       }],
       tagName: "",
       uploadCover: false
@@ -1818,7 +1844,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     GoToDataset: function (dataset) {
-      window.location.href = "/view?id=" + dataset._id;
+      window.location.href = "/dataset?id=" + dataset._id;
     }
   }
 });
@@ -1874,6 +1900,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "dataset-select",
   props: {
@@ -1886,11 +1925,22 @@ __webpack_require__.r(__webpack_exports__);
       searchKey: "",
       datasetArr: [],
       hasMore: true,
-      selectIndex: -1
+      selectIndex: -1,
+      lastDataset: {}
     };
   },
-  created: function () {},
+  created: function () {
+    this.GetLastDataset();
+  },
   methods: {
+    GetLastDataset: function () {
+      var storage = window.localStorage;
+      this.lastDataset = JSON.parse(localStorage.getItem("lastDataset"));
+    },
+    SetLastDataset: function (dataset) {
+      var storage = window.localStorage;
+      localStorage.setItem("lastDataset", JSON.stringify(dataset));
+    },
     LoadMoreDataset: function (index, done) {
       var url = "/dataset/list-dataset";
       url += "?page=" + (index - 1);
@@ -1925,6 +1975,10 @@ __webpack_require__.r(__webpack_exports__);
       this.selectIndex = -1;
     },
     GetSelectDataset: function () {
+      if (this.selectIndex == -1 && this.lastDataset) {
+        return this.lastDataset;
+      }
+
       if (this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return null;else return this.datasetArr[this.selectIndex];
     },
     SelectItem: function (i) {
@@ -1932,7 +1986,12 @@ __webpack_require__.r(__webpack_exports__);
       this.$emit("change");
     },
     ConfirmSelect: function () {
+      if (this.selectIndex == -1 && this.lastDataset) {
+        return this.$emit("confirm");
+      }
+
       if (this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return alert("請選擇資料集");
+      this.SetLastDataset(this.datasetArr[this.selectIndex]);
       this.$emit("confirm");
     },
     CancelSelect: function () {
@@ -2707,13 +2766,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
-      title: ""
+      title: "",
+      logo: "/static/image/logo.png"
     };
   },
   created: function () {
     $.get("/site-info", function (result) {
       if (result.status != "ok") return;
       this.title = result.data.title;
+      this.logo = result.data.logo;
     }.bind(this));
   },
   methods: {
@@ -2883,6 +2944,7 @@ __webpack_require__.r(__webpack_exports__);
     DatasetChange: function () {
       if (this.dataset) return;
       this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
+      console.log(this.datasetSelect);
       var uploader = this.$refs.uploader;
       uploader.SetMaxRes(this.datasetSelect.maxWidth, this.datasetSelect.maxHeight);
     },
@@ -5300,6 +5362,32 @@ var render = function() {
                 _vm._v("選擇相機")
               ]),
               _vm._v(" "),
+              _vm.lastCamera
+                ? _c(
+                    "div",
+                    { staticClass: "q-px-md" },
+                    [
+                      _c("div", { staticClass: "text-subtitle2" }, [
+                        _vm._v("上次使用")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "q-item",
+                        {
+                          attrs: { clickable: "" },
+                          on: {
+                            click: function($event) {
+                              return _vm.SelectCamera(_vm.lastCamera)
+                            }
+                          }
+                        },
+                        [_vm._v(_vm._s(_vm.lastCamera.name))]
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
               _c(
                 "q-list",
                 { attrs: { bordered: "", separator: "" } },
@@ -5311,7 +5399,7 @@ var render = function() {
                       attrs: { clickable: "" },
                       on: {
                         click: function($event) {
-                          return _vm.SelectCamera(camera.id)
+                          return _vm.SelectCamera(camera)
                         }
                       }
                     },
@@ -5701,7 +5789,27 @@ var render = function() {
                       })
                     ],
                     1
-                  )
+                  ),
+                  _vm._v(" "),
+                  _c("q-select", {
+                    ref: "annotationType",
+                    staticClass: "col-12 col-sm-6 q-pa-sm",
+                    attrs: {
+                      options: _vm.externalLinkOption,
+                      "option-value": "value",
+                      "option-label": "label",
+                      "emit-value": "",
+                      "map-options": "",
+                      label: "外部連結"
+                    },
+                    model: {
+                      value: _vm.info.externalLink,
+                      callback: function($$v) {
+                        _vm.$set(_vm.info, "externalLink", $$v)
+                      },
+                      expression: "info.externalLink"
+                    }
+                  })
                 ],
                 1
               )
@@ -6077,6 +6185,71 @@ var render = function() {
         "q-card-section",
         [
           _c("div", { staticClass: "text-h6" }, [_vm._v("選擇資料集")]),
+          _vm._v(" "),
+          _vm.lastDataset
+            ? _c(
+                "div",
+                [
+                  _c("div", { staticClass: "text-subtitle2" }, [
+                    _vm._v("上次使用")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "q-item",
+                    {
+                      attrs: {
+                        clickable: "",
+                        active: _vm.selectIndex == -1,
+                        "active-class": "bg-green-2"
+                      },
+                      on: {
+                        click: function($event) {
+                          return _vm.SelectItem(-1)
+                        },
+                        dblclick: function($event) {
+                          return _vm.ConfirmSelect()
+                        }
+                      }
+                    },
+                    [
+                      _c(
+                        "q-item-section",
+                        { attrs: { avatar: "" } },
+                        [
+                          _c(
+                            "q-avatar",
+                            { attrs: { square: "", rounded: "" } },
+                            [
+                              _c("img", {
+                                staticStyle: { "object-fit": "cover" },
+                                attrs: {
+                                  src:
+                                    _vm.lastDataset.picCover ||
+                                    "/static/image/logo-16-9.png"
+                                }
+                              })
+                            ]
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "q-item-section",
+                        [
+                          _c("q-item-label", [
+                            _vm._v(_vm._s(_vm.lastDataset.name))
+                          ])
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            : _vm._e(),
           _vm._v(" "),
           _c(
             "q-scroll-area",
@@ -6833,7 +7006,7 @@ var render = function() {
                 { attrs: { flat: "", "no-caps": "" } },
                 [
                   _c("q-avatar", { attrs: { size: "md", square: "" } }, [
-                    _c("img", { attrs: { src: "/static/image/logo.png" } })
+                    _c("img", { attrs: { src: _vm.logo } })
                   ]),
                   _vm._v(" "),
                   _c(

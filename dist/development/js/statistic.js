@@ -164,6 +164,11 @@ __webpack_require__.r(__webpack_exports__);
     $.get("/dataset/view-dataset?id=" + param.id, function (result) {
       if (result.status != "ok") return window.location.href = "/?message=" + encodeURIComponent("無法取得資料集資訊");
       this.info = result.data;
+
+      if (this.info.enableGPS && !hash.tab) {
+        this.tab = "map";
+      }
+
       $.get("/dataset/list-image?all=1&dataset=" + param.id, function (result) {
         if (result.status != "ok") return window.location.href = "/?message=" + encodeURIComponent("無法取得影像資訊");
         this.imageArr = result.data;
@@ -1384,8 +1389,35 @@ __webpack_require__.r(__webpack_exports__);
             break;
         }
 
-        var content = "<img src='" + d.url + "' class='popup-image' />";
-        content += "<div>" + tagInfo + "</div>";
+        var content = "";
+        var t = spacetime(d.dataTime).goto(s.timezone().name);
+        t = t.subtract(t.minute() % 10, "minute");
+
+        switch (this.dataset.externalLink) {
+          case "riverlog":
+            var link = "https://riverlog.lass-net.org/";
+            link += "#year=" + t.year();
+            link += "&date=" + t.unixFmt("MM-dd");
+            link += "&time=" + t.unixFmt("HH:mm");
+            link += "&lat=" + d.lat;
+            link += "&lng=" + d.lng;
+            link += "&zoom=12";
+            content += "<div class='popup-bt' onclick=\"window.open('" + link + "','_blank');\">前往山河事件簿</div>";
+            break;
+
+          case "purbao":
+            var link = "https://purbao.lass-net.org/";
+            link += "?year=" + t.year();
+            link += "&date=" + t.unixFmt("M/d");
+            link += "&lat=" + d.lat;
+            link += "&lng=" + d.lng;
+            link += "&zoom=12";
+            content += "<div class='popup-bt'  onclick=\"window.open('" + link + "','_blank');\">前往紫豹在哪裡</div>";
+            break;
+        }
+
+        content += "<img src='" + d.url + "' class='popup-image' />";
+        content += "<div class='popup-info'>" + tagInfo + "</div>";
         var marker = L.marker({
           lat: d.lat,
           lng: d.lng
@@ -1462,13 +1494,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
-      title: ""
+      title: "",
+      logo: "/static/image/logo.png"
     };
   },
   created: function () {
     $.get("/site-info", function (result) {
       if (result.status != "ok") return;
       this.title = result.data.title;
+      this.logo = result.data.logo;
     }.bind(this));
   },
   methods: {
@@ -1563,7 +1597,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".statistic-map {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n.statistic-map .map {\n    width: 100%;\n    height: 100%;\n}\n.statistic-map .option-panel {\n    width: 100%;\n    padding: 20px;\n    background-color: rgba(100, 100, 100, 0.8);\n    color: white;\n    overflow: auto;\n}\n.statistic-map .popup-image {\n    width: 150px;\n    object-fit: contain;\n}\n", ""]);
+exports.push([module.i, ".statistic-map {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n.statistic-map .map {\n    width: 100%;\n    height: 100%;\n}\n.statistic-map .option-panel {\n    width: 100%;\n    padding: 20px;\n    background-color: rgba(100, 100, 100, 0.8);\n    color: white;\n    overflow: auto;\n}\n.statistic-map .popup-image {\n    display: block;\n    width: 150px;\n    object-fit: contain;\n    border-radius: 3px;\n}\n.statistic-map .popup-info {\n    margin: 5px 0px;\n}\n.statistic-map .popup-bt {\n    display: inline-block;\n    margin: 5px 0px;\n    padding: 5px 10px;\n    background-color: #555555;\n    color: #ffffff;\n    border-radius: 3px;\n    cursor: pointer;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -2927,7 +2961,7 @@ var render = function() {
                 { attrs: { flat: "", "no-caps": "" } },
                 [
                   _c("q-avatar", { attrs: { size: "md", square: "" } }, [
-                    _c("img", { attrs: { src: "/static/image/logo.png" } })
+                    _c("img", { attrs: { src: _vm.logo } })
                   ]),
                   _vm._v(" "),
                   _c(
