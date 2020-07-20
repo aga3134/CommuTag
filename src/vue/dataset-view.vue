@@ -9,7 +9,7 @@
 				<div class="text-h4 q-ma-sm">
 					{{info.name}}
 					<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
-					<div class="text-subtitle2 q-ma-sm" style="white-space:pre-line;">{{info.desc}}</div>
+					<div class="text-subtitle2 q-ma-sm" style="white-space:pre-line;" v-html="info.descWithLink"></div>
 				</div>
 				
 				<q-chip icon="image">影像數: {{info.picNum}}</q-chip>
@@ -192,6 +192,10 @@ export default {
 			$.get("/dataset/view-dataset?id="+this.datasetID, function(result){
 				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示資料集");;
 				this.info = result.data;
+				//將網址設成可直接點擊
+				var re = /(?![^<]*>|[^<>]*<\/)((https?:)\/\/[a-z0-9&#=.\/\-?_]+)/gi;
+				var subst = '<a href="$1" target="_blank">$1</a>'; 
+				this.info.descWithLink = this.info.desc.replace(re,subst);
 
 				this.badgeArr = [];
 				if(!this.info.isPublic) this.badgeArr.push("不公開");

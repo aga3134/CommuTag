@@ -31,7 +31,7 @@
 		</q-dialog>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'info'">
-			<image-info ref="imageInfo" :dataset="datasetSelect" @confirm="UpdateImageInfo();NextStep();" @cancel="PrevStep();"></image-info>
+			<image-info ref="imageInfo" :dataset="datasetSelect" :initLat="initLoc.lat" :initLng="initLoc.lng" @confirm="UpdateImageInfo();NextStep();" @cancel="PrevStep();"></image-info>
 		</q-dialog>
 
 		<image-upload ref="uploader" v-show="false"></image-upload>
@@ -70,7 +70,8 @@ export default {
 			stepArr:[],
 			step:0,
 			datasetSelect:null,
-			imageInfo: null
+			imageInfo: null,
+			initLoc: {}
 		};
 	},
 	mounted: function(){
@@ -108,6 +109,7 @@ export default {
 		SelectFile: function(){
 			var uploader = this.$refs.uploader;
 			uploader.OnChange = function(){
+				this.initLoc = uploader.loc;
 				this.$refs.imageEdit.SetImage(uploader.imageData);
 				this.NextStep();
 			}.bind(this);
