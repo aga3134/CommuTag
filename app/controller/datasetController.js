@@ -173,6 +173,19 @@ datasetController.ListDataset = function(param){
 
 };
 
+datasetController.ListDatasetByID = function(param){
+	var query = {};
+	query._id = param.id.split(",");
+	Dataset.find(query,{"name":1,"picCover":1})
+		.exec(function(err, dataset){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"list dataset fail"});
+			}
+			param.succFunc(dataset);
+		});
+};
+
 datasetController.ViewDataset = function(param){
 	CheckDatasetAuth({
 		dataset: param.id,

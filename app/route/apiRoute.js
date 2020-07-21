@@ -11,6 +11,8 @@ router.post('/add-key', util.CheckAdmin,util.CSRF, function(req, res){
 	var param = {};
 	param.key = req.body.key;
 	param.desc = req.body.desc;
+	param.scope = req.body.scope||"all";
+	param.dataset = req.body.dataset||[];
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};

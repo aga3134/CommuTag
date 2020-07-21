@@ -193,10 +193,12 @@ export default {
 				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示資料集");;
 				this.info = result.data;
 				//將網址設成可直接點擊
-				var re = /(?![^<]*>|[^<>]*<\/)((https?:)\/\/[a-z0-9&#=.\/\-?_]+)/gi;
-				var subst = '<a href="$1" target="_blank">$1</a>'; 
-				this.info.descWithLink = this.info.desc.replace(re,subst);
-
+				if(this.info.desc){
+					var re = /(?![^<]*>|[^<>]*<\/)((https?:)\/\/[a-z0-9&#=.\/\-?_]+)/gi;
+					var subst = '<a href="$1" target="_blank">$1</a>'; 
+					this.info.descWithLink = this.info.desc.replace(re,subst);
+				}
+				
 				this.badgeArr = [];
 				if(!this.info.isPublic) this.badgeArr.push("不公開");
 				if(this.info.enableGPS) this.badgeArr.push("GPS");

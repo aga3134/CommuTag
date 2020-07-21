@@ -12,7 +12,9 @@ var apiController = {};
 apiController.AddKey = function(param){
 	var data = {
 		key: param.key,
-		desc: param.desc
+		desc: param.desc,
+		scope: param.scope,
+		dataset: param.dataset
 	};
 	ApiKey.updateOne({key: param.key},data,{upsert:true},function(err, key){
 		if(err){
@@ -51,6 +53,14 @@ function CheckApiAuth(param){
 				return reject({err:"find key fail"});
 			}
 			if(!key) return reject({err:"key not found"});
+			if(key.scope == "target"){
+				var found = key.dataset.filter(function(d){
+					return d == param.dataset;
+				});
+				if(found.length == 0){
+					return reject({err:"dataset not in target"});
+				}
+			}
 
 			Dataset.findOne({_id:param.dataset},{"__v":0})
 			.exec(function(err, result){

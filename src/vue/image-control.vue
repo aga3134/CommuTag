@@ -130,6 +130,7 @@ export default {
 		if(hasAnnotator){
 			idArr.push(this.image.annotation.user);
 		}
+		if(idArr.length == 0) return;
 		$.get("/user/list-name?id="+idArr.join(),function(result){
 			if(result.status != "ok") return alert("取得貢獻者資料失敗");
 			var userHash = {};
