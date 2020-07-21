@@ -86,7 +86,7 @@ export default {
 	},
 	methods: {
 		GoToDataset: function(){
-			window.location.href="/view?id="+this.datasetID;
+			window.location.href="/dataset?id="+this.datasetID;
 		},
 		InitTabContent: function(){
 			Vue.nextTick(function(){

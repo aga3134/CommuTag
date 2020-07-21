@@ -297,9 +297,13 @@ __webpack_require__.r(__webpack_exports__);
         var h = i % binNum * step;
         var s = 1 - parseInt(i * step) % binNum * step;
         var v = 1 - parseInt(i * step * step) % binNum * step;
-        var color = this.HSVtoRGB(h, s, v, 1);
+        var bgColor = this.HSVtoRGB(h, s, v, 1);
+        var fgColor = v >= 0.5 ? "#000000" : "#ffffff";
         var tag = this.dataset.tagArr[i];
-        this.labelColor[tag] = color;
+        this.labelColor[tag] = {
+          "fg": fgColor,
+          "bg": bgColor
+        };
       }
     },
     BoundInImage: function (pos) {
@@ -543,12 +547,13 @@ __webpack_require__.r(__webpack_exports__);
       var tag = this.$refs.tagSelect.selectTag;
       if (!tag || tag == "") return alert("請選擇標籤");
       this.target.tag = tag;
-      var color = this.labelColor[tag];
+      var bgColor = this.labelColor[tag].bg;
+      var fgColor = this.labelColor[tag].fg;
       var bbox = this.target.node.find("Rect")[0];
-      bbox.setAttr("stroke", color);
+      bbox.setAttr("stroke", bgColor);
       var label = this.target.node.find("Label")[0];
-      label.getTag().setAttr("fill", color);
-      label.getText().text(tag);
+      label.getTag().setAttr("fill", bgColor);
+      label.getText().setAttr("fill", fgColor).text(tag);
       this.target = null;
       this.openTagSelect = false;
       this.stage.batchDraw();
@@ -590,21 +595,19 @@ __webpack_require__.r(__webpack_exports__);
         width: size.width,
         height: size.height,
         fill: "rgba(0,0,0,0)",
-        stroke: this.labelColor[tag]
+        stroke: this.labelColor[tag].bg
       });
       group.add(bbox); //add annotation label
 
-      var label = new Konva.Label({
-        x: pos.x,
-        y: pos.y - 20
-      });
+      var label = new Konva.Label({});
       label.add(new Konva.Tag({
-        fill: this.labelColor[tag]
+        fill: this.labelColor[tag].bg
       }));
       label.add(new Konva.Text({
         text: tag,
-        padding: 5,
-        fill: "#ffffff",
+        padding: 3,
+        fontSize: 10,
+        fill: this.labelColor[tag].fg,
         name: "BBoxLabel"
       }));
       label.on("click tap", function (e) {
@@ -614,6 +617,10 @@ __webpack_require__.r(__webpack_exports__);
           this.$refs.tagSelect.selectTag = annotation.tag;
         }.bind(this));
       }.bind(this));
+      label.position({
+        x: pos.x,
+        y: pos.y - label.height()
+      });
       group.add(label);
       var annotation = {
         tag: tag,
@@ -689,7 +696,7 @@ __webpack_require__.r(__webpack_exports__);
 
         label.setAttrs({
           x: minX,
-          y: minY - 20
+          y: minY - label.height()
         });
         this.stage.batchDraw();
       }.bind(this);
@@ -806,23 +813,25 @@ __webpack_require__.r(__webpack_exports__);
           width: rb.x - lt.x,
           height: rb.y - lt.y,
           fill: "rgba(0,0,0,0)",
-          stroke: this.labelColor[annotation.tag]
+          stroke: this.labelColor[annotation.tag].bg
         });
         group.add(bbox); //add annotation label
 
-        var label = new Konva.Label({
-          x: lt.x,
-          y: lt.y - 18
-        });
+        var label = new Konva.Label({});
         label.add(new Konva.Tag({
-          fill: this.labelColor[annotation.tag]
+          fill: this.labelColor[annotation.tag].bg
         }));
         label.add(new Konva.Text({
           text: annotation.tag,
-          padding: 3,
-          fill: "#ffffff",
+          fontSize: 10,
+          padding: 1,
+          fill: this.labelColor[annotation.tag].fg,
           name: "BBoxLabel"
         }));
+        label.position({
+          x: lt.x,
+          y: lt.y - label.height()
+        });
         group.add(label);
         var a = {
           tag: annotation.tag,
@@ -2242,7 +2251,8 @@ __webpack_require__.r(__webpack_exports__);
       OnChange: null,
       maxW: 1024,
       maxH: 1024,
-      uploading: false
+      uploading: false,
+      loc: {}
     };
   },
   created: function () {
@@ -2274,6 +2284,23 @@ __webpack_require__.r(__webpack_exports__);
 
           img.onload = function () {
             //image load ready
+            //get gps position if exist
+            EXIF.getData(img, function () {
+              function ToDegree(arr, dir) {
+                if (!arr) return null;
+                var deg = arr[0] + arr[1] / 60 + arr[2] / 3600;
+                if (dir == "S" || dir == "W") deg *= -1;
+                return deg;
+              }
+
+              var lat = ToDegree(img.exifdata.GPSLatitude, img.exifdata.GPSLatitudeRef);
+              var lng = ToDegree(img.exifdata.GPSLongitude, img.exifdata.GPSLongitudeRef);
+
+              if (lat && lng) {
+                this.loc.lat = lat;
+                this.loc.lng = lng;
+              }
+            }.bind(this));
             this.FitCanvasFromImage(img);
 
             if (this.OnChange) {
@@ -2870,7 +2897,8 @@ __webpack_require__.r(__webpack_exports__);
       stepArr: [],
       step: 0,
       datasetSelect: null,
-      imageInfo: null
+      imageInfo: null,
+      initLoc: {}
     };
   },
   mounted: function () {
@@ -2924,6 +2952,7 @@ __webpack_require__.r(__webpack_exports__);
       var uploader = this.$refs.uploader;
 
       uploader.OnChange = function () {
+        this.initLoc = uploader.loc;
         this.$refs.imageEdit.SetImage(uploader.imageData);
         this.NextStep();
       }.bind(this);
@@ -7302,7 +7331,11 @@ var render = function() {
         [
           _c("image-info", {
             ref: "imageInfo",
-            attrs: { dataset: _vm.datasetSelect },
+            attrs: {
+              dataset: _vm.datasetSelect,
+              initLat: _vm.initLoc.lat,
+              initLng: _vm.initLoc.lng
+            },
             on: {
               confirm: function($event) {
                 _vm.UpdateImageInfo()

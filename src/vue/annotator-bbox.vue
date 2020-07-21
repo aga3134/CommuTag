@@ -176,9 +176,10 @@ export default {
 				var h = (i%binNum)*step;
 				var s = 1-(parseInt(i*step)%binNum)*step;
 				var v = 1-(parseInt(i*step*step)%binNum)*step;
-				var color = this.HSVtoRGB(h,s,v,1);
+				var bgColor = this.HSVtoRGB(h,s,v,1);
+				var fgColor = v>=0.5?"#000000":"#ffffff";
 				var tag = this.dataset.tagArr[i];
-				this.labelColor[tag] = color;
+				this.labelColor[tag] = {"fg":fgColor,"bg":bgColor};
 			}
 		},
 		BoundInImage: function(pos){
@@ -421,12 +422,13 @@ export default {
 			if(!tag || tag == "") return alert("請選擇標籤");
 
 			this.target.tag = tag;
-			var color = this.labelColor[tag];
+			var bgColor = this.labelColor[tag].bg;
+			var fgColor = this.labelColor[tag].fg;
 			var bbox = this.target.node.find("Rect")[0];
-			bbox.setAttr("stroke",color);
+			bbox.setAttr("stroke",bgColor);
 			var label = this.target.node.find("Label")[0];
-			label.getTag().setAttr("fill",color);
-			label.getText().text(tag);
+			label.getTag().setAttr("fill",bgColor);
+			label.getText().setAttr("fill",fgColor).text(tag);
 			
 			this.target = null;
 			this.openTagSelect = false;
@@ -467,22 +469,21 @@ export default {
 				width: size.width,
 				height: size.height,
 				fill: "rgba(0,0,0,0)",
-				stroke: this.labelColor[tag],
+				stroke: this.labelColor[tag].bg,
 			});
 			group.add(bbox);
 
 			//add annotation label
-			var label = new Konva.Label({
-				x:pos.x,
-				y:pos.y-20,
-			});
+
+			var label = new Konva.Label({});
 			label.add(new Konva.Tag({
-				fill: this.labelColor[tag],
+				fill: this.labelColor[tag].bg,
 			}));
 			label.add(new Konva.Text({
 				text: tag,
-				padding: 5,
-				fill: "#ffffff",
+				padding: 3,
+				fontSize: 10,
+				fill: this.labelColor[tag].fg,
 				name: "BBoxLabel"
 			}));
 			label.on("click tap", function(e){
@@ -492,6 +493,10 @@ export default {
 					this.$refs.tagSelect.selectTag = annotation.tag;
 				}.bind(this));
 			}.bind(this));
+			label.position({
+				x:pos.x,
+				y:pos.y-label.height()
+			});
 			group.add(label);
 
 			var annotation = {
@@ -564,7 +569,7 @@ export default {
 				//update label pos
 				label.setAttrs({
 					x:minX,
-					y:minY-20,
+					y:minY-label.height(),
 				});
 				this.stage.batchDraw();
 			}.bind(this);
@@ -678,24 +683,26 @@ export default {
 					width: rb.x-lt.x,
 					height: rb.y-lt.y,
 					fill: "rgba(0,0,0,0)",
-					stroke: this.labelColor[annotation.tag],
+					stroke: this.labelColor[annotation.tag].bg,
 				});
 				group.add(bbox);
 
 				//add annotation label
-				var label = new Konva.Label({
-					x:lt.x,
-					y:lt.y-18,
-				});
+				var label = new Konva.Label({});
 				label.add(new Konva.Tag({
-					fill: this.labelColor[annotation.tag],
+					fill: this.labelColor[annotation.tag].bg,
 				}));
 				label.add(new Konva.Text({
 					text: annotation.tag,
-					padding: 3,
-					fill: "#ffffff",
+					fontSize: 10,
+					padding: 1,
+					fill: this.labelColor[annotation.tag].fg,
 					name: "BBoxLabel"
 				}));
+				label.position({
+					x:lt.x,
+					y:lt.y-label.height()
+				});
 				group.add(label);
 
 				var a = {

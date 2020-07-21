@@ -27,7 +27,7 @@
 					<q-btn v-if="dataset && dataset.enableAnnotation" flat :label="image.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 					<q-btn flat label="影像網址" @click="GoToImageUrl();"></q-btn>
 					<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
-					<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="openInfoEdit = true;"></q-btn>
+					<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="OpenInfoEditor();"></q-btn>
 					<q-btn v-if="CheckMasterAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
 				</div>
 
@@ -43,8 +43,8 @@
 			</div>
 		</q-dialog>
 
-		<q-dialog v-model="openInfoEdit" v-if="image">
-			<image-info ref="imageInfo" :dataset="dataset" :initDataTime="image.dataTime" :initLat="image.lat" :initLng="image.lng" :initRemark="image.remark" @confirm="UpdateImageInfo();" @cancel="openInfoEdit=false;"></image-info>
+		<q-dialog v-model="openInfoEdit" v-if="editImage">
+			<image-info ref="imageInfo" :dataset="dataset" :initDataTime="editImage.dataTime" :initLat="editImage.lat" :initLng="editImage.lng" :initRemark="editImage.remark" @confirm="UpdateImageInfo();" @cancel="openInfoEdit=false;"></image-info>
 		</q-dialog>
 
 		<q-dialog v-model="openLocationView" v-if="image && image.lat && image.lng">
@@ -87,6 +87,7 @@ export default {
 			openAnnotator: false,
 			openLocationView: false,
 			openInfoEdit: false,
+			editImage: null
 		};
 	},
 	mounted: function(){
@@ -116,6 +117,21 @@ export default {
 				this.$refs.locationSelect.SetPosition(this.image.lat,this.image.lng);
 			}.bind(this));
 		},
+		OpenInfoEditor: function(){
+			//編輯前從伺服器取得最新資料，減少共同編輯時被蓋掉的機率
+			$.get("/dataset/view-image?dataset="+this.dataset._id+"&image="+this.image._id, function(result){
+				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示影像");
+
+				var tz = spacetime().name;	//get browser time zone
+				this.editImage = result.data;
+				if(this.editImage.dataTime){
+					var t = spacetime(this.editImage.dataTime).goto(tz);
+					this.editImage.time = t.unixFmt("yyyy-MM-dd HH:mm:ss");
+				}
+				this.editImage.url = "/static/upload/dataset/"+this.dataset._id+"/image/"+this.image._id+".jpg";
+				this.openInfoEdit = true;
+			}.bind(this));
+		},
 		UpdateImageInfo: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var info = this.$refs.imageInfo.GetImageInfo();
@@ -124,8 +140,10 @@ export default {
 			data.image = this.image._id;
 			data.dataTime = info.dataTime;
 			data.remark = info.remark;
-			data.lat = info.loc.lat;
-			data.lng = info.loc.lng;
+			if(info.loc){
+				data.lat = info.loc.lat;
+				data.lng = info.loc.lng;
+			}
 			data._csrf = csrfToken;
 			$.post("/dataset/update-image-info", data, function(result){
 				if(result.status != "ok") return alert("更新失敗");

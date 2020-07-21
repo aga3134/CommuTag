@@ -184,7 +184,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     GoToDataset: function () {
-      window.location.href = "/view?id=" + this.datasetID;
+      window.location.href = "/dataset?id=" + this.datasetID;
     },
     InitTabContent: function () {
       Vue.nextTick(function () {
@@ -1291,6 +1291,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     InitTagSelect: function () {
       this.locFilter.tagSelect = [];
+      this.locFilter.tagSelect.push({
+        name: "未標註",
+        value: true
+      });
 
       for (var i = 0; i < this.dataset.tagArr.length; i++) {
         var tag = this.dataset.tagArr[i];
@@ -1329,7 +1333,9 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       filterArr = filterArr.filter(function (d) {
-        if (!d.annotation) return false;
+        if (!d.annotation) {
+          return tagHash["未標註"];
+        }
 
         switch (this.dataset.annotationType) {
           case "image":
@@ -1368,25 +1374,29 @@ __webpack_require__.r(__webpack_exports__);
         if (!d.lat || !d.lng) continue;
         var tagInfo = "";
 
-        switch (this.dataset.annotationType) {
-          case "image":
-            var tag = d.annotation.annotation;
-            tagInfo = tag;
-            break;
+        if (!d.annotation) {
+          tagInfo = "未標註";
+        } else {
+          switch (this.dataset.annotationType) {
+            case "image":
+              var tag = d.annotation.annotation;
+              tagInfo = tag;
+              break;
 
-          case "bbox":
-            var bboxArr = d.annotation.annotation;
-            var info = {};
+            case "bbox":
+              var bboxArr = d.annotation.annotation;
+              var info = {};
 
-            for (var j = 0; j < bboxArr.length; j++) {
-              var tag = bboxArr[j].tag;
-              if (!info[tag]) info[tag] = 1;else info[tag]++;
-            }
+              for (var j = 0; j < bboxArr.length; j++) {
+                var tag = bboxArr[j].tag;
+                if (!info[tag]) info[tag] = 1;else info[tag]++;
+              }
 
-            tagInfo = Object.keys(info).map(function (key) {
-              return key + ":" + info[key];
-            }).join("<br>");
-            break;
+              tagInfo = Object.keys(info).map(function (key) {
+                return key + ":" + info[key];
+              }).join("<br>");
+              break;
+          }
         }
 
         var content = "";

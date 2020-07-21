@@ -1138,7 +1138,8 @@ __webpack_require__.r(__webpack_exports__);
       OnChange: null,
       maxW: 1024,
       maxH: 1024,
-      uploading: false
+      uploading: false,
+      loc: {}
     };
   },
   created: function () {
@@ -1170,6 +1171,23 @@ __webpack_require__.r(__webpack_exports__);
 
           img.onload = function () {
             //image load ready
+            //get gps position if exist
+            EXIF.getData(img, function () {
+              function ToDegree(arr, dir) {
+                if (!arr) return null;
+                var deg = arr[0] + arr[1] / 60 + arr[2] / 3600;
+                if (dir == "S" || dir == "W") deg *= -1;
+                return deg;
+              }
+
+              var lat = ToDegree(img.exifdata.GPSLatitude, img.exifdata.GPSLatitudeRef);
+              var lng = ToDegree(img.exifdata.GPSLongitude, img.exifdata.GPSLongitudeRef);
+
+              if (lat && lng) {
+                this.loc.lat = lat;
+                this.loc.lng = lng;
+              }
+            }.bind(this));
             this.FitCanvasFromImage(img);
 
             if (this.OnChange) {

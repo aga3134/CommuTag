@@ -231,11 +231,12 @@ export default {
 		},
 		ReloadImage: function(){
 			this.imageArr = [];
+			this.filterArr = [];
 			this.$refs.imageScroll.reset();
 			this.$refs.imageScroll.resume();
+			this.$refs.imageScroll.poll();
 			this.targetImage = null;
 			this.openViewImage = false;
-			this.LoadDatasetInfo();
 		},
 		LoadMoreImage: function(index,done){
 			var url = "/dataset/list-image";
