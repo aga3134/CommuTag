@@ -8,6 +8,7 @@ var userController = {};
 userController.EditUserInfo = function(param){
 	var modify = {};
 	modify.name = param.body.name;
+	modify.contactEmail = param.body.contactEmail;
 
 	User.updateOne({"_id": param.userID}, modify, function(err, result) {
 		if(err){
@@ -73,7 +74,7 @@ userController.ListName = function(param){
 	if(!param.id) return param.failFunc({err:"no id"});
 	var query = {};
 	query._id = param.id.split(",");
-	User.find(query,{"name":1},function(err, user) {
+	User.find(query,{"name":1,"photo":1,"contactEmail":1},function(err, user) {
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"list name fail"});

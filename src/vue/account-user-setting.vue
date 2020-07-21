@@ -44,6 +44,8 @@
 					<q-form>
 						<q-input class="q-my-sm" v-model="editInfo.name" label="姓名">
 						</q-input>
+						<q-input class="q-my-sm" v-model="editInfo.contactEmail" label="聯絡信箱">
+						</q-input>
 					</q-form>
 				</q-card-section>
 
@@ -82,6 +84,7 @@ export default {
 		EditUserInfo: function(){
 			this.openInputPanel = true;
 			this.editInfo.name = this.user.name;
+			this.editInfo.contactEmail = this.user.contactEmail;
 		},
 		ChangePhoto: function(){
 			if(this.uploadPhoto) return;

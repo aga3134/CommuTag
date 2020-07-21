@@ -20,12 +20,21 @@
 				<q-chip class="transparent" dense clickable v-if="image.lat && image.lng" icon="room" @click="ViewLocation();">觀看地點</q-chip>
 				<q-chip class="transparent" dense v-if="image.annotation">{{'認同數 / 驗證數 : '+AgreeVerifyRatio}}</q-chip>
 				<pre class="q-mx-sm q-my-none" v-if="image.remark && image.remark != '' ">{{image.remark}}</pre>
+				<div class="row">
+					<div class="q-pa-sm" v-if="uploader" @click="OpenUserInfo(uploader)">上傳者:
+						<span class="cursor-pointer text-blue-10">{{uploader.name}}</span>
+					</div>
+					<div class="q-pa-sm" v-if="annotator" @click="OpenUserInfo(annotator);">標註者:
+						<span class="cursor-pointer  text-blue-10">{{annotator.name}}</span>
+					</div>
+				</div>
 			</q-card-section>
 
 			<q-card-actions>
 				<div v-if="editable">
 					<q-btn v-if="dataset && dataset.enableAnnotation" flat :label="image.annotation?'協助驗證':'協助標註' " @click="AnnotateImage();"></q-btn>
 					<q-btn flat label="影像網址" @click="GoToImageUrl();"></q-btn>
+					<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
 					<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
 					<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="OpenInfoEditor();"></q-btn>
 					<q-btn v-if="CheckMasterAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
@@ -53,6 +62,23 @@
 				<div class="text-h6">資料地點</div>
 				<location-select mode="view" ref="locationSelect"></location-select>
 				<div class="text-center">座標: {{image.lat.toFixed(5)+" "+image.lng.toFixed(5)}}</div>
+				<q-card-actions align="center">
+					<q-btn flat label="確定" v-close-popup></q-btn>
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
+
+		<q-dialog v-model="openUserInfo" v-if="targetUser">
+			<q-card class="q-pa-lg">
+				<div class="row justify-center q-pa-sm">
+					<q-avatar size="150px">
+						<img style="object-fit:cover;" :src="user.photo"/>
+					</q-avatar>
+				</div>
+				<div class="column q-pa-sm">
+					<div>{{targetUser.name}}</div>
+					<div>{{targetUser.contactEmail}}</div>
+				</div>
 				<q-card-actions align="center">
 					<q-btn flat label="確定" v-close-popup></q-btn>
 				</q-card-actions>
@@ -87,11 +113,37 @@ export default {
 			openAnnotator: false,
 			openLocationView: false,
 			openInfoEdit: false,
-			editImage: null
+			editImage: null,
+			uploader: null,
+			annotator: null,
+			openUserInfo: false,
+			targetUser: null
 		};
 	},
 	mounted: function(){
-		
+		var idArr = [];
+		var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
+		var hasAnnotator = this.image.annotation && this.image.annotation.user;
+		if(hasUploader){
+			idArr.push(this.image.uploader);
+		}
+		if(hasAnnotator){
+			idArr.push(this.image.annotation.user);
+		}
+		$.get("/user/list-name?id="+idArr.join(),function(result){
+			if(result.status != "ok") return alert("取得貢獻者資料失敗");
+			var userHash = {};
+			for(var i=0;i<result.data.length;i++){
+				var d = result.data[i];
+				userHash[d._id] = d;
+			}
+			if(hasUploader){
+				this.uploader = userHash[this.image.uploader];
+			}
+			if(hasAnnotator){
+				this.annotator = userHash[this.image.annotation.user];
+			}
+		}.bind(this));
 	},
 	methods: {
 		GoToPrev: function(){
@@ -132,6 +184,10 @@ export default {
 				this.openInfoEdit = true;
 			}.bind(this));
 		},
+		OpenUserInfo: function(user){
+			this.targetUser = user;
+			this.openUserInfo = true;
+		},
 		UpdateImageInfo: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");
 			var info = this.$refs.imageInfo.GetImageInfo();
@@ -165,6 +221,15 @@ export default {
 					this.$q.notify("刪除成功");
 				}.bind(this));
 			}
+		},
+		DownloadImage: function(){
+			if(!this.image) return;
+			var a = $("<a>")
+				.attr("href", this.image.url)
+				.attr("download", this.image._id+".jpg")
+				.appendTo("body");
+			a[0].click();
+			a.remove();
 		},
 		GoToImageUrl: function(){
 			if(!this.image) return;
