@@ -232,6 +232,32 @@ export default {
 			a[0].click();
 			a.remove();
 		},
+		GoToExternalLink: function(){
+			var s = spacetime.now();
+			var t = spacetime(this.image.dataTime).goto(s.timezone().name);
+			t = t.subtract(t.minute()%10, "minute");
+			switch(this.dataset.externalLink){
+				case "riverlog":
+					var link="https://riverlog.lass-net.org/";
+					link += "#year="+t.year();
+					link += "&date="+t.unixFmt("MM-dd");
+					link += "&time="+t.unixFmt("HH:mm");
+					link += "&lat="+this.image.lat;
+					link += "&lng="+this.image.lng;
+					link += "&zoom=12";
+					window.open(link,"_blank");
+					break;
+				case "purbao":
+					var link="https://purbao.lass-net.org/";
+					link += "?year="+t.year();
+					link += "&date="+t.unixFmt("M/d");
+					link += "&lat="+this.image.lat;
+					link += "&lng="+this.image.lng;
+					link += "&zoom=12";
+					window.open(link,"_blank");
+					break;
+			}
+		},
 		GoToImageUrl: function(){
 			if(!this.image) return;
 			window.open("/image?dataset="+this.dataset._id+"&image="+this.image._id,"_blank");

@@ -374,32 +374,6 @@ export default {
 		        link.click();
 				this.openBatchDownload = false;
 			}.bind(this));
-		},
-		GoToExternalLink: function(){
-			var s = spacetime.now();
-			var t = spacetime(this.targetImage.dataTime).goto(s.timezone().name);
-			t = t.subtract(t.minute()%10, "minute");
-			switch(this.info.externalLink){
-				case "riverlog":
-					var link="https://riverlog.lass-net.org/";
-					link += "#year="+t.year();
-					link += "&date="+t.unixFmt("MM-dd");
-					link += "&time="+t.unixFmt("HH:mm");
-					link += "&lat="+this.targetImage.lat;
-					link += "&lng="+this.targetImage.lng;
-					link += "&zoom=12";
-					window.open(link,"_blank");
-					break;
-				case "purbao":
-					var link="https://purbao.lass-net.org/";
-					link += "?year="+t.year();
-					link += "&date="+t.unixFmt("M/d");
-					link += "&lat="+this.targetImage.lat;
-					link += "&lng="+this.targetImage.lng;
-					link += "&zoom=12";
-					window.open(link,"_blank");
-					break;
-			}
 		}
 	},
 	computed: {
