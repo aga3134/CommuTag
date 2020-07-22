@@ -49,6 +49,10 @@ var DatasetSchema = new mongoose.Schema({
 		type: Number,
 		default: 0
 	},
+	form:{			//form for additional question
+		type: mongoose.Schema.Types.Mixed,
+		default: null
+	},
 	externalLink: String,
 	member:[mongoose.Schema.Types.Mixed],	//私密成員
 	master:[mongoose.Schema.Types.Mixed]	//版主

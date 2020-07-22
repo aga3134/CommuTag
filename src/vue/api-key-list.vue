@@ -15,8 +15,8 @@
 
 				<q-item-section side>
 					<div class="row">
-						<q-btn flat icon="edit" class="text-gray-8" @click="EditKey(i);"></q-btn>
-						<q-btn flat icon="close" class="text-gray-8" @click="DeleteKey(i);"></q-btn>
+						<q-btn flat dense icon="edit" class="text-gray-8" @click="EditKey(i);"></q-btn>
+						<q-btn flat dense icon="close" class="text-gray-8" @click="DeleteKey(i);"></q-btn>
 					</div>
 				</q-item-section>
 			</q-item>

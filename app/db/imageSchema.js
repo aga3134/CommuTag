@@ -11,6 +11,10 @@ var ImageSchema = new mongoose.Schema({
 		type: [mongoose.Schema.Types.Mixed],
 		default: []
 	},
+	formAns:{			//answor for dataset form
+		type: mongoose.Schema.Types.Mixed,
+		default: null
+	},
 	verifyNum: {		//total number in verification
 		type: Number,
 		default: 0

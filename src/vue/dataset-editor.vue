@@ -49,6 +49,14 @@
 						<q-chip removable v-for="(tag,i) in info.tagArr" :key="tag" @remove="RemoveTag(i);">{{tag}}</q-chip>
 					</div>
 
+					<div class="full-width q-pa-md">
+						<div class="text-h6">表單欄位</div>
+						<div class="text-subtitle2">使用者上傳影像時將被要求填寫此表單</div>
+						
+						<form-editor ref="formEditor" :data="info.form"></form-editor>
+						
+					</div>
+
 					<div class="full-width q-pa-md" v-if="!info.isPublic">
 						<div class="text-h6">私密成員</div>
 						<div class="text-subtitle2">不公開的資料集只有管理員跟私密成員能看到</div>
@@ -80,6 +88,7 @@
 <script>
 import imageUpload from "./image-upload.vue"
 import userList from "./user-list.vue"
+import formEditor from "./form-editor.vue"
 
 export default {
 	name:"dataset-editor",
@@ -88,7 +97,8 @@ export default {
 	},
 	components:{
 		"image-upload":imageUpload,
-		"user-list":userList
+		"user-list":userList,
+		"form-editor":formEditor
 	},
 	data: function () {
 		return {
