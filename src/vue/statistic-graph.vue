@@ -259,17 +259,25 @@ export default {
 				case "image":
 					for(var i=0;i<filterArr.length;i++){
 						var d = filterArr[i];
-						var tag = "";
-						if(!d.annotation) tag = "未標註";
-						else tag = d.annotation.annotation;
-						if(!data[tag]){
-							data[tag] = {
-								name: tag,
-								value: 1
+						var tagArr = [];
+						if(!d.annotation) tagArr = ["未標註"];
+						else{
+							for(var j=0;j<d.annotation.annotation.length;j++){
+								 var tag = d.annotation.annotation[j];
+								 if(tag.value == "true") tagArr.push(tag.name);
 							}
 						}
-						else{
-							data[tag].value++;
+						for(var j=0;j<tagArr.length;j++){
+							var tag = tagArr[j];
+							if(!data[tag]){
+								data[tag] = {
+									name: tag,
+									value: 1
+								}
+							}
+							else{
+								data[tag].value++;
+							}
 						}
 					}
 					break;
@@ -364,20 +372,28 @@ export default {
 				case "image":
 					for(var i=0;i<filterArr.length;i++){
 						var d = filterArr[i];
-						var tag = "";
-						if(!d.annotation) tag = "未標註";
-						else tag = d.annotation.annotation;
+						var tagArr = [];
+						if(!d.annotation) tagArr = ["未標註"];
+						else{
+							for(var j=0;j<d.annotation.annotation.length;j++){
+								 var tag = d.annotation.annotation[j];
+								 if(tag.value == "true") tagArr.push(tag.name);
+							}
+						} 
 						var t = spacetime(d.dataTime).goto(tz);
 						var tStr = t.unixFmt(format);
-						if(!data[tag]) data[tag] = {};
-						if(!data[tag][tStr]){
-							data[tag][tStr] = {
-								key: tStr,
-								value:1
+						for(var j=0;j<tagArr.length;j++){
+							var tag = tagArr[j];
+							if(!data[tag]) data[tag] = {};
+							if(!data[tag][tStr]){
+								data[tag][tStr] = {
+									key: tStr,
+									value:1
+								}
 							}
-						}
-						else{
-							data[tag][tStr].value++;
+							else{
+								data[tag][tStr].value++;
+							}
 						}
 					}
 					break;

@@ -147,8 +147,11 @@ export default {
 				}
 				switch(this.dataset.annotationType){
 					case "image":
-						var tag = d.annotation.annotation;
-						if(tagHash[tag]) return true;
+						var tagArr = d.annotation.annotation;
+						for(var i=0;i<tagArr.length;i++){
+							var tag = tagArr[i];
+							if(tagHash[tag.name] && tag.value == "true") return true;
+						}
 						break;
 					case "bbox":
 						var bboxArr = d.annotation.annotation;
@@ -187,8 +190,14 @@ export default {
 				else{
 					switch(this.dataset.annotationType){
 						case "image":
-							var tag = d.annotation.annotation;
-							tagInfo = tag;
+							tagInfo = "";
+							var tagArr = d.annotation.annotation;
+							for(var j=0;j<tagArr.length;j++){
+								var tag = tagArr[j];
+								if(tag.value == "true"){
+									tagInfo += "#"+tag.name+" ";
+								}
+							}
 							break;
 						case "bbox":
 							var bboxArr = d.annotation.annotation;

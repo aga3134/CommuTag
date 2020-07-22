@@ -3,7 +3,7 @@
 		<div class="column fit" v-if="task=='view' ">
 			<q-img contain class="col" :src="image.url">
 				<div class="absolute-bottom text-subtitle1 text-center" v-if="image.annotation">
-					{{image.annotation.annotation}}
+					{{GetSelectTag(image.annotation.annotation)}}
 				</div>
 			</q-img>
 		</div>
@@ -15,7 +15,7 @@
 					<div class="text-h6 inline-block">
 						請選擇符合此影像的標籤
 					</div>
-					<tag-select class="tag-select" :dataset="dataset" ref="tagSelect"></tag-select>
+					<tag-checkbox :dataset="dataset" ref="tagCheckbox"></tag-checkbox>
 				</div>
 				<template v-slot:action>
 					<q-btn class="q-ma-xs bg-primary" label="確定" @click="SetAnnotation();"></q-btn>
@@ -25,7 +25,7 @@
 
 			<q-banner inline-actions class="bg-grey-6 text-white col-shrink" v-if="task =='verify' ">
 				<div class="text-h6 inline-block">
-					請驗證此影像是否為 {{image.annotation.annotation}}?
+					請驗證此影像是否為 {{GetSelectTag(image.annotation.annotation)}}?
 				</div>
 				
 				<template v-slot:action>
@@ -61,12 +61,12 @@
 
 <script>
 
-import tagSelect from "./tag-select.vue"
+import tagCheckbox from "./tag-checkbox.vue"
 
 export default {
 	name:"annotator-image",
 	components:{
-		"tag-select":tagSelect
+		"tag-checkbox":tagCheckbox
 	},
 	props: {
 		dataset: Object,
@@ -90,10 +90,18 @@ export default {
 			this.$emit("setVerification",agree);
 		},
 		GetAnnotation: function(){
-			return this.$refs.tagSelect.selectTag;
+			return this.$refs.tagCheckbox.tagSelect;
 		},
 		SkipTask: function(){
 			this.$emit("skipTask");
+		},
+		GetSelectTag: function(annotation){
+			var selected = "";
+			for(var i=0;i<annotation.length;i++){
+				var tag = annotation[i];
+				if(tag.value == "true") selected += "#"+tag.name+" ";
+			}
+			return selected;
 		}
 	}
 }
@@ -107,11 +115,6 @@ export default {
 		margin: auto;
 		max-width: 800px;
 		max-height: 100%;
-	}
-	.tag-select{
-		width: 150px;
-		display: inline-block;
-		padding: 0px 5px;
 	}
 }
 </style>

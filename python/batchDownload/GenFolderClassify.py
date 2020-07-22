@@ -12,13 +12,17 @@ class GenFolderClassify:
 				serial = 1
 				for image in imageArr:
 					if image["annotation"] is None:
-						tag = "未分類"
+						tagArr = "未分類"
 					else:
-						tag = image["annotation"]["annotation"]
+						tagArr = []
+						for tag in image["annotation"]["annotation"]:
+							if tag["value"] == "true":
+								tagArr.append(tag["name"])
 
 					imageFile = imagePath+str(image["_id"])+".jpg"
 					if not os.path.isfile(imageFile):
 						continue
-					outputZip.write(imageFile, tag+"/"+str(serial).zfill(5)+".jpg")
+					for tag in tagArr:
+						outputZip.write(imageFile, tag+"/"+str(serial).zfill(5)+".jpg")
 					serial+=1
 
