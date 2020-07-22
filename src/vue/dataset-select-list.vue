@@ -15,7 +15,9 @@
 				</q-item-section>
 
 				<q-item-section>
-					<q-item-label>{{dataset.name}}</q-item-label>
+					<q-item-label>
+						<a style="text-decoration:none;" :href="'/dataset?id='+dataset._id" target="_blank">{{dataset.name}}</a>
+					</q-item-label>
 				</q-item-section>
 
 				<q-item-section side v-if="enableRemove">

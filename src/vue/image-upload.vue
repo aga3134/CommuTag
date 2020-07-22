@@ -28,7 +28,7 @@ export default {
 			maxW: 1024,
 			maxH: 1024,
 			uploading: false,
-			loc: {}
+			exif: {}
 		};
 	},
 	created: function(){
@@ -54,7 +54,7 @@ export default {
 				reader.onload = function(){		//read file ready
 					var img = new Image();
 					img.onload = function(){	//image load ready
-						//get gps position if exist
+						//get gps position & time if exist
 						EXIF.getData(img, function() {
 							function ToDegree(arr,dir){
 								if(!arr) return null;
@@ -65,8 +65,13 @@ export default {
 							var lat = ToDegree(img.exifdata.GPSLatitude,img.exifdata.GPSLatitudeRef);
 							var lng = ToDegree(img.exifdata.GPSLongitude,img.exifdata.GPSLongitudeRef);
 							if(lat && lng){
-								this.loc.lat = lat;
-								this.loc.lng = lng;
+								this.exif.lat = lat;
+								this.exif.lng = lng;
+							}
+							if(img.exifdata.DateTime){
+								var t = img.exifdata.DateTime.split(" ");
+								var d = t[0].replace(/:/g,"-");
+								this.exif.time = d+" "+t[1];
 							}
 					    }.bind(this));
 

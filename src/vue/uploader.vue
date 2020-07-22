@@ -31,7 +31,7 @@
 		</q-dialog>
 
 		<q-dialog v-model="stepArr[step] && stepArr[step].id == 'info'">
-			<image-info ref="imageInfo" :dataset="datasetSelect" :initLat="initLoc.lat" :initLng="initLoc.lng" @confirm="UpdateImageInfo();NextStep();" @cancel="PrevStep();"></image-info>
+			<image-info ref="imageInfo" :dataset="datasetSelect" :initLat="initLoc.lat" :initLng="initLoc.lng" :initDataTime="initDataTime" @confirm="UpdateImageInfo();NextStep();" @cancel="PrevStep();"></image-info>
 		</q-dialog>
 
 		<image-upload ref="uploader" v-show="false"></image-upload>
@@ -71,7 +71,8 @@ export default {
 			step:0,
 			datasetSelect:null,
 			imageInfo: null,
-			initLoc: {}
+			initLoc: {},
+			initDataTime: null
 		};
 	},
 	mounted: function(){
@@ -109,7 +110,11 @@ export default {
 		SelectFile: function(){
 			var uploader = this.$refs.uploader;
 			uploader.OnChange = function(){
-				this.initLoc = uploader.loc;
+				this.initLoc = {
+					"lat":uploader.exif.lat,
+					"lng":uploader.exif.lng
+				};
+				this.initDataTime = uploader.exif.time;
 				this.$refs.imageEdit.SetImage(uploader.imageData);
 				this.NextStep();
 			}.bind(this);
@@ -128,7 +133,6 @@ export default {
 		DatasetChange: function(){
 			if(this.dataset) return;
 			this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
-			console.log(this.datasetSelect);
 			var uploader = this.$refs.uploader;
 			uploader.SetMaxRes(this.datasetSelect.maxWidth,this.datasetSelect.maxHeight);
 		},
