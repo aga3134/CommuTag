@@ -906,7 +906,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _tag_select_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tag-select.vue */ "./src/vue/tag-select.vue");
+/* harmony import */ var _tag_checkbox_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tag-checkbox.vue */ "./src/vue/tag-checkbox.vue");
 //
 //
 //
@@ -972,7 +972,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "annotator-image",
   components: {
-    "tag-select": _tag_select_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+    "tag-checkbox": _tag_checkbox_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   props: {
     dataset: Object,
@@ -994,10 +994,20 @@ __webpack_require__.r(__webpack_exports__);
       this.$emit("setVerification", agree);
     },
     GetAnnotation: function () {
-      return this.$refs.tagSelect.selectTag;
+      return this.$refs.tagCheckbox.tagSelect;
     },
     SkipTask: function () {
       this.$emit("skipTask");
+    },
+    GetSelectTag: function (annotation) {
+      var selected = "";
+
+      for (var i = 0; i < annotation.length; i++) {
+        var tag = annotation[i];
+        if (tag.value == "true") selected += "#" + tag.name + " ";
+      }
+
+      return selected;
     }
   }
 });
@@ -1442,6 +1452,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _image_upload_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./image-upload.vue */ "./src/vue/image-upload.vue");
 /* harmony import */ var _user_list_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./user-list.vue */ "./src/vue/user-list.vue");
+/* harmony import */ var _form_editor_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./form-editor.vue */ "./src/vue/form-editor.vue");
 //
 //
 //
@@ -1521,6 +1532,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1530,7 +1550,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   components: {
     "image-upload": _image_upload_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
-    "user-list": _user_list_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+    "user-list": _user_list_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    "form-editor": _form_editor_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data: function () {
     return {
@@ -1681,6 +1702,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     RemoveMaster: function (i) {
       this.info.master.splice(i, 1);
+    },
+    UpdateForm: function () {
+      var formData = this.$refs.formEditor.editData;
+      this.info.form = Object.assign({}, formData);
     }
   }
 });
@@ -2011,6 +2036,447 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "form-editor",
+  props: {
+    data: Object
+  },
+  components: {},
+  data: function () {
+    return {
+      openEditItem: false,
+      editData: {},
+      editItem: {},
+      editIndex: -1,
+      typeOption: [{
+        label: "文字",
+        value: "text"
+      }, {
+        label: "單選",
+        value: "radio"
+      }, {
+        label: "多選",
+        value: "checkbox"
+      }, {
+        label: "數字",
+        value: "number"
+      }],
+      optionName: ""
+    };
+  },
+  created: function () {
+    this.editData = Object.assign({}, this.data);
+  },
+  methods: {
+    OpenAddItem: function () {
+      this.openEditItem = true;
+      this.editItem = {
+        type: "text",
+        canNotEmpty: "false",
+        option: [],
+        attr: {}
+      };
+    },
+    AddItemOption: function () {
+      if (!this.editItem.option) Vue.set(this.editItem, "option", []);
+
+      if (this.editItem.option.includes(this.optionName)) {
+        alert("此選項已存在");
+      } else this.editItem.option.push(this.optionName);
+
+      this.optionName = "";
+    },
+    RemoveItemOption: function (i) {
+      this.editItem.option.splice(i, 1);
+    },
+    MoveItemUp: function (i) {
+      if (i <= 0) return;
+      var temp = this.editData.itemArr[i - 1];
+      this.editData.itemArr[i - 1] = this.editData.itemArr[i];
+      this.editData.itemArr[i] = temp;
+      this.$forceUpdate();
+      this.$emit("update");
+    },
+    MoveItemDown: function (i) {
+      if (i >= this.editData.itemArr.length - 1) return;
+      var temp = this.editData.itemArr[i + 1];
+      this.editData.itemArr[i + 1] = this.editData.itemArr[i];
+      this.editData.itemArr[i] = temp;
+      this.$forceUpdate();
+      this.$emit("update");
+    },
+    EditItem: function (i) {
+      this.editIndex = i;
+      this.editItem = Object.assign({}, this.editData.itemArr[i]);
+      if (!this.editItem.attr) this.editItem.attr = {};
+      this.openEditItem = true;
+    },
+    RemoveItem: function (i) {
+      this.editData.itemArr.splice(i, 1);
+      this.$emit("update");
+    },
+    GenerateID: function () {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    },
+    ConfirmEdit: function () {
+      this.$refs.type.validate();
+
+      if (this.$refs.type.hasError) {
+        return this.$q.notify({
+          color: "negative",
+          message: "填答類型不能空白"
+        });
+      }
+
+      this.$refs.quest.validate();
+
+      if (this.$refs.quest.hasError) {
+        return this.$q.notify({
+          color: "negative",
+          message: "欄位名稱不能空白"
+        });
+      }
+
+      if (this.editItem.type == "radio" || this.editItem.type == "checkbox") {
+        if (this.editItem.option.length == 0) {
+          return this.$q.notify({
+            color: "negative",
+            message: "請新增選項"
+          });
+        }
+      }
+
+      if (this.editItem.attr.minCheck) {
+        if (this.editItem.attr.minCheck < 1 || this.editItem.attr.minCheck > this.editItem.option.length) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最少選幾項超出選項範圍"
+          });
+        }
+      }
+
+      if (this.editItem.attr.maxCheck) {
+        if (this.editItem.attr.maxCheck < 1 || this.editItem.attr.maxCheck > this.editItem.option.length) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最多選幾項超出選項範圍"
+          });
+        }
+      }
+
+      if (this.editItem.attr.minCheck && this.editItem.attr.maxCheck) {
+        if (this.editItem.attr.minCheck > this.editItem.attr.maxCheck) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最少選幾項不能大於最多選幾項"
+          });
+        }
+      }
+
+      if (this.editItem.attr.minValue && this.editItem.attr.maxValue) {
+        if (this.editItem.attr.minValue > this.editItem.attr.maxValue) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最小數值不能大於最大數值"
+          });
+        }
+      }
+
+      this.openEditItem = false;
+
+      if (!this.editData.itemArr) {
+        this.editData.itemArr = [];
+      }
+
+      if (!this.editItem.id) {
+        this.editItem.id = this.GenerateID();
+        this.editData.itemArr.push(this.editItem);
+      } else {
+        this.editData.itemArr[this.editIndex] = Object.assign({}, this.editItem);
+        this.editIndex = -1;
+      }
+
+      this.$emit("update");
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-reply.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "form-editor",
+  props: {
+    formData: Object,
+    formReply: Object
+  },
+  components: {},
+  data: function () {
+    return {
+      editReply: {}
+    };
+  },
+  created: function () {
+    if (this.formReply) {
+      this.editReply = Object.assign({}, this.formReply);
+    } else {
+      var initReply = {};
+
+      for (var i = 0; i < this.formData.itemArr.length; i++) {
+        var item = this.formData.itemArr[i];
+        var reply = {
+          "id": item.id
+        };
+
+        if (item.type == "checkbox") {
+          reply.value = [];
+        }
+
+        initReply[item.id] = reply;
+      }
+
+      this.editReply = initReply;
+    } //若沒資料mongodb不會存空物件或空陣列，把空資料放回去避免取資料時出錯
+
+
+    for (var i = 0; i < this.formData.itemArr.length; i++) {
+      var item = this.formData.itemArr[i];
+      if (!item.attr) item.attr = {};
+      if (!item.option) item.option = []; //依問題產生validate rule
+      //radio跟checkbox沒內建validation，另外處理
+
+      item.rule = [];
+
+      switch (item.type) {
+        case "text":
+          if (item.canNotEmpty == "true") {
+            item.rule.push(val => !!val || '文字不能空白');
+          }
+
+          break;
+
+        case "number":
+          item.rule.push(function () {
+            var minValue = parseFloat(item.attr.minValue);
+            var maxValue = parseFloat(item.attr.maxValue);
+            var canNotEmpty = item.canNotEmpty == "true";
+            return function (val) {
+              if (canNotEmpty && val == null) return "數字不能空白";
+              if (minValue != NaN && val < minValue) return "數值不能小於" + minValue;
+              if (maxValue != NaN && val > maxValue) return "數值不能大於" + maxValue;
+              return true;
+            };
+          }());
+          break;
+      }
+    }
+  },
+  methods: {
+    ValidateReply: function () {
+      var valid = true;
+
+      for (var i = 0; i < this.formData.itemArr.length; i++) {
+        var item = this.formData.itemArr[i];
+        var reply = this.editReply[item.id].value;
+
+        switch (item.type) {
+          case "text":
+          case "number":
+            //ref在v-for裡面會自動變array
+            var ref = this.$refs[item.id][0];
+            ref.validate();
+
+            if (ref.hasError) {
+              this.$q.notify({
+                color: "negative",
+                message: "欄位" + (i + 1) + " 格式不符"
+              });
+              valid = false;
+            }
+
+            break;
+
+          case "radio":
+            if (item.canNotEmpty == "true" && reply == null) {
+              this.$q.notify({
+                color: "negative",
+                message: "欄位" + (i + 1) + " 不能空白"
+              });
+              valid = false;
+            }
+
+            break;
+
+          case "checkbox":
+            if (!reply) reply = [];
+
+            if (item.canNotEmpty == "true" && !reply.length) {
+              this.$q.notify({
+                color: "negative",
+                message: "欄位" + (i + 1) + " 不能空白"
+              });
+              valid = false;
+            }
+
+            if (reply.length > 0) {
+              //有選擇才check數量
+              var minCheck = parseFloat(item.attr.minCheck);
+              var maxCheck = parseFloat(item.attr.maxCheck);
+
+              if (minCheck != NaN && reply.length < minCheck || maxCheck != NaN && reply.length > maxCheck) {
+                this.$q.notify({
+                  color: "negative",
+                  message: "欄位" + (i + 1) + " 選擇數量不符規定"
+                });
+                valid = false;
+              }
+            }
+
+            break;
+        }
+      }
+
+      return valid;
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-edit.vue?vue&type=script&lang=js&":
 /*!*******************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-edit.vue?vue&type=script&lang=js& ***!
@@ -2125,6 +2591,13 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _location_select_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./location-select.vue */ "./src/vue/location-select.vue");
+/* harmony import */ var _form_reply_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./form-reply.vue */ "./src/vue/form-reply.vue");
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2150,6 +2623,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "image-info",
   props: {
@@ -2157,10 +2631,12 @@ __webpack_require__.r(__webpack_exports__);
     initDataTime: String,
     initLat: Number,
     initLng: Number,
-    initRemark: String
+    initRemark: String,
+    initReply: Object
   },
   components: {
-    "location-select": _location_select_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+    "location-select": _location_select_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
+    "form-reply": _form_reply_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data: function () {
     return {
@@ -2191,6 +2667,7 @@ __webpack_require__.r(__webpack_exports__);
       var s = spacetime.now();
       info.dataTime = spacetime(this.dataTime, s.timezone().name).format("iso");
       info.remark = this.remark;
+      info.formReply = this.$refs.formReply.editReply;
 
       if (this.$refs.locationSelect) {
         info.loc = this.$refs.locationSelect.loc;
@@ -2199,6 +2676,8 @@ __webpack_require__.r(__webpack_exports__);
       return info;
     },
     ConfirmSelect: function () {
+      var formReply = this.$refs.formReply;
+      if (!formReply.ValidateReply()) return;
       this.$emit("confirm");
     },
     CancelSelect: function () {
@@ -2252,7 +2731,7 @@ __webpack_require__.r(__webpack_exports__);
       maxW: 1024,
       maxH: 1024,
       uploading: false,
-      loc: {}
+      exif: {}
     };
   },
   created: function () {
@@ -2284,7 +2763,7 @@ __webpack_require__.r(__webpack_exports__);
 
           img.onload = function () {
             //image load ready
-            //get gps position if exist
+            //get gps position & time if exist
             EXIF.getData(img, function () {
               function ToDegree(arr, dir) {
                 if (!arr) return null;
@@ -2297,8 +2776,14 @@ __webpack_require__.r(__webpack_exports__);
               var lng = ToDegree(img.exifdata.GPSLongitude, img.exifdata.GPSLongitudeRef);
 
               if (lat && lng) {
-                this.loc.lat = lat;
-                this.loc.lng = lng;
+                this.exif.lat = lat;
+                this.exif.lng = lng;
+              }
+
+              if (img.exifdata.DateTime) {
+                var t = img.exifdata.DateTime.split(" ");
+                var d = t[0].replace(/:/g, "-");
+                this.exif.time = d + " " + t[1];
               }
             }.bind(this));
             this.FitCanvasFromImage(img);
@@ -2696,6 +3181,77 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/tag-checkbox.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "tag-checkbox",
+  props: {
+    dataset: Object
+  },
+  components: {},
+  data: function () {
+    return {
+      btTitle: "選擇標籤",
+      tagSelect: [],
+      openTagSelect: false
+    };
+  },
+  created: function () {
+    this.tagSelect = [];
+
+    for (var i = 0; i < this.dataset.tagArr.length; i++) {
+      var tag = this.dataset.tagArr[i];
+      this.tagSelect.push({
+        "name": tag,
+        "value": false
+      });
+    }
+  },
+  methods: {
+    UpdateSelect: function () {
+      var selected = 0;
+
+      for (var i = 0; i < this.tagSelect.length; i++) {
+        var tag = this.tagSelect[i];
+        if (tag.value) selected++;
+      }
+
+      if (selected == 0) this.btTitle = "選擇標籤";else this.btTitle = selected + "個選擇";
+    },
+    ConfirmSelect: function () {
+      this.openTagSelect = false;
+      this.$emit("confirm");
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-select.vue?vue&type=script&lang=js&":
 /*!*******************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/tag-select.vue?vue&type=script&lang=js& ***!
@@ -2898,7 +3454,8 @@ __webpack_require__.r(__webpack_exports__);
       step: 0,
       datasetSelect: null,
       imageInfo: null,
-      initLoc: {}
+      initLoc: {},
+      initDataTime: null
     };
   },
   mounted: function () {
@@ -2952,7 +3509,11 @@ __webpack_require__.r(__webpack_exports__);
       var uploader = this.$refs.uploader;
 
       uploader.OnChange = function () {
-        this.initLoc = uploader.loc;
+        this.initLoc = {
+          "lat": uploader.exif.lat,
+          "lng": uploader.exif.lng
+        };
+        this.initDataTime = uploader.exif.time;
         this.$refs.imageEdit.SetImage(uploader.imageData);
         this.NextStep();
       }.bind(this);
@@ -2973,7 +3534,6 @@ __webpack_require__.r(__webpack_exports__);
     DatasetChange: function () {
       if (this.dataset) return;
       this.datasetSelect = this.$refs.datasetSelect.GetSelectDataset();
-      console.log(this.datasetSelect);
       var uploader = this.$refs.uploader;
       uploader.SetMaxRes(this.datasetSelect.maxWidth, this.datasetSelect.maxHeight);
     },
@@ -2982,12 +3542,13 @@ __webpack_require__.r(__webpack_exports__);
     },
     UploadImageToDataset: function () {
       var dataset = this.dataset || this.datasetSelect;
-      var loc, remark, dataTime;
+      var loc, remark, dataTime, formReply;
 
       if (this.imageInfo) {
         loc = this.imageInfo.loc;
         remark = this.imageInfo.remark;
         dataTime = this.imageInfo.dataTime;
+        formReply = this.imageInfo.formReply;
       }
 
       var uploader = this.$refs.uploader;
@@ -3032,6 +3593,10 @@ __webpack_require__.r(__webpack_exports__);
 
       if (dataTime) {
         data.dataTime = dataTime;
+      }
+
+      if (formReply) {
+        data.formReply = JSON.stringify(formReply);
       }
 
       uploader.additionData = data;
@@ -3330,7 +3895,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".annotator-image {\n  width: 100%;\n  height: 100%;\n}\n.annotator-image .image {\n    margin: auto;\n    max-width: 800px;\n    max-height: 100%;\n}\n.annotator-image .tag-select {\n    width: 150px;\n    display: inline-block;\n    padding: 0px 5px;\n}\n", ""]);
+exports.push([module.i, ".annotator-image {\n  width: 100%;\n  height: 100%;\n}\n.annotator-image .image {\n    margin: auto;\n    max-width: 800px;\n    max-height: 100%;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -3427,6 +3992,42 @@ module.exports = exports;
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".form-editor {\n  width: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss&":
+/*!**********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss& ***!
+  \**********************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".form-reply {\n  width: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-edit.vue?vue&type=style&index=0&lang=scss&":
 /*!**********************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-edit.vue?vue&type=style&index=0&lang=scss& ***!
@@ -3511,6 +4112,24 @@ var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
 exports.push([module.i, ".main-app {\n  width: 100%;\n  height: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss&":
+/*!************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss& ***!
+  \************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".tag-select {\n  width: 100%;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -3911,6 +4530,68 @@ module.exports = exported;
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss& ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss&":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./form-reply.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-edit.vue?vue&type=style&index=0&lang=scss&":
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-edit.vue?vue&type=style&index=0&lang=scss& ***!
@@ -4044,6 +4725,37 @@ module.exports = exported;
 
 var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
             var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./main-app.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/main-app.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./tag-checkbox.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss&");
 
             content = content.__esModule ? content.default : content;
 
@@ -4949,7 +5661,11 @@ var render = function() {
                         [
                           _vm._v(
                             "\n\t\t\t\t" +
-                              _vm._s(_vm.image.annotation.annotation) +
+                              _vm._s(
+                                _vm.GetSelectTag(
+                                  _vm.image.annotation.annotation
+                                )
+                              ) +
                               "\n\t\t\t"
                           )
                         ]
@@ -5021,9 +5737,8 @@ var render = function() {
                             )
                           ]),
                           _vm._v(" "),
-                          _c("tag-select", {
-                            ref: "tagSelect",
-                            staticClass: "tag-select",
+                          _c("tag-checkbox", {
+                            ref: "tagCheckbox",
                             attrs: { dataset: _vm.dataset }
                           })
                         ],
@@ -5088,7 +5803,9 @@ var render = function() {
                       _c("div", { staticClass: "text-h6 inline-block" }, [
                         _vm._v(
                           "\n\t\t\t\t請驗證此影像是否為 " +
-                            _vm._s(_vm.image.annotation.annotation) +
+                            _vm._s(
+                              _vm.GetSelectTag(_vm.image.annotation.annotation)
+                            ) +
                             "?\n\t\t\t"
                         )
                       ])
@@ -5768,6 +6485,31 @@ var render = function() {
                     1
                   ),
                   _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "full-width q-pa-md" },
+                    [
+                      _c("div", { staticClass: "text-h6" }, [
+                        _vm._v("表單欄位")
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "text-subtitle2" }, [
+                        _vm._v("使用者上傳影像時將被要求填寫此表單")
+                      ]),
+                      _vm._v(" "),
+                      _c("form-editor", {
+                        ref: "formEditor",
+                        attrs: { data: _vm.info.form },
+                        on: {
+                          update: function($event) {
+                            return _vm.UpdateForm()
+                          }
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
                   !_vm.info.isPublic
                     ? _c(
                         "div",
@@ -6435,6 +7177,627 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&":
+/*!********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html& ***!
+  \********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "form-editor q-pa-sm" },
+    [
+      _c("div", { staticClass: "row items-center" }, [
+        _c(
+          "div",
+          { staticClass: "col-shrink q-pr-lg" },
+          [
+            _c("q-btn", {
+              staticClass: "bg-grey-8 text-white",
+              attrs: { icon: "add", label: "新增欄位" },
+              on: {
+                click: function($event) {
+                  return _vm.OpenAddItem()
+                }
+              }
+            })
+          ],
+          1
+        )
+      ]),
+      _vm._v(" "),
+      _c(
+        "q-list",
+        { staticClass: "q-my-md", attrs: { bordered: "" } },
+        _vm._l(_vm.editData.itemArr, function(item, i) {
+          return _c(
+            "q-item",
+            { key: item.id },
+            [
+              _c("q-item-section", [
+                _c("div", [
+                  item.canNotEmpty == "true"
+                    ? _c("span", { staticClass: "text-red" }, [_vm._v("*")])
+                    : _vm._e(),
+                  _vm._v("\n\t\t\t\t\t" + _vm._s(item.quest) + "\n\t\t\t\t")
+                ])
+              ]),
+              _vm._v(" "),
+              _c("q-item-section", { attrs: { side: "" } }, [
+                _c(
+                  "div",
+                  { staticClass: "row" },
+                  [
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "arrow_circle_up" },
+                      on: {
+                        click: function($event) {
+                          return _vm.MoveItemUp(i)
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "arrow_circle_down" },
+                      on: {
+                        click: function($event) {
+                          return _vm.MoveItemDown(i)
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "edit" },
+                      on: {
+                        click: function($event) {
+                          return _vm.EditItem(i)
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.RemoveItem(i)
+                        }
+                      }
+                    })
+                  ],
+                  1
+                )
+              ])
+            ],
+            1
+          )
+        }),
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "q-dialog",
+        {
+          model: {
+            value: _vm.openEditItem,
+            callback: function($$v) {
+              _vm.openEditItem = $$v
+            },
+            expression: "openEditItem"
+          }
+        },
+        [
+          _c(
+            "q-card",
+            { staticClass: "full-width" },
+            [
+              _c("q-card-section", [
+                _vm.editItem.id
+                  ? _c("div", { staticClass: "text-h6" }, [_vm._v("新增欄位")])
+                  : _c("div", { staticClass: "text-h6" }, [_vm._v("編輯欄位")]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "row" },
+                  [
+                    _c("q-select", {
+                      ref: "type",
+                      staticClass: "col-12 col-sm-6 q-pa-sm",
+                      attrs: {
+                        dense: "",
+                        options: _vm.typeOption,
+                        "option-value": "value",
+                        "option-label": "label",
+                        "emit-value": "",
+                        "map-options": "",
+                        label: "填答類型",
+                        disable: _vm.editItem.id != null,
+                        rules: [
+                          function(val) {
+                            return !!val || "填答類型不能空白"
+                          }
+                        ]
+                      },
+                      model: {
+                        value: _vm.editItem.type,
+                        callback: function($$v) {
+                          _vm.$set(_vm.editItem, "type", $$v)
+                        },
+                        expression: "editItem.type"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-toggle", {
+                      staticClass: "col-12 col-sm-6 q-pa-sm",
+                      attrs: {
+                        label: "必填欄位",
+                        "true-value": "true",
+                        "false-value": "false"
+                      },
+                      model: {
+                        value: _vm.editItem.canNotEmpty,
+                        callback: function($$v) {
+                          _vm.$set(_vm.editItem, "canNotEmpty", $$v)
+                        },
+                        expression: "editItem.canNotEmpty"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-input", {
+                      ref: "quest",
+                      staticClass: "col-12 q-pa-sm",
+                      attrs: {
+                        label: "欄位名稱",
+                        rules: [
+                          function(val) {
+                            return !!val || "欄位名稱不能空白"
+                          }
+                        ]
+                      },
+                      model: {
+                        value: _vm.editItem.quest,
+                        callback: function($$v) {
+                          _vm.$set(_vm.editItem, "quest", $$v)
+                        },
+                        expression: "editItem.quest"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _vm.editItem.type == "radio" ||
+                    _vm.editItem.type == "checkbox"
+                      ? _c(
+                          "div",
+                          [
+                            _c("q-input", {
+                              staticClass: "col-12 q-pa-sm",
+                              attrs: { label: "新增選項" },
+                              on: {
+                                keyup: function($event) {
+                                  if (
+                                    !$event.type.indexOf("key") &&
+                                    _vm._k(
+                                      $event.keyCode,
+                                      "enter",
+                                      13,
+                                      $event.key,
+                                      "Enter"
+                                    )
+                                  ) {
+                                    return null
+                                  }
+                                  return _vm.AddItemOption()
+                                }
+                              },
+                              scopedSlots: _vm._u(
+                                [
+                                  {
+                                    key: "append",
+                                    fn: function() {
+                                      return [
+                                        _c("q-btn", {
+                                          attrs: {
+                                            round: "",
+                                            dense: "",
+                                            flat: "",
+                                            icon: "add"
+                                          },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.AddItemOption()
+                                            }
+                                          }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ],
+                                null,
+                                false,
+                                876527129
+                              ),
+                              model: {
+                                value: _vm.optionName,
+                                callback: function($$v) {
+                                  _vm.optionName = $$v
+                                },
+                                expression: "optionName"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              { staticClass: "full-width" },
+                              _vm._l(_vm.editItem.option, function(op, i) {
+                                return _c(
+                                  "q-chip",
+                                  {
+                                    key: op,
+                                    attrs: { removable: "" },
+                                    on: {
+                                      remove: function($event) {
+                                        return _vm.RemoveItemOption(i)
+                                      }
+                                    }
+                                  },
+                                  [_vm._v(_vm._s(op))]
+                                )
+                              }),
+                              1
+                            )
+                          ],
+                          1
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.editItem.type == "checkbox"
+                      ? _c(
+                          "div",
+                          { staticClass: "col-12 row" },
+                          [
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: {
+                                type: "number",
+                                label: "最少選幾項",
+                                min: 0,
+                                max: _vm.editItem.option.length
+                              },
+                              model: {
+                                value: _vm.editItem.attr.minCheck,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "minCheck",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.minCheck"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: {
+                                type: "number",
+                                label: "最多選幾項",
+                                min: 0,
+                                max: _vm.editItem.option.length
+                              },
+                              model: {
+                                value: _vm.editItem.attr.maxCheck,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "maxCheck",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.maxCheck"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.editItem.type == "number"
+                      ? _c(
+                          "div",
+                          { staticClass: "col-12 row" },
+                          [
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: { type: "number", label: "最小數值" },
+                              model: {
+                                value: _vm.editItem.attr.minValue,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "minValue",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.minValue"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: { type: "number", label: "最大數值" },
+                              model: {
+                                value: _vm.editItem.attr.maxValue,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "maxValue",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.maxValue"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      : _vm._e()
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c(
+                "q-card-actions",
+                { staticClass: "justify-center" },
+                [
+                  _c("q-btn", {
+                    attrs: { flat: "", label: "確定" },
+                    on: {
+                      click: function($event) {
+                        return _vm.ConfirmEdit()
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("q-btn", {
+                    directives: [
+                      { name: "close-popup", rawName: "v-close-popup" }
+                    ],
+                    attrs: { flat: "", label: "取消" }
+                  })
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=template&id=7e7157e3&lang=html&":
+/*!*******************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-reply.vue?vue&type=template&id=7e7157e3&lang=html& ***!
+  \*******************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "form-reply" },
+    [
+      _c(
+        "q-list",
+        { attrs: { bordered: "" } },
+        _vm._l(_vm.formData.itemArr, function(item, i) {
+          return _c(
+            "q-item",
+            { key: item.id },
+            [
+              _c("q-item-section", [
+                _c("div", [
+                  item.canNotEmpty == "true"
+                    ? _c("span", { staticClass: "text-red" }, [_vm._v("*")])
+                    : _vm._e(),
+                  _vm._v(
+                    "\n\t\t\t\t\t" +
+                      _vm._s(i + 1) +
+                      ". " +
+                      _vm._s(item.quest) +
+                      "\n\t\t\t\t"
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", [
+                  item.type == "text"
+                    ? _c(
+                        "div",
+                        [
+                          _c("q-input", {
+                            ref: item.id,
+                            refInFor: true,
+                            attrs: {
+                              dense: "",
+                              placeholder: "請輸入文字",
+                              rules: item.rule
+                            },
+                            model: {
+                              value: _vm.editReply[item.id].value,
+                              callback: function($$v) {
+                                _vm.$set(_vm.editReply[item.id], "value", $$v)
+                              },
+                              expression: "editReply[item.id].value"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  item.type == "radio"
+                    ? _c(
+                        "div",
+                        _vm._l(item.option, function(op, j) {
+                          return _c("q-radio", {
+                            key: op,
+                            attrs: { label: op, val: op },
+                            model: {
+                              value: _vm.editReply[item.id].value,
+                              callback: function($$v) {
+                                _vm.$set(_vm.editReply[item.id], "value", $$v)
+                              },
+                              expression: "editReply[item.id].value"
+                            }
+                          })
+                        }),
+                        1
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  item.type == "checkbox"
+                    ? _c(
+                        "div",
+                        [
+                          _c(
+                            "div",
+                            { staticClass: "text-subtitle2 text-red row" },
+                            [
+                              item.attr.minCheck
+                                ? _c("div", { staticClass: "q-mx-sm" }, [
+                                    _vm._v(
+                                      "最少選" +
+                                        _vm._s(item.attr.minCheck) +
+                                        "項"
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              item.attr.maxCheck
+                                ? _c("div", { staticClass: "q-mx-sm" }, [
+                                    _vm._v(
+                                      "最多選" +
+                                        _vm._s(item.attr.maxCheck) +
+                                        "項"
+                                    )
+                                  ])
+                                : _vm._e()
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _vm._l(item.option, function(op, j) {
+                            return _c("q-checkbox", {
+                              key: op,
+                              attrs: { label: op, val: op },
+                              model: {
+                                value: _vm.editReply[item.id].value,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.editReply[item.id], "value", $$v)
+                                },
+                                expression: "editReply[item.id].value"
+                              }
+                            })
+                          })
+                        ],
+                        2
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  item.type == "number"
+                    ? _c(
+                        "div",
+                        [
+                          _c(
+                            "div",
+                            { staticClass: "text-subtitle2 text-red row" },
+                            [
+                              item.attr.minValue
+                                ? _c("div", { staticClass: "q-mx-sm" }, [
+                                    _vm._v(
+                                      "最小數值" + _vm._s(item.attr.minValue)
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              item.attr.maxValue
+                                ? _c("div", { staticClass: "q-mx-sm" }, [
+                                    _vm._v(
+                                      "最大數值" + _vm._s(item.attr.maxValue)
+                                    )
+                                  ])
+                                : _vm._e()
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c("q-input", {
+                            ref: item.id,
+                            refInFor: true,
+                            attrs: {
+                              type: "number",
+                              dense: "",
+                              placeholder: "請輸入數字",
+                              rules: item.rule
+                            },
+                            model: {
+                              value: _vm.editReply[item.id].value,
+                              callback: function($$v) {
+                                _vm.$set(_vm.editReply[item.id], "value", $$v)
+                              },
+                              expression: "editReply[item.id].value"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    : _vm._e()
+                ])
+              ])
+            ],
+            1
+          )
+        }),
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/image-edit.vue?vue&type=template&id=404b88fe&lang=html&":
 /*!*******************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-edit.vue?vue&type=template&id=404b88fe&lang=html& ***!
@@ -6671,6 +8034,24 @@ var render = function() {
                         _vm._v(_vm._s(_vm.$refs.locationSelect.status))
                       ])
                     : _vm._e()
+                ],
+                1
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.dataset.form
+            ? _c(
+                "q-card-section",
+                [
+                  _c("div", { staticClass: "text-h6" }, [_vm._v("填寫表單")]),
+                  _vm._v(" "),
+                  _c("form-reply", {
+                    ref: "formReply",
+                    attrs: {
+                      formData: _vm.dataset.form,
+                      formReply: _vm.initReply
+                    }
+                  })
                 ],
                 1
               )
@@ -6925,6 +8306,112 @@ var render = function() {
                   label: "照片標註"
                 }
               })
+            ],
+            1
+          )
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html&":
+/*!*********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html& ***!
+  \*********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "tag-checkbox" },
+    [
+      _c(
+        "q-btn",
+        {
+          staticClass: "q-ma-sm bg-brown-8",
+          on: {
+            click: function($event) {
+              _vm.openTagSelect = true
+            }
+          }
+        },
+        [_vm._v(_vm._s(_vm.btTitle))]
+      ),
+      _vm._v(" "),
+      _c(
+        "q-dialog",
+        {
+          model: {
+            value: _vm.openTagSelect,
+            callback: function($$v) {
+              _vm.openTagSelect = $$v
+            },
+            expression: "openTagSelect"
+          }
+        },
+        [
+          _c(
+            "q-card",
+            [
+              _c(
+                "q-card-section",
+                [
+                  _c("div", { staticClass: "text-h6" }, [_vm._v("選擇標籤")]),
+                  _vm._v(" "),
+                  _vm._l(_vm.tagSelect, function(tag) {
+                    return _c("q-checkbox", {
+                      key: tag.name,
+                      attrs: { label: tag.name },
+                      on: {
+                        input: function($event) {
+                          return _vm.UpdateSelect()
+                        }
+                      },
+                      model: {
+                        value: tag.value,
+                        callback: function($$v) {
+                          _vm.$set(tag, "value", $$v)
+                        },
+                        expression: "tag.value"
+                      }
+                    })
+                  })
+                ],
+                2
+              ),
+              _vm._v(" "),
+              _c(
+                "q-card-actions",
+                { staticClass: "justify-center" },
+                [
+                  _c("q-btn", {
+                    attrs: { flat: "", label: "確定" },
+                    on: {
+                      click: function($event) {
+                        return _vm.ConfirmSelect()
+                      }
+                    }
+                  })
+                ],
+                1
+              )
             ],
             1
           )
@@ -7334,7 +8821,8 @@ var render = function() {
             attrs: {
               dataset: _vm.datasetSelect,
               initLat: _vm.initLoc.lat,
-              initLng: _vm.initLoc.lng
+              initLng: _vm.initLoc.lng,
+              initDataTime: _vm.initDataTime
             },
             on: {
               confirm: function($event) {
@@ -8591,6 +10079,180 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/vue/form-editor.vue":
+/*!*********************************!*\
+  !*** ./src/vue/form-editor.vue ***!
+  \*********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./form-editor.vue?vue&type=template&id=16512a44&lang=html& */ "./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&");
+/* harmony import */ var _form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./form-editor.vue?vue&type=script&lang=js& */ "./src/vue/form-editor.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./form-editor.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/form-editor.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue?vue&type=script&lang=js&":
+/*!**********************************************************!*\
+  !*** ./src/vue/form-editor.vue?vue&type=script&lang=js& ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************!*\
+  !*** ./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&":
+/*!**************************************************************************!*\
+  !*** ./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=template&id=16512a44&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/form-reply.vue":
+/*!********************************!*\
+  !*** ./src/vue/form-reply.vue ***!
+  \********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _form_reply_vue_vue_type_template_id_7e7157e3_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./form-reply.vue?vue&type=template&id=7e7157e3&lang=html& */ "./src/vue/form-reply.vue?vue&type=template&id=7e7157e3&lang=html&");
+/* harmony import */ var _form_reply_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./form-reply.vue?vue&type=script&lang=js& */ "./src/vue/form-reply.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./form-reply.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _form_reply_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _form_reply_vue_vue_type_template_id_7e7157e3_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _form_reply_vue_vue_type_template_id_7e7157e3_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/form-reply.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/form-reply.vue?vue&type=script&lang=js&":
+/*!*********************************************************!*\
+  !*** ./src/vue/form-reply.vue?vue&type=script&lang=js& ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./form-reply.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************!*\
+  !*** ./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./form-reply.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/form-reply.vue?vue&type=template&id=7e7157e3&lang=html&":
+/*!*************************************************************************!*\
+  !*** ./src/vue/form-reply.vue?vue&type=template&id=7e7157e3&lang=html& ***!
+  \*************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_template_id_7e7157e3_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./form-reply.vue?vue&type=template&id=7e7157e3&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/form-reply.vue?vue&type=template&id=7e7157e3&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_template_id_7e7157e3_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_reply_vue_vue_type_template_id_7e7157e3_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./src/vue/image-edit.vue":
 /*!********************************!*\
   !*** ./src/vue/image-edit.vue ***!
@@ -9021,6 +10683,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_main_app_vue_vue_type_template_id_ad9c3862_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_main_app_vue_vue_type_template_id_ad9c3862_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/tag-checkbox.vue":
+/*!**********************************!*\
+  !*** ./src/vue/tag-checkbox.vue ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _tag_checkbox_vue_vue_type_template_id_4b92eed8_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html& */ "./src/vue/tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html&");
+/* harmony import */ var _tag_checkbox_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tag-checkbox.vue?vue&type=script&lang=js& */ "./src/vue/tag-checkbox.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tag-checkbox.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _tag_checkbox_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _tag_checkbox_vue_vue_type_template_id_4b92eed8_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _tag_checkbox_vue_vue_type_template_id_4b92eed8_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/tag-checkbox.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/tag-checkbox.vue?vue&type=script&lang=js&":
+/*!***********************************************************!*\
+  !*** ./src/vue/tag-checkbox.vue?vue&type=script&lang=js& ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./tag-checkbox.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss&":
+/*!********************************************************************!*\
+  !*** ./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss& ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./tag-checkbox.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html&":
+/*!***************************************************************************!*\
+  !*** ./src/vue/tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html& ***!
+  \***************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_template_id_4b92eed8_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/tag-checkbox.vue?vue&type=template&id=4b92eed8&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_template_id_4b92eed8_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_tag_checkbox_vue_vue_type_template_id_4b92eed8_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

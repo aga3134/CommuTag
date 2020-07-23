@@ -278,6 +278,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -300,6 +302,7 @@ __webpack_require__.r(__webpack_exports__);
     EditUserInfo: function () {
       this.openInputPanel = true;
       this.editInfo.name = this.user.name;
+      this.editInfo.contactEmail = this.user.contactEmail;
     },
     ChangePhoto: function () {
       if (this.uploadPhoto) return;
@@ -557,6 +560,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _dataset_select_list_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dataset-select-list.vue */ "./src/vue/dataset-select-list.vue");
 //
 //
 //
@@ -605,18 +609,38 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "api-key-list",
   props: {},
-  components: {},
+  components: {
+    "dataset-select-list": _dataset_select_list_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   data: function () {
     return {
       keyArr: [],
-      openAddKey: false,
-      newKey: {
+      openEditKey: false,
+      editKey: {
         key: "",
-        desc: ""
-      }
+        desc: "",
+        scope: "all",
+        dataset: []
+      },
+      scopeOption: [{
+        label: "全部資料集",
+        value: "all"
+      }, {
+        label: "特定資料集",
+        value: "target"
+      }]
     };
   },
   created: function () {
@@ -630,19 +654,30 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
     GenRandomKey: function () {
-      this.newKey.key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      this.editKey.key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    },
+    AddNewKey: function () {
+      this.editKey = {
+        key: "",
+        desc: "",
+        scope: "all",
+        dataset: []
+      };
+      this.openEditKey = true;
     },
     AddKey: function () {
-      if (!this.newKey.key || this.newKey.key == "") return alert("請輸入金鑰");
-      this.openAddKey = false;
+      if (!this.editKey.key || this.editKey.key == "") return alert("請輸入金鑰");
+      this.openEditKey = false;
       var csrfToken = $("meta[name='csrf-token']").attr("content");
       var data = {};
-      data.key = this.newKey.key;
-      data.desc = this.newKey.desc;
+      data.key = this.editKey.key;
+      data.desc = this.editKey.desc;
+      data.scope = this.editKey.scope;
+      data.dataset = this.editKey.dataset;
       data._csrf = csrfToken;
       $.post("/api/add-key", data, function (result) {
-        if (result.status != "ok") return alert("新增金鑰失敗");
-        this.$q.notify("新增金鑰成功");
+        if (result.status != "ok") return alert("修改金鑰失敗");
+        this.$q.notify("修改金鑰成功");
         this.LoadKey();
       }.bind(this));
     },
@@ -661,6 +696,18 @@ __webpack_require__.r(__webpack_exports__);
           this.LoadKey();
         }.bind(this));
       }
+    },
+    EditKey: function (i) {
+      if (i < 0 || i >= this.keyArr.length) return;
+      this.editKey = this.keyArr[i];
+      this.openEditKey = true;
+    },
+    AddDatasetToKey: function (dataset) {
+      this.editKey.dataset.push(dataset._id);
+    },
+    RemoveDatasetFromKey: function (i) {
+      if (i < 0 || i >= this.keyArr.length) return;
+      this.editKey.dataset.splice(i, 1);
     }
   }
 });
@@ -678,6 +725,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _image_upload_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./image-upload.vue */ "./src/vue/image-upload.vue");
 /* harmony import */ var _user_list_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./user-list.vue */ "./src/vue/user-list.vue");
+/* harmony import */ var _form_editor_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./form-editor.vue */ "./src/vue/form-editor.vue");
 //
 //
 //
@@ -757,6 +805,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -766,7 +823,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   components: {
     "image-upload": _image_upload_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
-    "user-list": _user_list_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+    "user-list": _user_list_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    "form-editor": _form_editor_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data: function () {
     return {
@@ -917,6 +975,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     RemoveMaster: function (i) {
       this.info.master.splice(i, 1);
+    },
+    UpdateForm: function () {
+      var formData = this.$refs.formEditor.editData;
+      this.info.form = Object.assign({}, formData);
     }
   }
 });
@@ -1096,6 +1158,512 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select-list.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _dataset_select_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dataset-select.vue */ "./src/vue/dataset-select.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "dataset-select-list",
+  props: {
+    enableAdd: Boolean,
+    enableRemove: Boolean,
+    list: Array
+  },
+  components: {
+    "dataset-select": _dataset_select_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  data: function () {
+    return {
+      datasetArr: [],
+      openDatasetSelect: false
+    };
+  },
+  created: function () {
+    this.LoadDatasetList();
+  },
+  methods: {
+    LoadDatasetList: function () {
+      if (!this.list || this.list.length == 0) {
+        this.datasetArr = [];
+        return;
+      }
+
+      var idArr = this.list.join();
+      $.get("/dataset/list-dataset-by-id?id=" + idArr, function (result) {
+        if (result.status != "ok") return alert("讀取資料集列表失敗");
+        this.datasetArr = result.data;
+      }.bind(this));
+    },
+    AddDataset: function () {
+      this.openDatasetSelect = false;
+      var dataset = this.$refs.datasetSelect.GetSelectDataset();
+      if (!dataset) return;
+      var sameID = this.datasetArr.filter(function (d) {
+        return dataset._id == d._id;
+      }.bind(this));
+
+      if (sameID.length == 0) {
+        this.datasetArr.push(dataset);
+        this.$emit("add", dataset);
+      }
+    },
+    RemoveDataset: function (i) {
+      if (i < 0 || i >= this.datasetArr.length) return;
+      this.datasetArr.splice(i, 1);
+      this.$emit("remove", i);
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "dataset-select",
+  props: {
+    forUpload: Boolean,
+    forAnnotation: Boolean
+  },
+  components: {},
+  data: function () {
+    return {
+      searchKey: "",
+      datasetArr: [],
+      hasMore: true,
+      selectIndex: -1,
+      lastDataset: {}
+    };
+  },
+  created: function () {
+    this.GetLastDataset();
+  },
+  methods: {
+    GetLastDataset: function () {
+      var storage = window.localStorage;
+      this.lastDataset = JSON.parse(localStorage.getItem("lastDataset"));
+    },
+    SetLastDataset: function (dataset) {
+      var storage = window.localStorage;
+      localStorage.setItem("lastDataset", JSON.stringify(dataset));
+    },
+    LoadMoreDataset: function (index, done) {
+      var url = "/dataset/list-dataset";
+      url += "?page=" + (index - 1);
+      url += "&sort=updatedAt";
+      url += "&orderType=desc";
+
+      if (this.forUpload) {
+        url += "&enableUpload=1";
+      }
+
+      if (this.forAnnotation) {
+        url += "&enableAnnotation=1";
+      }
+
+      url += "&keyword=" + this.searchKey;
+      $.get(url, function (result) {
+        if (result.status != "ok") return;
+        this.hasMore = result.data.hasMore;
+
+        if (!this.hasMore) {
+          this.$refs.datasetScroll.stop();
+        }
+
+        this.datasetArr = this.datasetArr.concat(result.data.dataset);
+        done();
+      }.bind(this));
+    },
+    ReloadDataset: function () {
+      this.datasetArr = [];
+      this.$refs.datasetScroll.reset();
+      this.$refs.datasetScroll.resume();
+      this.selectIndex = -1;
+    },
+    GetSelectDataset: function () {
+      if (this.selectIndex == -1 && this.lastDataset) {
+        return this.lastDataset;
+      }
+
+      if (this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return null;else return this.datasetArr[this.selectIndex];
+    },
+    SelectItem: function (i) {
+      this.selectIndex = i;
+      this.$emit("change");
+    },
+    ConfirmSelect: function () {
+      if (this.selectIndex == -1 && this.lastDataset) {
+        return this.$emit("confirm");
+      }
+
+      if (this.selectIndex < 0 || this.selectIndex >= this.datasetArr.length) return alert("請選擇資料集");
+      this.SetLastDataset(this.datasetArr[this.selectIndex]);
+      this.$emit("confirm");
+    },
+    CancelSelect: function () {
+      this.$emit("cancel");
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "form-editor",
+  props: {
+    data: Object
+  },
+  components: {},
+  data: function () {
+    return {
+      openEditItem: false,
+      editData: {},
+      editItem: {},
+      editIndex: -1,
+      typeOption: [{
+        label: "文字",
+        value: "text"
+      }, {
+        label: "單選",
+        value: "radio"
+      }, {
+        label: "多選",
+        value: "checkbox"
+      }, {
+        label: "數字",
+        value: "number"
+      }],
+      optionName: ""
+    };
+  },
+  created: function () {
+    this.editData = Object.assign({}, this.data);
+  },
+  methods: {
+    OpenAddItem: function () {
+      this.openEditItem = true;
+      this.editItem = {
+        type: "text",
+        canNotEmpty: "false",
+        option: [],
+        attr: {}
+      };
+    },
+    AddItemOption: function () {
+      if (!this.editItem.option) Vue.set(this.editItem, "option", []);
+
+      if (this.editItem.option.includes(this.optionName)) {
+        alert("此選項已存在");
+      } else this.editItem.option.push(this.optionName);
+
+      this.optionName = "";
+    },
+    RemoveItemOption: function (i) {
+      this.editItem.option.splice(i, 1);
+    },
+    MoveItemUp: function (i) {
+      if (i <= 0) return;
+      var temp = this.editData.itemArr[i - 1];
+      this.editData.itemArr[i - 1] = this.editData.itemArr[i];
+      this.editData.itemArr[i] = temp;
+      this.$forceUpdate();
+      this.$emit("update");
+    },
+    MoveItemDown: function (i) {
+      if (i >= this.editData.itemArr.length - 1) return;
+      var temp = this.editData.itemArr[i + 1];
+      this.editData.itemArr[i + 1] = this.editData.itemArr[i];
+      this.editData.itemArr[i] = temp;
+      this.$forceUpdate();
+      this.$emit("update");
+    },
+    EditItem: function (i) {
+      this.editIndex = i;
+      this.editItem = Object.assign({}, this.editData.itemArr[i]);
+      if (!this.editItem.attr) this.editItem.attr = {};
+      this.openEditItem = true;
+    },
+    RemoveItem: function (i) {
+      this.editData.itemArr.splice(i, 1);
+      this.$emit("update");
+    },
+    GenerateID: function () {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    },
+    ConfirmEdit: function () {
+      this.$refs.type.validate();
+
+      if (this.$refs.type.hasError) {
+        return this.$q.notify({
+          color: "negative",
+          message: "填答類型不能空白"
+        });
+      }
+
+      this.$refs.quest.validate();
+
+      if (this.$refs.quest.hasError) {
+        return this.$q.notify({
+          color: "negative",
+          message: "欄位名稱不能空白"
+        });
+      }
+
+      if (this.editItem.type == "radio" || this.editItem.type == "checkbox") {
+        if (this.editItem.option.length == 0) {
+          return this.$q.notify({
+            color: "negative",
+            message: "請新增選項"
+          });
+        }
+      }
+
+      if (this.editItem.attr.minCheck) {
+        if (this.editItem.attr.minCheck < 1 || this.editItem.attr.minCheck > this.editItem.option.length) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最少選幾項超出選項範圍"
+          });
+        }
+      }
+
+      if (this.editItem.attr.maxCheck) {
+        if (this.editItem.attr.maxCheck < 1 || this.editItem.attr.maxCheck > this.editItem.option.length) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最多選幾項超出選項範圍"
+          });
+        }
+      }
+
+      if (this.editItem.attr.minCheck && this.editItem.attr.maxCheck) {
+        if (this.editItem.attr.minCheck > this.editItem.attr.maxCheck) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最少選幾項不能大於最多選幾項"
+          });
+        }
+      }
+
+      if (this.editItem.attr.minValue && this.editItem.attr.maxValue) {
+        if (this.editItem.attr.minValue > this.editItem.attr.maxValue) {
+          return this.$q.notify({
+            color: "negative",
+            message: "最小數值不能大於最大數值"
+          });
+        }
+      }
+
+      this.openEditItem = false;
+
+      if (!this.editData.itemArr) {
+        this.editData.itemArr = [];
+      }
+
+      if (!this.editItem.id) {
+        this.editItem.id = this.GenerateID();
+        this.editData.itemArr.push(this.editItem);
+      } else {
+        this.editData.itemArr[this.editIndex] = Object.assign({}, this.editItem);
+        this.editIndex = -1;
+      }
+
+      this.$emit("update");
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-upload.vue?vue&type=script&lang=js&":
 /*!*********************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-upload.vue?vue&type=script&lang=js& ***!
@@ -1139,7 +1707,7 @@ __webpack_require__.r(__webpack_exports__);
       maxW: 1024,
       maxH: 1024,
       uploading: false,
-      loc: {}
+      exif: {}
     };
   },
   created: function () {
@@ -1171,7 +1739,7 @@ __webpack_require__.r(__webpack_exports__);
 
           img.onload = function () {
             //image load ready
-            //get gps position if exist
+            //get gps position & time if exist
             EXIF.getData(img, function () {
               function ToDegree(arr, dir) {
                 if (!arr) return null;
@@ -1184,8 +1752,14 @@ __webpack_require__.r(__webpack_exports__);
               var lng = ToDegree(img.exifdata.GPSLongitude, img.exifdata.GPSLongitudeRef);
 
               if (lat && lng) {
-                this.loc.lat = lat;
-                this.loc.lng = lng;
+                this.exif.lat = lat;
+                this.exif.lng = lng;
+              }
+
+              if (img.exifdata.DateTime) {
+                var t = img.exifdata.DateTime.split(" ");
+                var d = t[0].replace(/:/g, "-");
+                this.exif.time = d + " " + t[1];
               }
             }.bind(this));
             this.FitCanvasFromImage(img);
@@ -1757,6 +2331,60 @@ module.exports = exports;
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".dataset-select-list {\n  width: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss&":
+/*!**************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".dataset-select {\n  width: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".form-editor {\n  width: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-upload.vue?vue&type=style&index=0&lang=scss&":
 /*!************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-upload.vue?vue&type=style&index=0&lang=scss& ***!
@@ -2080,6 +2708,99 @@ module.exports = exported;
 
 var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
             var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-list.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-list.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select-list.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss& ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&");
 
             content = content.__esModule ? content.default : content;
 
@@ -2527,7 +3248,7 @@ var render = function() {
       _c("div", { staticClass: "text-h6" }, [_vm._v("API金鑰")]),
       _vm._v(" "),
       _c("div", { staticClass: "text-subtitle2 text-grey-7" }, [
-        _vm._v("金鑰用於讓程式自動化上傳影像")
+        _vm._v("金鑰用於讓程式自動化上傳、標註影像")
       ]),
       _vm._v(" "),
       _c("api-key-list")
@@ -2712,6 +3433,18 @@ var render = function() {
                             _vm.$set(_vm.editInfo, "name", $$v)
                           },
                           expression: "editInfo.name"
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("q-input", {
+                        staticClass: "q-my-sm",
+                        attrs: { label: "聯絡信箱" },
+                        model: {
+                          value: _vm.editInfo.contactEmail,
+                          callback: function($$v) {
+                            _vm.$set(_vm.editInfo, "contactEmail", $$v)
+                          },
+                          expression: "editInfo.contactEmail"
                         }
                       })
                     ],
@@ -3246,7 +3979,7 @@ var render = function() {
               attrs: { icon: "add", label: "新增金鑰" },
               on: {
                 click: function($event) {
-                  _vm.openAddKey = true
+                  return _vm.AddNewKey()
                 }
               }
             })
@@ -3275,22 +4008,34 @@ var render = function() {
                 1
               ),
               _vm._v(" "),
-              _c(
-                "q-item-section",
-                { attrs: { side: "" } },
-                [
-                  _c("q-btn", {
-                    staticClass: "text-gray-8",
-                    attrs: { flat: "", icon: "close" },
-                    on: {
-                      click: function($event) {
-                        return _vm.DeleteKey(i)
+              _c("q-item-section", { attrs: { side: "" } }, [
+                _c(
+                  "div",
+                  { staticClass: "row" },
+                  [
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "edit" },
+                      on: {
+                        click: function($event) {
+                          return _vm.EditKey(i)
+                        }
                       }
-                    }
-                  })
-                ],
-                1
-              )
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.DeleteKey(i)
+                        }
+                      }
+                    })
+                  ],
+                  1
+                )
+              ])
             ],
             1
           )
@@ -3302,11 +4047,11 @@ var render = function() {
         "q-dialog",
         {
           model: {
-            value: _vm.openAddKey,
+            value: _vm.openEditKey,
             callback: function($$v) {
-              _vm.openAddKey = $$v
+              _vm.openEditKey = $$v
             },
-            expression: "openAddKey"
+            expression: "openEditKey"
           }
         },
         [
@@ -3315,7 +4060,9 @@ var render = function() {
             { staticClass: "full-width" },
             [
               _c("q-card-section", [
-                _c("div", { staticClass: "text-h6" }, [_vm._v("新增金鑰")])
+                _vm.editKey._id
+                  ? _c("div", { staticClass: "text-h6" }, [_vm._v("編輯金鑰")])
+                  : _c("div", { staticClass: "text-h6" }, [_vm._v("新增金鑰")])
               ]),
               _vm._v(" "),
               _c(
@@ -3323,7 +4070,7 @@ var render = function() {
                 [
                   _c("q-input", {
                     staticClass: "q-ma-sm",
-                    attrs: { label: "金鑰" },
+                    attrs: { label: "金鑰", disable: _vm.editKey._id },
                     scopedSlots: _vm._u([
                       {
                         key: "append",
@@ -3344,13 +4091,47 @@ var render = function() {
                       }
                     ]),
                     model: {
-                      value: _vm.newKey.key,
+                      value: _vm.editKey.key,
                       callback: function($$v) {
-                        _vm.$set(_vm.newKey, "key", $$v)
+                        _vm.$set(_vm.editKey, "key", $$v)
                       },
-                      expression: "newKey.key"
+                      expression: "editKey.key"
                     }
                   }),
+                  _vm._v(" "),
+                  _c("q-select", {
+                    staticClass: "q-ma-sm",
+                    attrs: {
+                      dense: "",
+                      options: _vm.scopeOption,
+                      "option-value": "value",
+                      "option-label": "label",
+                      "emit-value": "",
+                      "map-options": "",
+                      label: "適用範圍"
+                    },
+                    model: {
+                      value: _vm.editKey.scope,
+                      callback: function($$v) {
+                        _vm.$set(_vm.editKey, "scope", $$v)
+                      },
+                      expression: "editKey.scope"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _vm.editKey.scope == "target"
+                    ? _c("dataset-select-list", {
+                        attrs: {
+                          list: _vm.editKey.dataset,
+                          enableAdd: "",
+                          enableRemove: ""
+                        },
+                        on: {
+                          add: _vm.AddDatasetToKey,
+                          remove: _vm.RemoveDatasetFromKey
+                        }
+                      })
+                    : _vm._e(),
                   _vm._v(" "),
                   _c("div", { staticClass: "text-subtitle1" }, [
                     _vm._v("金鑰說明")
@@ -3359,11 +4140,11 @@ var render = function() {
                   _c("q-input", {
                     attrs: { filled: "" },
                     model: {
-                      value: _vm.newKey.desc,
+                      value: _vm.editKey.desc,
                       callback: function($$v) {
-                        _vm.$set(_vm.newKey, "desc", $$v)
+                        _vm.$set(_vm.editKey, "desc", $$v)
                       },
-                      expression: "newKey.desc"
+                      expression: "editKey.desc"
                     }
                   })
                 ],
@@ -3375,7 +4156,7 @@ var render = function() {
                 { attrs: { align: "right" } },
                 [
                   _c("q-btn", {
-                    attrs: { flat: "", label: "新增", color: "primary" },
+                    attrs: { flat: "", label: "儲存", color: "primary" },
                     on: {
                       click: function($event) {
                         return _vm.AddKey()
@@ -3720,6 +4501,31 @@ var render = function() {
                         [_vm._v(_vm._s(tag))]
                       )
                     }),
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "full-width q-pa-md" },
+                    [
+                      _c("div", { staticClass: "text-h6" }, [
+                        _vm._v("表單欄位")
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "text-subtitle2" }, [
+                        _vm._v("使用者上傳影像時將被要求填寫此表單")
+                      ]),
+                      _vm._v(" "),
+                      _c("form-editor", {
+                        ref: "formEditor",
+                        attrs: { data: _vm.info.form },
+                        on: {
+                          update: function($event) {
+                            return _vm.UpdateForm()
+                          }
+                        }
+                      })
+                    ],
                     1
                   ),
                   _vm._v(" "),
@@ -4132,6 +4938,815 @@ var render = function() {
               }
             }
           })
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html&":
+/*!****************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html& ***!
+  \****************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "dataset-select-list q-pa-sm" },
+    [
+      _c("div", { staticClass: "row items-center" }, [
+        _vm.enableAdd
+          ? _c(
+              "div",
+              { staticClass: "col-shrink q-pr-lg" },
+              [
+                _c("q-btn", {
+                  staticClass: "bg-grey-8 text-white",
+                  attrs: { icon: "add", label: "加入資料集" },
+                  on: {
+                    click: function($event) {
+                      _vm.openDatasetSelect = true
+                    }
+                  }
+                })
+              ],
+              1
+            )
+          : _vm._e()
+      ]),
+      _vm._v(" "),
+      _c(
+        "q-list",
+        { staticClass: "q-my-md", attrs: { bordered: "" } },
+        _vm._l(_vm.datasetArr, function(dataset, i) {
+          return _c(
+            "q-item",
+            { key: dataset._id },
+            [
+              _c(
+                "q-item-section",
+                { attrs: { avatar: "" } },
+                [
+                  _c("q-avatar", [
+                    _c("img", {
+                      attrs: {
+                        src: dataset.picCover || "/static/image/logo.png"
+                      }
+                    })
+                  ])
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "q-item-section",
+                [
+                  _c("q-item-label", [
+                    _c(
+                      "a",
+                      {
+                        staticStyle: { "text-decoration": "none" },
+                        attrs: {
+                          href: "/dataset?id=" + dataset._id,
+                          target: "_blank"
+                        }
+                      },
+                      [_vm._v(_vm._s(dataset.name))]
+                    )
+                  ])
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _vm.enableRemove
+                ? _c(
+                    "q-item-section",
+                    { attrs: { side: "" } },
+                    [
+                      _c("q-btn", {
+                        staticClass: "text-gray-8",
+                        attrs: { flat: "", icon: "close" },
+                        on: {
+                          click: function($event) {
+                            return _vm.RemoveDataset(i)
+                          }
+                        }
+                      })
+                    ],
+                    1
+                  )
+                : _vm._e()
+            ],
+            1
+          )
+        }),
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "q-dialog",
+        {
+          model: {
+            value: _vm.openDatasetSelect,
+            callback: function($$v) {
+              _vm.openDatasetSelect = $$v
+            },
+            expression: "openDatasetSelect"
+          }
+        },
+        [
+          _c("dataset-select", {
+            ref: "datasetSelect",
+            on: {
+              confirm: function($event) {
+                return _vm.AddDataset()
+              },
+              cancel: function($event) {
+                _vm.openDatasetSelect = false
+              }
+            }
+          })
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=template&id=10806e33&lang=html&":
+/*!***********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/dataset-select.vue?vue&type=template&id=10806e33&lang=html& ***!
+  \***********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "q-card",
+    { staticClass: "dataset-select full-width q-pa-sm" },
+    [
+      _c(
+        "q-card-section",
+        [
+          _c("div", { staticClass: "text-h6" }, [_vm._v("選擇資料集")]),
+          _vm._v(" "),
+          _vm.lastDataset
+            ? _c(
+                "div",
+                [
+                  _c("div", { staticClass: "text-subtitle2" }, [
+                    _vm._v("上次使用")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "q-item",
+                    {
+                      attrs: {
+                        clickable: "",
+                        active: _vm.selectIndex == -1,
+                        "active-class": "bg-green-2"
+                      },
+                      on: {
+                        click: function($event) {
+                          return _vm.SelectItem(-1)
+                        },
+                        dblclick: function($event) {
+                          return _vm.ConfirmSelect()
+                        }
+                      }
+                    },
+                    [
+                      _c(
+                        "q-item-section",
+                        { attrs: { avatar: "" } },
+                        [
+                          _c(
+                            "q-avatar",
+                            { attrs: { square: "", rounded: "" } },
+                            [
+                              _c("img", {
+                                staticStyle: { "object-fit": "cover" },
+                                attrs: {
+                                  src:
+                                    _vm.lastDataset.picCover ||
+                                    "/static/image/logo-16-9.png"
+                                }
+                              })
+                            ]
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "q-item-section",
+                        [
+                          _c("q-item-label", [
+                            _vm._v(_vm._s(_vm.lastDataset.name))
+                          ])
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _c(
+            "q-scroll-area",
+            { staticStyle: { height: "300px" } },
+            [
+              _c(
+                "q-infinite-scroll",
+                {
+                  ref: "datasetScroll",
+                  on: { load: _vm.LoadMoreDataset },
+                  scopedSlots: _vm._u([
+                    {
+                      key: "loading",
+                      fn: function() {
+                        return [
+                          _c(
+                            "div",
+                            { staticClass: "row justify-center q-my-md" },
+                            [
+                              _c("q-spinner-dots", {
+                                attrs: { color: "primary", size: "40px" }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      },
+                      proxy: true
+                    }
+                  ])
+                },
+                [
+                  _c("q-input", {
+                    attrs: {
+                      placeholder: "輸入篩選文字",
+                      outlined: "",
+                      dense: "",
+                      square: ""
+                    },
+                    on: {
+                      change: function($event) {
+                        return _vm.ReloadDataset()
+                      }
+                    },
+                    model: {
+                      value: _vm.searchKey,
+                      callback: function($$v) {
+                        _vm.searchKey = $$v
+                      },
+                      expression: "searchKey"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "q-list",
+                    { attrs: { bordered: "", separator: "" } },
+                    _vm._l(_vm.datasetArr, function(dataset, i) {
+                      return _c(
+                        "q-item",
+                        {
+                          key: i,
+                          attrs: {
+                            clickable: "",
+                            active: _vm.selectIndex == i,
+                            "active-class": "bg-green-2"
+                          },
+                          on: {
+                            click: function($event) {
+                              return _vm.SelectItem(i)
+                            },
+                            dblclick: function($event) {
+                              return _vm.ConfirmSelect()
+                            }
+                          }
+                        },
+                        [
+                          _c(
+                            "q-item-section",
+                            { attrs: { avatar: "" } },
+                            [
+                              _c(
+                                "q-avatar",
+                                { attrs: { square: "", rounded: "" } },
+                                [
+                                  _c("img", {
+                                    staticStyle: { "object-fit": "cover" },
+                                    attrs: {
+                                      src:
+                                        dataset.picCover ||
+                                        "/static/image/logo-16-9.png"
+                                    }
+                                  })
+                                ]
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "q-item-section",
+                            [
+                              _c("q-item-label", [_vm._v(_vm._s(dataset.name))])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    }),
+                    1
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "q-card-actions",
+        { staticClass: "justify-center" },
+        [
+          _c("q-btn", {
+            attrs: { flat: "", label: "確定" },
+            on: {
+              click: function($event) {
+                return _vm.ConfirmSelect()
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("q-btn", {
+            attrs: { flat: "", label: "取消" },
+            on: {
+              click: function($event) {
+                return _vm.CancelSelect()
+              }
+            }
+          })
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&":
+/*!********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html& ***!
+  \********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "form-editor q-pa-sm" },
+    [
+      _c("div", { staticClass: "row items-center" }, [
+        _c(
+          "div",
+          { staticClass: "col-shrink q-pr-lg" },
+          [
+            _c("q-btn", {
+              staticClass: "bg-grey-8 text-white",
+              attrs: { icon: "add", label: "新增欄位" },
+              on: {
+                click: function($event) {
+                  return _vm.OpenAddItem()
+                }
+              }
+            })
+          ],
+          1
+        )
+      ]),
+      _vm._v(" "),
+      _c(
+        "q-list",
+        { staticClass: "q-my-md", attrs: { bordered: "" } },
+        _vm._l(_vm.editData.itemArr, function(item, i) {
+          return _c(
+            "q-item",
+            { key: item.id },
+            [
+              _c("q-item-section", [
+                _c("div", [
+                  item.canNotEmpty == "true"
+                    ? _c("span", { staticClass: "text-red" }, [_vm._v("*")])
+                    : _vm._e(),
+                  _vm._v("\n\t\t\t\t\t" + _vm._s(item.quest) + "\n\t\t\t\t")
+                ])
+              ]),
+              _vm._v(" "),
+              _c("q-item-section", { attrs: { side: "" } }, [
+                _c(
+                  "div",
+                  { staticClass: "row" },
+                  [
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "arrow_circle_up" },
+                      on: {
+                        click: function($event) {
+                          return _vm.MoveItemUp(i)
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "arrow_circle_down" },
+                      on: {
+                        click: function($event) {
+                          return _vm.MoveItemDown(i)
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "edit" },
+                      on: {
+                        click: function($event) {
+                          return _vm.EditItem(i)
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-btn", {
+                      staticClass: "text-gray-8",
+                      attrs: { flat: "", dense: "", icon: "close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.RemoveItem(i)
+                        }
+                      }
+                    })
+                  ],
+                  1
+                )
+              ])
+            ],
+            1
+          )
+        }),
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "q-dialog",
+        {
+          model: {
+            value: _vm.openEditItem,
+            callback: function($$v) {
+              _vm.openEditItem = $$v
+            },
+            expression: "openEditItem"
+          }
+        },
+        [
+          _c(
+            "q-card",
+            { staticClass: "full-width" },
+            [
+              _c("q-card-section", [
+                _vm.editItem.id
+                  ? _c("div", { staticClass: "text-h6" }, [_vm._v("新增欄位")])
+                  : _c("div", { staticClass: "text-h6" }, [_vm._v("編輯欄位")]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "row" },
+                  [
+                    _c("q-select", {
+                      ref: "type",
+                      staticClass: "col-12 col-sm-6 q-pa-sm",
+                      attrs: {
+                        dense: "",
+                        options: _vm.typeOption,
+                        "option-value": "value",
+                        "option-label": "label",
+                        "emit-value": "",
+                        "map-options": "",
+                        label: "填答類型",
+                        disable: _vm.editItem.id != null,
+                        rules: [
+                          function(val) {
+                            return !!val || "填答類型不能空白"
+                          }
+                        ]
+                      },
+                      model: {
+                        value: _vm.editItem.type,
+                        callback: function($$v) {
+                          _vm.$set(_vm.editItem, "type", $$v)
+                        },
+                        expression: "editItem.type"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-toggle", {
+                      staticClass: "col-12 col-sm-6 q-pa-sm",
+                      attrs: {
+                        label: "必填欄位",
+                        "true-value": "true",
+                        "false-value": "false"
+                      },
+                      model: {
+                        value: _vm.editItem.canNotEmpty,
+                        callback: function($$v) {
+                          _vm.$set(_vm.editItem, "canNotEmpty", $$v)
+                        },
+                        expression: "editItem.canNotEmpty"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-input", {
+                      ref: "quest",
+                      staticClass: "col-12 q-pa-sm",
+                      attrs: {
+                        label: "欄位名稱",
+                        rules: [
+                          function(val) {
+                            return !!val || "欄位名稱不能空白"
+                          }
+                        ]
+                      },
+                      model: {
+                        value: _vm.editItem.quest,
+                        callback: function($$v) {
+                          _vm.$set(_vm.editItem, "quest", $$v)
+                        },
+                        expression: "editItem.quest"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _vm.editItem.type == "radio" ||
+                    _vm.editItem.type == "checkbox"
+                      ? _c(
+                          "div",
+                          [
+                            _c("q-input", {
+                              staticClass: "col-12 q-pa-sm",
+                              attrs: { label: "新增選項" },
+                              on: {
+                                keyup: function($event) {
+                                  if (
+                                    !$event.type.indexOf("key") &&
+                                    _vm._k(
+                                      $event.keyCode,
+                                      "enter",
+                                      13,
+                                      $event.key,
+                                      "Enter"
+                                    )
+                                  ) {
+                                    return null
+                                  }
+                                  return _vm.AddItemOption()
+                                }
+                              },
+                              scopedSlots: _vm._u(
+                                [
+                                  {
+                                    key: "append",
+                                    fn: function() {
+                                      return [
+                                        _c("q-btn", {
+                                          attrs: {
+                                            round: "",
+                                            dense: "",
+                                            flat: "",
+                                            icon: "add"
+                                          },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.AddItemOption()
+                                            }
+                                          }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ],
+                                null,
+                                false,
+                                876527129
+                              ),
+                              model: {
+                                value: _vm.optionName,
+                                callback: function($$v) {
+                                  _vm.optionName = $$v
+                                },
+                                expression: "optionName"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              { staticClass: "full-width" },
+                              _vm._l(_vm.editItem.option, function(op, i) {
+                                return _c(
+                                  "q-chip",
+                                  {
+                                    key: op,
+                                    attrs: { removable: "" },
+                                    on: {
+                                      remove: function($event) {
+                                        return _vm.RemoveItemOption(i)
+                                      }
+                                    }
+                                  },
+                                  [_vm._v(_vm._s(op))]
+                                )
+                              }),
+                              1
+                            )
+                          ],
+                          1
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.editItem.type == "checkbox"
+                      ? _c(
+                          "div",
+                          { staticClass: "col-12 row" },
+                          [
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: {
+                                type: "number",
+                                label: "最少選幾項",
+                                min: 0,
+                                max: _vm.editItem.option.length
+                              },
+                              model: {
+                                value: _vm.editItem.attr.minCheck,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "minCheck",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.minCheck"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: {
+                                type: "number",
+                                label: "最多選幾項",
+                                min: 0,
+                                max: _vm.editItem.option.length
+                              },
+                              model: {
+                                value: _vm.editItem.attr.maxCheck,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "maxCheck",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.maxCheck"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.editItem.type == "number"
+                      ? _c(
+                          "div",
+                          { staticClass: "col-12 row" },
+                          [
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: { type: "number", label: "最小數值" },
+                              model: {
+                                value: _vm.editItem.attr.minValue,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "minValue",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.minValue"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("q-input", {
+                              staticClass: "col q-ma-sm",
+                              attrs: { type: "number", label: "最大數值" },
+                              model: {
+                                value: _vm.editItem.attr.maxValue,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.editItem.attr,
+                                    "maxValue",
+                                    _vm._n($$v)
+                                  )
+                                },
+                                expression: "editItem.attr.maxValue"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      : _vm._e()
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c(
+                "q-card-actions",
+                { staticClass: "justify-center" },
+                [
+                  _c("q-btn", {
+                    attrs: { flat: "", label: "確定" },
+                    on: {
+                      click: function($event) {
+                        return _vm.ConfirmEdit()
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("q-btn", {
+                    directives: [
+                      { name: "close-popup", rawName: "v-close-popup" }
+                    ],
+                    attrs: { flat: "", label: "取消" }
+                  })
+                ],
+                1
+              )
+            ],
+            1
+          )
         ],
         1
       )
@@ -5413,6 +7028,267 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_list_vue_vue_type_template_id_773036d6_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_list_vue_vue_type_template_id_773036d6_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select-list.vue":
+/*!*****************************************!*\
+  !*** ./src/vue/dataset-select-list.vue ***!
+  \*****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _dataset_select_list_vue_vue_type_template_id_4c1db4a8_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html& */ "./src/vue/dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html&");
+/* harmony import */ var _dataset_select_list_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dataset-select-list.vue?vue&type=script&lang=js& */ "./src/vue/dataset-select-list.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dataset-select-list.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _dataset_select_list_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _dataset_select_list_vue_vue_type_template_id_4c1db4a8_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _dataset_select_list_vue_vue_type_template_id_4c1db4a8_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/dataset-select-list.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select-list.vue?vue&type=script&lang=js&":
+/*!******************************************************************!*\
+  !*** ./src/vue/dataset-select-list.vue?vue&type=script&lang=js& ***!
+  \******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select-list.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss&":
+/*!***************************************************************************!*\
+  !*** ./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss& ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select-list.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html&":
+/*!**********************************************************************************!*\
+  !*** ./src/vue/dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html& ***!
+  \**********************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_template_id_4c1db4a8_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select-list.vue?vue&type=template&id=4c1db4a8&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_template_id_4c1db4a8_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_list_vue_vue_type_template_id_4c1db4a8_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select.vue":
+/*!************************************!*\
+  !*** ./src/vue/dataset-select.vue ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _dataset_select_vue_vue_type_template_id_10806e33_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dataset-select.vue?vue&type=template&id=10806e33&lang=html& */ "./src/vue/dataset-select.vue?vue&type=template&id=10806e33&lang=html&");
+/* harmony import */ var _dataset_select_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dataset-select.vue?vue&type=script&lang=js& */ "./src/vue/dataset-select.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dataset-select.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _dataset_select_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _dataset_select_vue_vue_type_template_id_10806e33_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _dataset_select_vue_vue_type_template_id_10806e33_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/dataset-select.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select.vue?vue&type=script&lang=js&":
+/*!*************************************************************!*\
+  !*** ./src/vue/dataset-select.vue?vue&type=script&lang=js& ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss&":
+/*!**********************************************************************!*\
+  !*** ./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss& ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/dataset-select.vue?vue&type=template&id=10806e33&lang=html&":
+/*!*****************************************************************************!*\
+  !*** ./src/vue/dataset-select.vue?vue&type=template&id=10806e33&lang=html& ***!
+  \*****************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_template_id_10806e33_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-select.vue?vue&type=template&id=10806e33&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-select.vue?vue&type=template&id=10806e33&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_template_id_10806e33_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_select_vue_vue_type_template_id_10806e33_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue":
+/*!*********************************!*\
+  !*** ./src/vue/form-editor.vue ***!
+  \*********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./form-editor.vue?vue&type=template&id=16512a44&lang=html& */ "./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&");
+/* harmony import */ var _form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./form-editor.vue?vue&type=script&lang=js& */ "./src/vue/form-editor.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./form-editor.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/form-editor.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue?vue&type=script&lang=js&":
+/*!**********************************************************!*\
+  !*** ./src/vue/form-editor.vue?vue&type=script&lang=js& ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************!*\
+  !*** ./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&":
+/*!**************************************************************************!*\
+  !*** ./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./form-editor.vue?vue&type=template&id=16512a44&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/form-editor.vue?vue&type=template&id=16512a44&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_form_editor_vue_vue_type_template_id_16512a44_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

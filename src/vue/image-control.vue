@@ -53,7 +53,7 @@
 		</q-dialog>
 
 		<q-dialog v-model="openInfoEdit" v-if="editImage">
-			<image-info ref="imageInfo" :dataset="dataset" :initDataTime="editImage.dataTime" :initLat="editImage.lat" :initLng="editImage.lng" :initRemark="editImage.remark" @confirm="UpdateImageInfo();" @cancel="openInfoEdit=false;"></image-info>
+			<image-info ref="imageInfo" :dataset="dataset" :initDataTime="editImage.dataTime" :initLat="editImage.lat" :initLng="editImage.lng" :initRemark="editImage.remark" :initReply="editImage.formReply" @confirm="UpdateImageInfo();" @cancel="openInfoEdit=false;"></image-info>
 		</q-dialog>
 
 		<q-dialog v-model="openLocationView" v-if="image && image.lat && image.lng">
@@ -197,6 +197,7 @@ export default {
 			data.image = this.image._id;
 			data.dataTime = info.dataTime;
 			data.remark = info.remark;
+			data.formReply = info.formReply;
 			if(info.loc){
 				data.lat = info.loc.lat;
 				data.lng = info.loc.lng;

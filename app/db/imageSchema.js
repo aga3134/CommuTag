@@ -11,7 +11,7 @@ var ImageSchema = new mongoose.Schema({
 		type: [mongoose.Schema.Types.Mixed],
 		default: []
 	},
-	formAns:{			//answor for dataset form
+	formReply:{			//reply for dataset form
 		type: mongoose.Schema.Types.Mixed,
 		default: null
 	},

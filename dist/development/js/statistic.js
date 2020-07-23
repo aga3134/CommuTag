@@ -656,16 +656,25 @@ __webpack_require__.r(__webpack_exports__);
         case "image":
           for (var i = 0; i < filterArr.length; i++) {
             var d = filterArr[i];
-            var tag = "";
-            if (!d.annotation) tag = "未標註";else tag = d.annotation.annotation;
+            var tagArr = [];
+            if (!d.annotation) tagArr = ["未標註"];else {
+              for (var j = 0; j < d.annotation.annotation.length; j++) {
+                var tag = d.annotation.annotation[j];
+                if (tag.value == "true") tagArr.push(tag.name);
+              }
+            }
 
-            if (!data[tag]) {
-              data[tag] = {
-                name: tag,
-                value: 1
-              };
-            } else {
-              data[tag].value++;
+            for (var j = 0; j < tagArr.length; j++) {
+              var tag = tagArr[j];
+
+              if (!data[tag]) {
+                data[tag] = {
+                  name: tag,
+                  value: 1
+                };
+              } else {
+                data[tag].value++;
+              }
             }
           }
 
@@ -772,19 +781,28 @@ __webpack_require__.r(__webpack_exports__);
         case "image":
           for (var i = 0; i < filterArr.length; i++) {
             var d = filterArr[i];
-            var tag = "";
-            if (!d.annotation) tag = "未標註";else tag = d.annotation.annotation;
+            var tagArr = [];
+            if (!d.annotation) tagArr = ["未標註"];else {
+              for (var j = 0; j < d.annotation.annotation.length; j++) {
+                var tag = d.annotation.annotation[j];
+                if (tag.value == "true") tagArr.push(tag.name);
+              }
+            }
             var t = spacetime(d.dataTime).goto(tz);
             var tStr = t.unixFmt(format);
-            if (!data[tag]) data[tag] = {};
 
-            if (!data[tag][tStr]) {
-              data[tag][tStr] = {
-                key: tStr,
-                value: 1
-              };
-            } else {
-              data[tag][tStr].value++;
+            for (var j = 0; j < tagArr.length; j++) {
+              var tag = tagArr[j];
+              if (!data[tag]) data[tag] = {};
+
+              if (!data[tag][tStr]) {
+                data[tag][tStr] = {
+                  key: tStr,
+                  value: 1
+                };
+              } else {
+                data[tag][tStr].value++;
+              }
             }
           }
 
@@ -1339,8 +1357,13 @@ __webpack_require__.r(__webpack_exports__);
 
         switch (this.dataset.annotationType) {
           case "image":
-            var tag = d.annotation.annotation;
-            if (tagHash[tag]) return true;
+            var tagArr = d.annotation.annotation;
+
+            for (var i = 0; i < tagArr.length; i++) {
+              var tag = tagArr[i];
+              if (tagHash[tag.name] && tag.value == "true") return true;
+            }
+
             break;
 
           case "bbox":
@@ -1379,8 +1402,17 @@ __webpack_require__.r(__webpack_exports__);
         } else {
           switch (this.dataset.annotationType) {
             case "image":
-              var tag = d.annotation.annotation;
-              tagInfo = tag;
+              tagInfo = "";
+              var tagArr = d.annotation.annotation;
+
+              for (var j = 0; j < tagArr.length; j++) {
+                var tag = tagArr[j];
+
+                if (tag.value == "true") {
+                  tagInfo += "#" + tag.name + " ";
+                }
+              }
+
               break;
 
             case "bbox":

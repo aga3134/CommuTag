@@ -9,6 +9,12 @@
 			<location-select mode="selectLoc" ref="locationSelect"></location-select>
 			<div v-if="$refs.locationSelect" class="text-center">{{$refs.locationSelect.status}}</div>
 		</q-card-section>
+
+		<q-card-section v-if="dataset.form">
+			<div class="text-h6">填寫表單</div>
+			<form-reply :formData="dataset.form" :formReply="initReply" ref="formReply"></form-reply>
+		</q-card-section>
+
 		<q-card-section>
 			<div class="text-h6">資料備註說明(若無備註說明請直接按確定)</div>
 			<q-input v-model="remark" filled type="textarea" @input="$emit('change');"></q-input>
@@ -25,6 +31,7 @@
 <script>
 
 import locationSelect from "./location-select.vue"
+import formReply from "./form-reply.vue"
 
 export default {
 	name:"image-info",
@@ -33,10 +40,12 @@ export default {
 		initDataTime: String,
 		initLat: Number,
 		initLng: Number,
-		initRemark: String
+		initRemark: String,
+		initReply: Object
 	},
 	components:{
-		"location-select": locationSelect
+		"location-select": locationSelect,
+		"form-reply": formReply
 	},
 	data: function () {
 		return {
@@ -68,12 +77,15 @@ export default {
 			var s = spacetime.now();
 			info.dataTime = spacetime(this.dataTime,s.timezone().name).format("iso");
 			info.remark = this.remark;
+			info.formReply = this.$refs.formReply.editReply;
 			if(this.$refs.locationSelect){
 				info.loc = this.$refs.locationSelect.loc;
 			}
 			return info;
 		},
 		ConfirmSelect: function(){
+			var formReply = this.$refs.formReply;
+			if(!formReply.ValidateReply()) return;
 			this.$emit("confirm");
 		},
 		CancelSelect: function(){

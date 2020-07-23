@@ -53,7 +53,7 @@
 						<div class="text-h6">表單欄位</div>
 						<div class="text-subtitle2">使用者上傳影像時將被要求填寫此表單</div>
 						
-						<form-editor ref="formEditor" :data="info.form"></form-editor>
+						<form-editor ref="formEditor" :data="info.form" @update="UpdateForm();"></form-editor>
 						
 					</div>
 
@@ -231,6 +231,10 @@ export default {
 		},
 		RemoveMaster: function(i){
 			this.info.master.splice(i,1);
+		},
+		UpdateForm: function(){
+			var formData = this.$refs.formEditor.editData;
+			this.info.form = Object.assign({}, formData);
 		}
 	}
 }

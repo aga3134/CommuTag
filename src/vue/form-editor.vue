@@ -10,7 +10,7 @@
 			<q-item v-for="(item,i) in editData.itemArr" :key="item.id">
 				<q-item-section>
 					<div>
-						<span v-if="item.canNotEmpty" class="text-red">*</span>
+						<span v-if="item.canNotEmpty == 'true' " class="text-red">*</span>
 						{{item.quest}}
 					</div>
 				</q-item-section>
@@ -33,10 +33,10 @@
 					<div v-if="editItem.id" class="text-h6">新增欄位</div>
 					<div v-else class="text-h6">編輯欄位</div>
 					<div class="row">
-						<q-select class="col-12 col-sm-6 q-pa-sm" dense v-model="editItem.type" :options="typeOption" option-value="value" option-label="label" ref="type" emit-value map-options label="填答類型" :disable="editItem.id" :rules="[
+						<q-select class="col-12 col-sm-6 q-pa-sm" dense v-model="editItem.type" :options="typeOption" option-value="value" option-label="label" ref="type" emit-value map-options label="填答類型" :disable="editItem.id!=null" :rules="[
 							val => !!val || '填答類型不能空白'
 						]"></q-select>
-						<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="editItem.canNotEmpty" label="必填欄位"></q-toggle>
+						<q-toggle class="col-12 col-sm-6 q-pa-sm" v-model="editItem.canNotEmpty" label="必填欄位" true-value="true" false-value="false"></q-toggle>
 
 						<q-input class="col-12 q-pa-sm" v-model="editItem.quest" label="欄位名稱" ref="quest" :rules="[
 							val => !!val || '欄位名稱不能空白'
@@ -54,13 +54,13 @@
 						</div>
 
 						<div class="col-12 row" v-if="editItem.type == 'checkbox' ">
-							<q-input class="col q-ma-sm" v-model="editItem.attr.minCheck" type="number" label="最少選幾項" :min="0" :max="editItem.option.length"></q-input>
-							<q-input class="col q-ma-sm" v-model="editItem.attr.maxCheck" type="number" label="最多選幾項" :min="0" :max="editItem.option.length"></q-input>
+							<q-input class="col q-ma-sm" v-model.number="editItem.attr.minCheck" type="number" label="最少選幾項" :min="0" :max="editItem.option.length"></q-input>
+							<q-input class="col q-ma-sm" v-model.number="editItem.attr.maxCheck" type="number" label="最多選幾項" :min="0" :max="editItem.option.length"></q-input>
 						</div>
 
 						<div class="col-12 row" v-if="editItem.type == 'number' ">
-							<q-input class="col q-ma-sm" v-model="editItem.attr.minValue" type="number" label="最小數值"></q-input>
-							<q-input class="col q-ma-sm" v-model="editItem.attr.maxValue" type="number" label="最大數值"></q-input>
+							<q-input class="col q-ma-sm" v-model.number="editItem.attr.minValue" type="number" label="最小數值"></q-input>
+							<q-input class="col q-ma-sm" v-model.number="editItem.attr.maxValue" type="number" label="最大數值"></q-input>
 						</div>
 					</div>
 
@@ -91,6 +91,7 @@ export default {
 			openEditItem: false,
 			editData: {},
 			editItem: {},
+			editIndex: -1,
 			typeOption: [
 				{label: "文字",value:"text"},
 				{label: "單選",value:"radio"},
@@ -108,7 +109,7 @@ export default {
 			this.openEditItem = true;
 			this.editItem = {
 				type:"text",
-				canNotEmpty:false,
+				canNotEmpty:"false",
 				option: [],
 				attr: {}
 			};
@@ -141,7 +142,9 @@ export default {
 			this.$emit("update");
 		},
 		EditItem: function(i){
+			this.editIndex = i;
 			this.editItem = Object.assign({}, this.editData.itemArr[i]);
+			if(!this.editItem.attr) this.editItem.attr = {};
 			this.openEditItem = true;
 		},
 		RemoveItem: function(i){
@@ -174,14 +177,50 @@ export default {
 					});
 				}
 			}
+			if(this.editItem.attr.minCheck){
+				if(this.editItem.attr.minCheck < 1 || this.editItem.attr.minCheck > this.editItem.option.length){
+					return this.$q.notify({
+						color: "negative",
+						message: "最少選幾項超出選項範圍"
+					});
+				}
+			}
+			if(this.editItem.attr.maxCheck){
+				if(this.editItem.attr.maxCheck < 1 || this.editItem.attr.maxCheck > this.editItem.option.length){
+					return this.$q.notify({
+						color: "negative",
+						message: "最多選幾項超出選項範圍"
+					});
+				}
+			}
+			if(this.editItem.attr.minCheck && this.editItem.attr.maxCheck){
+				if(this.editItem.attr.minCheck > this.editItem.attr.maxCheck){
+					return this.$q.notify({
+						color: "negative",
+						message: "最少選幾項不能大於最多選幾項"
+					});
+				}
+			}
+			if(this.editItem.attr.minValue && this.editItem.attr.maxValue){
+				if(this.editItem.attr.minValue > this.editItem.attr.maxValue){
+					return this.$q.notify({
+						color: "negative",
+						message: "最小數值不能大於最大數值"
+					});
+				}
+			}
 			this.openEditItem = false;
 			if(!this.editData.itemArr){
 				this.editData.itemArr = [];
 			}
 			if(!this.editItem.id){
 				this.editItem.id = this.GenerateID();
+				this.editData.itemArr.push(this.editItem);
 			}
-			this.editData.itemArr.push(this.editItem);
+			else{
+				this.editData.itemArr[this.editIndex] = Object.assign({}, this.editItem);
+				this.editIndex = -1;
+			}
 			this.$emit("update");
 		}
 	}

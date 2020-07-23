@@ -141,11 +141,12 @@ export default {
 		},
 		UploadImageToDataset: function(){
 			var dataset = this.dataset || this.datasetSelect;
-			var loc,remark,dataTime;
+			var loc,remark,dataTime,formReply;
 			if(this.imageInfo){
 				loc = this.imageInfo.loc;
 				remark = this.imageInfo.remark;
 				dataTime = this.imageInfo.dataTime;
+				formReply = this.imageInfo.formReply;
 			}
 			
 			var uploader = this.$refs.uploader;
@@ -183,6 +184,9 @@ export default {
 			}
 			if(dataTime){
 				data.dataTime = dataTime;
+			}
+			if(formReply){
+				data.formReply = JSON.stringify(formReply);
 			}
 			uploader.additionData = data;
 			var canvas = this.$refs.imageEdit.GetCanvasData();
