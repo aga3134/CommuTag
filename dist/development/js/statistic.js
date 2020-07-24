@@ -206,6 +206,294 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-info-filter.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _location_select_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./location-select.vue */ "./src/vue/location-select.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "image-info-filter",
+  props: {
+    disableTag: Boolean,
+    disableTime: Boolean,
+    disableLocation: Boolean,
+    disableRemark: Boolean,
+    disableForm: Boolean,
+    initFilter: Object
+  },
+  components: {
+    "location-select": _location_select_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  data: function () {
+    return {
+      dataset: null,
+      imageArr: null,
+      filter: {
+        selectAll: true,
+        tag: [],
+        time: {
+          min: null,
+          max: null
+        },
+        loc: {
+          enable: false,
+          lat: null,
+          lng: null,
+          range: 50
+        },
+        remark: "",
+        timeLimit: {
+          min: null,
+          max: null,
+          rangeMin: 0,
+          rangeMax: 0
+        }
+      },
+      rangeTarget: null,
+      filterArr: []
+    };
+  },
+  mounted: function () {
+    if (this.initFilter) {
+      this.filter = Object.assign({}, this.initFilter);
+    }
+
+    Vue.nextTick(function () {
+      this.UpdateRangeSelectMap();
+    }.bind(this));
+  },
+  methods: {
+    SetData: function (dataset, imageArr) {
+      this.dataset = dataset;
+      this.imageArr = imageArr;
+
+      if (!this.initFilter) {
+        this.InitTimeSelect();
+        this.InitTagSelect();
+      }
+
+      Vue.nextTick(function () {
+        this.UpdateFilterResult();
+      }.bind(this));
+    },
+    InitTimeSelect: function () {
+      if (this.disableTime) return;
+      var s = spacetime.now();
+
+      for (var i = 0; i < this.imageArr.length; i++) {
+        var t = spacetime(this.imageArr[i].dataTime, s.timezone().name);
+
+        if (!this.filter.timeLimit.min || this.filter.timeLimit.min.isAfter(t)) {
+          this.filter.timeLimit.min = t.clone().last("day");
+        }
+
+        if (!this.filter.timeLimit.max || this.filter.timeLimit.max.isBefore(t)) {
+          this.filter.timeLimit.max = t.clone().next("day");
+        }
+      }
+
+      if (this.filter.timeLimit.min && this.filter.timeLimit.max) {
+        this.filter.timeLimit.rangeMin = 0;
+        this.filter.timeLimit.rangeMax = this.filter.timeLimit.min.diff(this.filter.timeLimit.max, "day") + 1;
+        this.filter.time.min = this.filter.timeLimit.rangeMin;
+        this.filter.time.max = this.filter.timeLimit.rangeMax;
+      }
+    },
+    InitTagSelect: function () {
+      if (this.disableTag) return;
+      if (!this.dataset) return;
+      this.filter.tag = [];
+      this.filter.tag.push({
+        name: "未標註",
+        value: true
+      });
+
+      for (var i = 0; i < this.dataset.tagArr.length; i++) {
+        var tag = this.dataset.tagArr[i];
+        this.filter.tag.push({
+          name: tag,
+          value: true
+        });
+      }
+    },
+    ToggleTagSelectAll: function () {
+      if (this.disableTag) return;
+
+      for (var i = 0; i < this.filter.tag.length; i++) {
+        var tagSelect = this.filter.tag[i];
+        tagSelect.value = this.filter.selectAll;
+      }
+
+      this.UpdateFilterResult();
+    },
+    UpdateRangeSelectMap: function () {
+      if (this.disableLocation) return;
+      var locationSelect = this.$refs.locationSelect;
+      locationSelect.range = this.filter.loc.range;
+
+      if (this.filter.loc.enable) {
+        if (!this.filter.loc.lat || !this.filter.loc.lng) {
+          locationSelect.GetGPS();
+        }
+
+        locationSelect.SetRange(this.filter.loc.lat, this.filter.loc.lng, this.filter.loc.range);
+      } else {
+        locationSelect.RemoveMarker();
+      }
+
+      this.UpdateFilterResult();
+    },
+
+    UpdateLoc() {
+      if (this.disableLocation) return;
+      this.filter.loc.enable = true;
+      var loc = this.$refs.locationSelect.loc;
+      this.filter.loc.lat = loc.lat;
+      this.filter.loc.lng = loc.lng;
+      this.UpdateFilterResult();
+    },
+
+    UpdateFilterResult: function () {
+      if (!this.imageArr) return;
+      var filterArr = this.imageArr; //filter by tag
+
+      if (!this.disableTag) {
+        var tagHash = {};
+
+        for (var i = 0; i < this.filter.tag.length; i++) {
+          var tag = this.filter.tag[i];
+          tagHash[tag.name] = tag.value;
+        }
+
+        filterArr = filterArr.filter(function (d) {
+          if (!d.annotation) {
+            return tagHash["未標註"];
+          }
+
+          switch (this.dataset.annotationType) {
+            case "image":
+              var tagArr = d.annotation.annotation;
+
+              for (var i = 0; i < tagArr.length; i++) {
+                var tag = tagArr[i];
+                if (tagHash[tag.name] && tag.value == "true") return true;
+              }
+
+              break;
+
+            case "bbox":
+              var bboxArr = d.annotation.annotation;
+
+              for (var i = 0; i < bboxArr.length; i++) {
+                var tag = bboxArr[i].tag;
+                if (tagHash[tag]) return true;
+              }
+
+              break;
+          }
+
+          return false;
+        }.bind(this));
+      } //filter by time range
+
+
+      if (!this.disableTime) {
+        var s = spacetime.now();
+        filterArr = filterArr.filter(function (d) {
+          var t = spacetime(d.dataTime, s.timezone().name);
+          var min = this.filter.timeLimit.min.add(this.filter.time.min, "day");
+          var max = this.filter.timeLimit.min.add(this.filter.time.max, "day");
+          return t.isAfter(min) && t.isBefore(max);
+        }.bind(this));
+      } //filter by location range
+
+
+      if (!this.disableLocation) {
+        if (this.filter.loc.enable) {
+          filterArr = filterArr.filter(function (d) {
+            var loc = this.filter.loc;
+            var range = loc.range / 111;
+            var latDiff = d.lat - loc.lat;
+            var lngDiff = d.lng - loc.lng;
+            return latDiff * latDiff + lngDiff * lngDiff <= range * range;
+          }.bind(this));
+        }
+      } //filter by remark
+
+
+      if (!this.disableRemark) {
+        filterArr = filterArr.filter(function (d) {
+          if (this.filter.remark == "") return true;else if (!d.remark) return false;else return d.remark.indexOf(this.filter.remark) != -1;
+        }.bind(this));
+      }
+
+      this.filterArr = filterArr;
+      this.$emit("update");
+    }
+  },
+  computed: {
+    minTimeLabel: function () {
+      if (this.disableTime) return "";
+      if (!this.filter.timeLimit.min) return "";
+      var day = this.filter.timeLimit.min.add(this.filter.time.min, "day");
+      return day.unixFmt("yyyy-MM-dd");
+    },
+    maxTimeLabel: function () {
+      if (this.disableTime) return "";
+      if (!this.filter.timeLimit.min) return "";
+      var day = this.filter.timeLimit.min.add(this.filter.time.max, "day");
+      return day.unixFmt("yyyy-MM-dd");
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/location-select.vue?vue&type=script&lang=js&":
 /*!************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/location-select.vue?vue&type=script&lang=js& ***!
@@ -224,8 +512,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "location-select",
   props: {
-    mode: String,
-    initLoc: Object
+    mode: String
   },
   components: {},
   data: function () {
@@ -389,35 +676,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _js_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../js/util.js */ "./src/js/util.js");
-/* harmony import */ var _location_select_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./location-select.vue */ "./src/vue/location-select.vue");
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony import */ var _image_info_filter_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./image-info-filter.vue */ "./src/vue/image-info-filter.vue");
 //
 //
 //
@@ -493,33 +752,23 @@ __webpack_require__.r(__webpack_exports__);
   name: "statistic-graph",
   props: {},
   components: {
-    "location-select": _location_select_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+    "image-info-filter": _image_info_filter_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data: function () {
     return {
       dataset: null,
       imageArr: [],
-      openTagFilter: false,
-      dataTime: {
-        min: null,
-        max: null,
-        rangeMin: 0,
-        rangeMax: 0
-      },
       tagFilter: {
-        location: {
-          enable: false,
-          lat: null,
-          lng: null,
-          range: 50
-        },
-        time: {
-          min: null,
-          max: null
-        },
-        keyword: ""
+        arr: [],
+        open: false,
+        filter: null
       },
-      openTimelineFilter: false,
+      timelineFilter: {
+        type: "time",
+        arr: [],
+        open: false,
+        filter: null
+      },
       typeOption: [{
         label: "時間分佈",
         value: "time"
@@ -529,93 +778,33 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         label: "月份變化",
         value: "month"
-      }],
-      timelineFilter: {
-        type: "time",
-        location: {
-          enable: false,
-          lat: null,
-          lng: null,
-          range: 50
-        },
-        keyword: ""
-      },
-      openRangeSelect: false,
-      rangeTarget: null
+      }]
     };
   },
   mounted: function () {},
   methods: {
-    OpenTagFilter: function () {
-      this.openTagFilter = true;
-    },
-    OpenTimelineFilter: function () {
-      this.openTimelineFilter = true;
-    },
-    OpenRangeSelect: function (target) {
-      this.openRangeSelect = true;
-      Vue.set(this, "rangeTarget", target);
-      Vue.nextTick(function () {
-        this.$refs.locationSelect.range = this.rangeTarget.range;
-        this.UpdateRangeSelectMap();
-      }.bind(this));
-    },
-    UpdateRangeSelectMap: function () {
-      if (!this.rangeTarget) return;
-      var locationSelect = this.$refs.locationSelect;
-      locationSelect.range = this.rangeTarget.range;
-
-      if (this.rangeTarget.enable) {
-        if (!this.rangeTarget.lat || !this.rangeTarget.lng) {
-          locationSelect.GetGPS();
-        }
-
-        locationSelect.SetRange(this.rangeTarget.lat, this.rangeTarget.lng, this.rangeTarget.range);
-      } else {
-        locationSelect.RemoveMarker();
-      }
-
-      this.UpdateGraph();
-    },
-
-    UpdateLoc() {
-      if (!this.rangeTarget) return;
-      this.rangeTarget.enable = true;
-      var loc = this.$refs.locationSelect.loc;
-      this.rangeTarget.lat = loc.lat;
-      this.rangeTarget.lng = loc.lng;
-      this.UpdateGraph();
-    },
-
-    InitTimeSelect: function () {
-      var tz = spacetime().name;
-
-      for (var i = 0; i < this.imageArr.length; i++) {
-        var t = spacetime(this.imageArr[i].dataTime).goto(tz);
-
-        if (!this.dataTime.min || this.dataTime.min.isAfter(t)) {
-          this.dataTime.min = t.clone().last("day");
-        }
-
-        if (!this.dataTime.max || this.dataTime.max.isBefore(t)) {
-          this.dataTime.max = t.clone().next("day");
-        }
-      }
-
-      if (this.dataTime.min && this.dataTime.max) {
-        this.dataTime.rangeMin = 0;
-        this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day") + 1;
-        this.tagFilter.time.min = this.dataTime.rangeMin;
-        this.tagFilter.time.max = this.dataTime.rangeMax;
-      }
-    },
     SetGraphData: function (dataset, imageArr) {
       this.dataset = dataset;
       this.imageArr = imageArr;
-      this.InitTimeSelect();
+      this.tagFilter.arr = imageArr;
+      this.timelineFilter.arr = imageArr;
       Vue.nextTick(function () {
         this.UpdateGraph();
       }.bind(this));
+    },
+    UpdateTagFilterResult: function () {
+      var ref = this.$refs.tagFilter;
+      this.tagFilter.filter = ref.filter;
+      this.tagFilter.arr = ref.filterArr;
+      this.UpdateGraphTag();
+    },
+    UpdateTimelineFilterResult: function () {
+      var ref = this.$refs.timelineFilter;
+      this.timelineFilter.filter = Object.assign({
+        "type": this.timelineFilter.type
+      }, ref.filter);
+      this.timelineFilter.arr = ref.filterArr;
+      this.UpdateGraphTimeline();
     },
     UpdateGraph: function () {
       this.UpdateGraphTag();
@@ -626,30 +815,7 @@ __webpack_require__.r(__webpack_exports__);
       this.UpdateGraphVerifyRank();
     },
     UpdateGraphTag: function () {
-      var filterArr = this.imageArr; //filter by location range
-
-      if (this.tagFilter.location.enable) {
-        filterArr = filterArr.filter(function (d) {
-          var loc = this.tagFilter.location;
-          var range = loc.range / 111;
-          var latDiff = d.lat - loc.lat;
-          var lngDiff = d.lng - loc.lng;
-          return latDiff * latDiff + lngDiff * lngDiff <= range * range;
-        }.bind(this));
-      } //filter by time range
-
-
-      var tz = spacetime().name;
-      filterArr = filterArr.filter(function (d) {
-        var t = spacetime(d.dataTime).goto(tz);
-        var min = this.dataTime.min.add(this.tagFilter.time.min, "day");
-        var max = this.dataTime.min.add(this.tagFilter.time.max, "day");
-        return t.isAfter(min) && t.isBefore(max);
-      }.bind(this)); //filter by keyword
-
-      filterArr = filterArr.filter(function (d) {
-        if (this.tagFilter.keyword == "") return true;else if (!d.remark) return false;else return d.remark.indexOf(this.tagFilter.keyword) != -1;
-      }.bind(this));
+      var filterArr = this.tagFilter.arr;
       var data = {};
 
       switch (this.dataset.annotationType) {
@@ -735,22 +901,8 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     UpdateGraphTimeline: function () {
-      var filterArr = this.imageArr; //filter by location range
-
-      if (this.timelineFilter.location.enable) {
-        filterArr = filterArr.filter(function (d) {
-          var loc = this.timelineFilter.location;
-          var range = loc.range / 111;
-          var latDiff = d.lat - loc.lat;
-          var lngDiff = d.lng - loc.lng;
-          return latDiff * latDiff + lngDiff * lngDiff <= range * range;
-        }.bind(this));
-      } //filter by keyword
-
-
-      filterArr = filterArr.filter(function (d) {
-        if (this.timelineFilter.keyword == "") return true;else if (!d.remark) return false;else return d.remark.indexOf(this.timelineFilter.keyword) != -1;
-      }.bind(this));
+      var filter = this.timelineFilter;
+      var filterArr = this.timelineFilter.arr;
       var tz = spacetime().name;
       var data = {};
       var format = "";
@@ -758,7 +910,7 @@ __webpack_require__.r(__webpack_exports__);
         fixedrange: true
       };
 
-      switch (this.timelineFilter.type) {
+      switch (filter.type) {
         case "time":
           format = "yyyy-MM-dd";
           axisX.tickformat = "%Y-%m-%d";
@@ -837,12 +989,27 @@ __webpack_require__.r(__webpack_exports__);
       } //fill zero to timestamp with no data
 
 
-      for (var tag in data) {
-        switch (this.timelineFilter.type) {
-          case "time":
-            var day = this.dataTime.min;
+      var s = spacetime.now();
+      var tMin, tMax;
 
-            while (day.isBefore(this.dataTime.max)) {
+      for (var i = 0; i < filterArr.length; i++) {
+        var t = spacetime(filterArr[i].dataTime, s.timezone().name);
+
+        if (!tMin || tMin.isAfter(t)) {
+          tMin = t.clone().last("day");
+        }
+
+        if (!tMax || tMax.isBefore(t)) {
+          tMax = t.clone().next("day");
+        }
+      }
+
+      for (var tag in data) {
+        switch (filter.type) {
+          case "time":
+            var day = tMin;
+
+            while (day.isBefore(tMax)) {
               var key = day.unixFmt(format);
 
               if (!data[tag][key]) {
@@ -1179,18 +1346,6 @@ __webpack_require__.r(__webpack_exports__);
         });
       }.bind(this));
     }
-  },
-  computed: {
-    minTimeLabel: function () {
-      if (!this.dataTime.min) return "";
-      var day = this.dataTime.min.add(this.tagFilter.time.min, "day");
-      return day.unixFmt("yyyy-MM-dd");
-    },
-    maxTimeLabel: function () {
-      if (!this.dataTime.min) return "";
-      var day = this.dataTime.min.add(this.tagFilter.time.max, "day");
-      return day.unixFmt("yyyy-MM-dd");
-    }
   }
 });
 
@@ -1205,6 +1360,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _image_info_filter_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./image-info-filter.vue */ "./src/vue/image-info-filter.vue");
 //
 //
 //
@@ -1228,46 +1384,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "statistic-map",
   props: {},
-  components: {},
+  components: {
+    "image-info-filter": _image_info_filter_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   data: function () {
     return {
-      dataset: null,
-      imageArr: [],
       openFilterPanel: false,
       markerGroup: null,
-      selectAll: true,
-      dataTime: {
-        min: null,
-        max: null,
-        rangeMin: 0,
-        rangeMax: 0
-      },
-      locFilter: {
-        tagSelect: [],
-        time: {
-          min: null,
-          max: null
-        },
-        keyword: ""
-      }
+      dataset: null,
+      imageArr: [],
+      filterArr: [],
+      curFilter: null
     };
   },
   created: function () {
@@ -1285,112 +1416,29 @@ __webpack_require__.r(__webpack_exports__);
       this.markerGroup = L.markerClusterGroup();
       this.map.addLayer(this.markerGroup);
     },
-    InitTimeSelect: function () {
-      var s = spacetime.now();
-
-      for (var i = 0; i < this.imageArr.length; i++) {
-        var t = spacetime(this.imageArr[i].dataTime, s.timezone().name);
-
-        if (!this.dataTime.min || this.dataTime.min.isAfter(t)) {
-          this.dataTime.min = t.clone().last("day");
-        }
-
-        if (!this.dataTime.max || this.dataTime.max.isBefore(t)) {
-          this.dataTime.max = t.clone().next("day");
-        }
-      }
-
-      if (this.dataTime.min && this.dataTime.max) {
-        this.dataTime.rangeMin = 0;
-        this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day") + 1;
-        this.locFilter.time.min = this.dataTime.rangeMin;
-        this.locFilter.time.max = this.dataTime.rangeMax;
-      }
-    },
-    InitTagSelect: function () {
-      this.locFilter.tagSelect = [];
-      this.locFilter.tagSelect.push({
-        name: "未標註",
-        value: true
-      });
-
-      for (var i = 0; i < this.dataset.tagArr.length; i++) {
-        var tag = this.dataset.tagArr[i];
-        this.locFilter.tagSelect.push({
-          name: tag,
-          value: true
-        });
-      }
-    },
-    ToggleTagSelectAll: function () {
-      for (var i = 0; i < this.locFilter.tagSelect.length; i++) {
-        var tagSelect = this.locFilter.tagSelect[i];
-        tagSelect.value = this.selectAll;
-      }
-
-      this.UpdateMap();
-    },
     SetGraphData: function (dataset, imageArr) {
       this.dataset = dataset;
       this.imageArr = imageArr;
-      this.InitTimeSelect();
-      this.InitTagSelect();
+      this.filterArr = imageArr;
       Vue.nextTick(function () {
         this.UpdateMap();
       }.bind(this));
     },
+    OpenFilterPanel: function () {
+      this.openFilterPanel = true;
+      Vue.nextTick(function () {
+        this.$refs.imageInfoFilter.SetData(this.dataset, this.imageArr);
+      }.bind(this));
+    },
+    UpdateFilterResult: function () {
+      var filter = this.$refs.imageInfoFilter;
+      this.curFilter = filter.filter;
+      this.filterArr = filter.filterArr;
+      this.UpdateMap();
+    },
     UpdateMap: function () {
       this.ClearMarker();
-      var filterArr = this.imageArr; //filter by tag
-
-      var tagHash = {};
-
-      for (var i = 0; i < this.locFilter.tagSelect.length; i++) {
-        var tag = this.locFilter.tagSelect[i];
-        tagHash[tag.name] = tag.value;
-      }
-
-      filterArr = filterArr.filter(function (d) {
-        if (!d.annotation) {
-          return tagHash["未標註"];
-        }
-
-        switch (this.dataset.annotationType) {
-          case "image":
-            var tagArr = d.annotation.annotation;
-
-            for (var i = 0; i < tagArr.length; i++) {
-              var tag = tagArr[i];
-              if (tagHash[tag.name] && tag.value == "true") return true;
-            }
-
-            break;
-
-          case "bbox":
-            var bboxArr = d.annotation.annotation;
-
-            for (var i = 0; i < bboxArr.length; i++) {
-              var tag = bboxArr[i].tag;
-              if (tagHash[tag]) return true;
-            }
-
-            break;
-        }
-
-        return false;
-      }.bind(this)); //filter by time range
-
-      var s = spacetime.now();
-      filterArr = filterArr.filter(function (d) {
-        var t = spacetime(d.dataTime, s.timezone().name);
-        var min = this.dataTime.min.add(this.locFilter.time.min, "day");
-        var max = this.dataTime.min.add(this.locFilter.time.max, "day");
-        return t.isAfter(min) && t.isBefore(max);
-      }.bind(this)); //filter by keyword
-
-      filterArr = filterArr.filter(function (d) {
-        if (this.locFilter.keyword == "") return true;else if (!d.remark) return false;else return d.remark.indexOf(this.locFilter.keyword) != -1;
-      }.bind(this));
+      var filterArr = this.filterArr;
 
       for (var i = 0; i < filterArr.length; i++) {
         var d = filterArr[i];
@@ -1431,8 +1479,10 @@ __webpack_require__.r(__webpack_exports__);
           }
         }
 
+        if (d.remark) tagInfo += "<pre>" + d.remark + "</pre>";
         var content = "";
-        var t = spacetime(d.dataTime).goto(s.timezone().name);
+        var tz = spacetime().name;
+        var t = spacetime(d.dataTime).goto(tz);
         t = t.subtract(t.minute() % 10, "minute");
 
         switch (this.dataset.externalLink) {
@@ -1469,16 +1519,6 @@ __webpack_require__.r(__webpack_exports__);
     },
     ClearMarker: function () {
       this.markerGroup.clearLayers();
-    }
-  },
-  computed: {
-    minTimeLabel: function () {
-      var day = this.dataTime.min.add(this.locFilter.time.min, "day");
-      return day.unixFmt("yyyy-MM-dd");
-    },
-    maxTimeLabel: function () {
-      var day = this.dataTime.min.add(this.locFilter.time.max, "day");
-      return day.unixFmt("yyyy-MM-dd");
     }
   }
 });
@@ -1592,6 +1632,24 @@ module.exports = exports;
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".image-info-filter {\n  width: 100%;\n}\n", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/location-select.vue?vue&type=style&index=0&lang=scss&":
 /*!***************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/location-select.vue?vue&type=style&index=0&lang=scss& ***!
@@ -1639,7 +1697,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".statistic-map {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n.statistic-map .map {\n    width: 100%;\n    height: 100%;\n}\n.statistic-map .option-panel {\n    width: 100%;\n    padding: 20px;\n    background-color: rgba(100, 100, 100, 0.8);\n    color: white;\n    overflow: auto;\n}\n.statistic-map .popup-image {\n    display: block;\n    width: 150px;\n    object-fit: contain;\n    border-radius: 3px;\n}\n.statistic-map .popup-info {\n    margin: 5px 0px;\n}\n.statistic-map .popup-bt {\n    display: inline-block;\n    margin: 5px 0px;\n    padding: 5px 10px;\n    background-color: #555555;\n    color: #ffffff;\n    border-radius: 3px;\n    cursor: pointer;\n}\n", ""]);
+exports.push([module.i, ".statistic-map {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n.statistic-map .map {\n    width: 100%;\n    height: 100%;\n}\n.statistic-map .popup-image {\n    display: block;\n    width: 150px;\n    object-fit: contain;\n    border-radius: 3px;\n}\n.statistic-map .popup-info {\n    margin: 5px 0px;\n}\n.statistic-map .popup-bt {\n    display: inline-block;\n    margin: 5px 0px;\n    padding: 5px 10px;\n    background-color: #555555;\n    color: #ffffff;\n    border-radius: 3px;\n    cursor: pointer;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -1760,6 +1818,37 @@ function toComment(sourceMap) {
 
 var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
             var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./dataset-statistic.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/dataset-statistic.vue?vue&type=style&index=0&lang=scss&");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(module.i, content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./image-info-filter.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss&");
 
             content = content.__esModule ? content.default : content;
 
@@ -2284,6 +2373,226 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html&":
+/*!**************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html& ***!
+  \**************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "image-info-filter q-pa-sm" }, [
+    !_vm.disableTag
+      ? _c(
+          "div",
+          [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("標籤篩選")]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "row items-center" },
+              [
+                _c("q-checkbox", {
+                  staticClass: "text-bold",
+                  attrs: { label: "全選" },
+                  on: {
+                    input: function($event) {
+                      return _vm.ToggleTagSelectAll()
+                    }
+                  },
+                  model: {
+                    value: _vm.filter.selectAll,
+                    callback: function($$v) {
+                      _vm.$set(_vm.filter, "selectAll", $$v)
+                    },
+                    expression: "filter.selectAll"
+                  }
+                }),
+                _vm._v(" "),
+                _vm._l(_vm.filter.tag, function(tag) {
+                  return _c("q-checkbox", {
+                    key: tag.name,
+                    attrs: { label: tag.name },
+                    on: {
+                      input: function($event) {
+                        return _vm.UpdateFilterResult()
+                      }
+                    },
+                    model: {
+                      value: tag.value,
+                      callback: function($$v) {
+                        _vm.$set(tag, "value", $$v)
+                      },
+                      expression: "tag.value"
+                    }
+                  })
+                })
+              ],
+              2
+            ),
+            _vm._v(" "),
+            _c("q-separator", { staticClass: "q-my-sm" })
+          ],
+          1
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    !_vm.disableTime
+      ? _c(
+          "div",
+          [
+            _c("div", { staticClass: "text-h6 q-mb-lg" }, [_vm._v("時間篩選")]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "q-px-md" },
+              [
+                _c("q-range", {
+                  attrs: {
+                    min: _vm.filter.timeLimit.rangeMin,
+                    max: _vm.filter.timeLimit.rangeMax,
+                    step: 1,
+                    "left-label-value": _vm.minTimeLabel,
+                    "right-label-value": _vm.maxTimeLabel,
+                    "left-label-color": "grey-8",
+                    "right-label-color": "grey-8",
+                    "label-always": ""
+                  },
+                  on: {
+                    change: function($event) {
+                      return _vm.UpdateFilterResult()
+                    }
+                  },
+                  model: {
+                    value: _vm.filter.time,
+                    callback: function($$v) {
+                      _vm.$set(_vm.filter, "time", $$v)
+                    },
+                    expression: "filter.time"
+                  }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c("q-separator", { staticClass: "q-my-sm" })
+          ],
+          1
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    !_vm.disableLocation
+      ? _c(
+          "div",
+          [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("地點篩選")]),
+            _vm._v(" "),
+            _c("q-toggle", {
+              attrs: { "left-label": "", label: "啟用範圍篩選" },
+              on: {
+                input: function($event) {
+                  return _vm.UpdateRangeSelectMap()
+                }
+              },
+              model: {
+                value: _vm.filter.loc.enable,
+                callback: function($$v) {
+                  _vm.$set(_vm.filter.loc, "enable", $$v)
+                },
+                expression: "filter.loc.enable"
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "text-subtitle2" },
+              [
+                _vm._v("\n\t\t\t半徑(公里)\n\t\t\t"),
+                _c("q-slider", {
+                  attrs: { label: "", min: 10, max: 400 },
+                  on: {
+                    change: function($event) {
+                      return _vm.UpdateRangeSelectMap()
+                    }
+                  },
+                  model: {
+                    value: _vm.filter.loc.range,
+                    callback: function($$v) {
+                      _vm.$set(_vm.filter.loc, "range", $$v)
+                    },
+                    expression: "filter.loc.range"
+                  }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c("location-select", {
+              ref: "locationSelect",
+              attrs: { mode: "selectRange" },
+              on: {
+                change: function($event) {
+                  return _vm.UpdateLoc()
+                }
+              }
+            }),
+            _vm._v(" "),
+            _vm.$refs.locationSelect
+              ? _c("div", { staticClass: "text-center" }, [
+                  _vm._v(_vm._s(_vm.$refs.locationSelect.status))
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _c("q-separator", { staticClass: "q-my-sm" })
+          ],
+          1
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    !_vm.disableRemark
+      ? _c(
+          "div",
+          [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("備註篩選")]),
+            _vm._v(" "),
+            _c("q-input", {
+              staticClass: "q-ma-sm",
+              attrs: { dense: "" },
+              on: {
+                input: function($event) {
+                  return _vm.UpdateFilterResult()
+                }
+              },
+              model: {
+                value: _vm.filter.remark,
+                callback: function($$v) {
+                  _vm.$set(_vm.filter, "remark", $$v)
+                },
+                expression: "filter.remark"
+              }
+            }),
+            _vm._v(" "),
+            _c("q-separator", { staticClass: "q-my-sm" })
+          ],
+          1
+        )
+      : _vm._e()
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/location-select.vue?vue&type=template&id=848c807c&lang=html&":
 /*!************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/vue/location-select.vue?vue&type=template&id=848c807c&lang=html& ***!
@@ -2327,408 +2636,216 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _vm.dataset && _vm.imageArr
     ? _c("div", { staticClass: "statistic-graph" }, [
-        _c(
-          "div",
-          { staticClass: "row items-center q-col-gutter-md q-pa-md" },
-          [
-            _c(
-              "div",
-              { staticClass: "col-12 col-sm-6 column" },
-              [
-                _c("div", { staticClass: "text-h6" }, [_vm._v("標註標籤比例")]),
-                _vm._v(" "),
-                _c("div", { staticClass: "graph-container bg-grey-1" }, [
-                  _c("div", { ref: "tagRatio", staticClass: "graph" }),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: _vm.openTagFilter,
-                          expression: "openTagFilter"
-                        }
-                      ],
-                      staticClass: "option-panel column"
-                    },
-                    [
-                      _c("div", { staticClass: "text-subtitle2 q-mb-lg" }, [
-                        _vm._v("時間篩選")
-                      ]),
-                      _vm._v(" "),
-                      _c("q-range", {
-                        attrs: {
-                          min: _vm.dataTime.rangeMin,
-                          max: _vm.dataTime.rangeMax,
-                          step: 1,
-                          "left-label-value": _vm.minTimeLabel,
-                          "right-label-value": _vm.maxTimeLabel,
-                          "left-label-color": "grey-8",
-                          "right-label-color": "grey-8",
-                          color: "white",
-                          "label-always": ""
-                        },
-                        on: {
-                          change: function($event) {
-                            return _vm.UpdateGraphTag()
-                          }
-                        },
-                        model: {
-                          value: _vm.tagFilter.time,
-                          callback: function($$v) {
-                            _vm.$set(_vm.tagFilter, "time", $$v)
-                          },
-                          expression: "tagFilter.time"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "text-subtitle2" },
-                        [
-                          _vm._v("\n\t\t\t\t\t\t地點篩選\n\t\t\t\t\t\t"),
-                          _c("q-btn", {
-                            staticClass: "bg-grey-8 text-white q-ma-sm",
-                            attrs: { label: "選擇範圍" },
-                            on: {
-                              click: function($event) {
-                                return _vm.OpenRangeSelect(
-                                  _vm.tagFilter.location
-                                )
-                              }
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "text-subtitle2" }, [
-                        _vm._v("備註篩選")
-                      ]),
-                      _vm._v(" "),
-                      _c("q-input", {
-                        staticClass: "q-ma-sm",
-                        attrs: { dense: "", dark: "", color: "white" },
-                        on: {
-                          input: function($event) {
-                            return _vm.UpdateGraphTag()
-                          }
-                        },
-                        model: {
-                          value: _vm.tagFilter.keyword,
-                          callback: function($$v) {
-                            _vm.$set(_vm.tagFilter, "keyword", $$v)
-                          },
-                          expression: "tagFilter.keyword"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("q-space"),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "row justify-center" },
-                        [
-                          _c("q-btn", {
-                            staticClass: "bg-grey-8",
-                            attrs: { label: "確定" },
-                            on: {
-                              click: function($event) {
-                                _vm.openTagFilter = false
-                              }
-                            }
-                          })
-                        ],
-                        1
-                      )
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("q-btn", {
-                  staticClass: "bg-grey-6 text-white q-my-sm",
-                  attrs: { dense: "", label: "篩選" },
-                  on: {
-                    click: function($event) {
-                      return _vm.OpenTagFilter()
-                    }
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "col-12 col-sm-6 column" },
-              [
-                _c("div", { staticClass: "text-h6" }, [_vm._v("資料時間分佈")]),
-                _vm._v(" "),
-                _c("div", { staticClass: "graph-container bg-grey-1" }, [
-                  _c("div", { ref: "timeline", staticClass: "graph" }),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: _vm.openTimelineFilter,
-                          expression: "openTimelineFilter"
-                        }
-                      ],
-                      staticClass: "option-panel column"
-                    },
-                    [
-                      _c(
-                        "div",
-                        { staticClass: "text-subtitle2" },
-                        [
-                          _vm._v("\n\t\t\t\t\t\t顯示類型\n\t\t\t\t\t\t"),
-                          _c("q-select", {
-                            attrs: {
-                              dense: "",
-                              dark: "",
-                              color: "white",
-                              options: _vm.typeOption,
-                              "option-value": "value",
-                              "option-label": "label",
-                              "emit-value": "",
-                              "map-options": ""
-                            },
-                            on: {
-                              input: function($event) {
-                                return _vm.UpdateGraphTimeline()
-                              }
-                            },
-                            model: {
-                              value: _vm.timelineFilter.type,
-                              callback: function($$v) {
-                                _vm.$set(_vm.timelineFilter, "type", $$v)
-                              },
-                              expression: "timelineFilter.type"
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "text-subtitle2" },
-                        [
-                          _vm._v("\n\t\t\t\t\t\t地點篩選\n\t\t\t\t\t\t"),
-                          _c("q-btn", {
-                            staticClass: "bg-grey-8 text-white q-ma-sm",
-                            attrs: { label: "選擇範圍" },
-                            on: {
-                              click: function($event) {
-                                return _vm.OpenRangeSelect(
-                                  _vm.timelineFilter.location
-                                )
-                              }
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "text-subtitle2" }, [
-                        _vm._v("備註篩選")
-                      ]),
-                      _vm._v(" "),
-                      _c("q-input", {
-                        staticClass: "q-ma-sm",
-                        attrs: { dense: "", dark: "", color: "white" },
-                        on: {
-                          input: function($event) {
-                            return _vm.UpdateGraphTimeline()
-                          }
-                        },
-                        model: {
-                          value: _vm.timelineFilter.keyword,
-                          callback: function($$v) {
-                            _vm.$set(_vm.timelineFilter, "keyword", $$v)
-                          },
-                          expression: "timelineFilter.keyword"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("q-space"),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "row justify-center" },
-                        [
-                          _c("q-btn", {
-                            staticClass: "bg-grey-8",
-                            attrs: { label: "確定" },
-                            on: {
-                              click: function($event) {
-                                _vm.openTimelineFilter = false
-                              }
-                            }
-                          })
-                        ],
-                        1
-                      )
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("q-btn", {
-                  staticClass: "bg-grey-6 text-white q-my-sm",
-                  attrs: { dense: "", label: "篩選" },
-                  on: {
-                    click: function($event) {
-                      return _vm.OpenTimelineFilter()
-                    }
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6" }, [
-              _c("div", { staticClass: "text-h6" }, [_vm._v("驗證認同率分佈")]),
+        _c("div", { staticClass: "row items-center q-col-gutter-md q-pa-md" }, [
+          _c(
+            "div",
+            { staticClass: "col-12 col-sm-6 column" },
+            [
+              _c("div", { staticClass: "text-h6" }, [_vm._v("標註標籤比例")]),
               _vm._v(" "),
               _c("div", { staticClass: "graph-container bg-grey-1" }, [
-                _c("div", { ref: "agreeRate", staticClass: "graph" })
-              ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6" }, [
-              _c("div", { staticClass: "text-h6" }, [_vm._v("上傳排行榜")]),
-              _vm._v(" "),
-              _c("div", { staticClass: "graph-container bg-grey-1" }, [
-                _c("div", { ref: "uploadRank", staticClass: "graph" })
-              ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6" }, [
-              _c("div", { staticClass: "text-h6" }, [_vm._v("標註排行榜")]),
-              _vm._v(" "),
-              _c("div", { staticClass: "graph-container bg-grey-1" }, [
-                _c("div", { ref: "annotateRank", staticClass: "graph" })
-              ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6" }, [
-              _c("div", { staticClass: "text-h6" }, [_vm._v("驗證排行榜")]),
-              _vm._v(" "),
-              _c("div", { staticClass: "graph-container bg-grey-1" }, [
-                _c("div", { ref: "verifyRank", staticClass: "graph" })
-              ])
-            ]),
-            _vm._v(" "),
-            _vm.rangeTarget
-              ? _c(
-                  "q-dialog",
+                _c("div", { ref: "tagRatio", staticClass: "graph" }),
+                _vm._v(" "),
+                _c(
+                  "div",
                   {
-                    model: {
-                      value: _vm.openRangeSelect,
-                      callback: function($$v) {
-                        _vm.openRangeSelect = $$v
-                      },
-                      expression: "openRangeSelect"
-                    }
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.tagFilter.open,
+                        expression: "tagFilter.open"
+                      }
+                    ],
+                    staticClass: "option-panel column"
                   },
                   [
+                    _c("image-info-filter", {
+                      ref: "tagFilter",
+                      attrs: {
+                        initFilter: _vm.tagFilter.filter,
+                        disableTag: ""
+                      },
+                      on: {
+                        update: function($event) {
+                          return _vm.UpdateTagFilterResult()
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-space"),
+                    _vm._v(" "),
                     _c(
-                      "q-card",
-                      { staticClass: "full-width q-pa-sm" },
+                      "div",
+                      { staticClass: "row justify-center" },
                       [
-                        _c("div", { staticClass: "text-h6" }, [
-                          _vm._v("選擇範圍")
-                        ]),
-                        _vm._v(" "),
-                        _c("q-toggle", {
-                          attrs: { "left-label": "", label: "啟用範圍篩選" },
+                        _c("q-btn", {
+                          staticClass: "bg-grey-8",
+                          attrs: { label: "確定" },
                           on: {
-                            input: function($event) {
-                              return _vm.UpdateRangeSelectMap()
-                            }
-                          },
-                          model: {
-                            value: _vm.rangeTarget.enable,
-                            callback: function($$v) {
-                              _vm.$set(_vm.rangeTarget, "enable", $$v)
-                            },
-                            expression: "rangeTarget.enable"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c(
-                          "div",
-                          { staticClass: "text-subtitle2" },
-                          [
-                            _vm._v("\n\t\t\t\t\t半徑(公里)\n\t\t\t\t\t"),
-                            _c("q-slider", {
-                              attrs: { label: "", min: 10, max: 400 },
-                              on: {
-                                change: function($event) {
-                                  return _vm.UpdateRangeSelectMap()
-                                }
-                              },
-                              model: {
-                                value: _vm.rangeTarget.range,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.rangeTarget, "range", $$v)
-                                },
-                                expression: "rangeTarget.range"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c("location-select", {
-                          ref: "locationSelect",
-                          attrs: { mode: "selectRange" },
-                          on: {
-                            change: function($event) {
-                              return _vm.UpdateLoc()
+                            click: function($event) {
+                              _vm.tagFilter.open = false
                             }
                           }
-                        }),
-                        _vm._v(" "),
-                        _vm.$refs.locationSelect
-                          ? _c("div", { staticClass: "text-center" }, [
-                              _vm._v(_vm._s(_vm.$refs.locationSelect.status))
-                            ])
-                          : _vm._e(),
-                        _vm._v(" "),
-                        _c(
-                          "q-card-actions",
-                          { attrs: { align: "center" } },
-                          [
-                            _c("q-btn", {
-                              attrs: { flat: "", label: "確定" },
-                              on: {
-                                click: function($event) {
-                                  _vm.openRangeSelect = false
-                                  _vm.UpdateGraph()
-                                }
-                              }
-                            })
-                          ],
-                          1
-                        )
+                        })
                       ],
                       1
                     )
                   ],
                   1
                 )
-              : _vm._e()
-          ],
-          1
-        )
+              ]),
+              _vm._v(" "),
+              _c("q-btn", {
+                staticClass: "bg-grey-6 text-white q-my-sm",
+                attrs: { dense: "", label: "篩選" },
+                on: {
+                  click: function($event) {
+                    _vm.tagFilter.open = true
+                  }
+                }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "col-12 col-sm-6 column" },
+            [
+              _c("div", { staticClass: "text-h6" }, [_vm._v("資料時間分佈")]),
+              _vm._v(" "),
+              _c("div", { staticClass: "graph-container bg-grey-1" }, [
+                _c("div", { ref: "timeline", staticClass: "graph" }),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.timelineFilter.open,
+                        expression: "timelineFilter.open"
+                      }
+                    ],
+                    staticClass: "option-panel column"
+                  },
+                  [
+                    _c(
+                      "div",
+                      { staticClass: "text-subtitle2" },
+                      [
+                        _vm._v("\n\t\t\t\t\t\t顯示類型\n\t\t\t\t\t\t"),
+                        _c("q-select", {
+                          attrs: {
+                            dense: "",
+                            dark: "",
+                            color: "white",
+                            options: _vm.typeOption,
+                            "option-value": "value",
+                            "option-label": "label",
+                            "emit-value": "",
+                            "map-options": ""
+                          },
+                          on: {
+                            input: function($event) {
+                              return _vm.UpdateGraphTimeline()
+                            }
+                          },
+                          model: {
+                            value: _vm.timelineFilter.type,
+                            callback: function($$v) {
+                              _vm.$set(_vm.timelineFilter, "type", $$v)
+                            },
+                            expression: "timelineFilter.type"
+                          }
+                        })
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c("image-info-filter", {
+                      ref: "timelineFilter",
+                      attrs: {
+                        initFilter: _vm.timelineFilter.filter,
+                        disableTag: ""
+                      },
+                      on: {
+                        update: function($event) {
+                          return _vm.UpdateTimelineFilterResult()
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("q-space"),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center" },
+                      [
+                        _c("q-btn", {
+                          staticClass: "bg-grey-8",
+                          attrs: { label: "確定" },
+                          on: {
+                            click: function($event) {
+                              _vm.timelineFilter.open = false
+                            }
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c("q-btn", {
+                staticClass: "bg-grey-6 text-white q-my-sm",
+                attrs: { dense: "", label: "篩選" },
+                on: {
+                  click: function($event) {
+                    _vm.timelineFilter.open = true
+                  }
+                }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-12 col-sm-6" }, [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("驗證認同率分佈")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "graph-container bg-grey-1" }, [
+              _c("div", { ref: "agreeRate", staticClass: "graph" })
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-12 col-sm-6" }, [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("上傳排行榜")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "graph-container bg-grey-1" }, [
+              _c("div", { ref: "uploadRank", staticClass: "graph" })
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-12 col-sm-6" }, [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("標註排行榜")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "graph-container bg-grey-1" }, [
+              _c("div", { ref: "annotateRank", staticClass: "graph" })
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-12 col-sm-6" }, [
+            _c("div", { staticClass: "text-h6" }, [_vm._v("驗證排行榜")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "graph-container bg-grey-1" }, [
+              _c("div", { ref: "verifyRank", staticClass: "graph" })
+            ])
+          ])
+        ])
       ])
     : _vm._e()
 }
@@ -2771,10 +2888,16 @@ var render = function() {
             "q-btn",
             {
               staticClass: "bg-primary text-white",
-              attrs: { flat: "", round: "", size: "md", icon: "insert_chart" },
+              attrs: {
+                flat: "",
+                round: "",
+                size: "md",
+                icon: "insert_chart",
+                disable: _vm.dataset == null || _vm.imageArr.length == 0
+              },
               on: {
                 click: function($event) {
-                  _vm.openFilterPanel = true
+                  return _vm.OpenFilterPanel()
                 }
               }
             },
@@ -2789,166 +2912,60 @@ var render = function() {
         1
       ),
       _vm._v(" "),
-      _vm.dataset && _vm.imageArr
-        ? _c(
-            "q-dialog",
-            {
-              model: {
-                value: _vm.openFilterPanel,
-                callback: function($$v) {
-                  _vm.openFilterPanel = $$v
-                },
-                expression: "openFilterPanel"
-              }
+      _c(
+        "q-dialog",
+        {
+          model: {
+            value: _vm.openFilterPanel,
+            callback: function($$v) {
+              _vm.openFilterPanel = $$v
             },
+            expression: "openFilterPanel"
+          }
+        },
+        [
+          _c(
+            "q-card",
+            { staticClass: "full-width q-px-md" },
             [
               _c(
-                "q-card",
-                { staticClass: "full-width q-px-md" },
+                "q-card-section",
+                { staticClass: "column" },
                 [
-                  _c("q-card-section", { staticClass: "column" }, [
-                    _c("div", { staticClass: "text-h6 text-center" }, [
-                      _vm._v("資料篩選")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row items-center" },
-                      [
-                        _c(
-                          "div",
-                          { staticClass: "col-shrink text-subtitle2 q-ma-md" },
-                          [_vm._v("標籤")]
-                        ),
-                        _vm._v(" "),
-                        _c("q-checkbox", {
-                          attrs: { label: "全選" },
-                          on: {
-                            input: function($event) {
-                              return _vm.ToggleTagSelectAll()
-                            }
-                          },
-                          model: {
-                            value: _vm.selectAll,
-                            callback: function($$v) {
-                              _vm.selectAll = $$v
-                            },
-                            expression: "selectAll"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _vm._l(_vm.locFilter.tagSelect, function(tag) {
-                          return _c("q-checkbox", {
-                            key: tag.name,
-                            attrs: { label: tag.name },
-                            on: {
-                              input: function($event) {
-                                return _vm.UpdateMap()
-                              }
-                            },
-                            model: {
-                              value: tag.value,
-                              callback: function($$v) {
-                                _vm.$set(tag, "value", $$v)
-                              },
-                              expression: "tag.value"
-                            }
-                          })
-                        })
-                      ],
-                      2
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row items-center q-mt-lg" },
-                      [
-                        _c(
-                          "div",
-                          { staticClass: "col-shrink text-subtitle2 q-mx-md" },
-                          [_vm._v("時間")]
-                        ),
-                        _vm._v(" "),
-                        _c("q-range", {
-                          staticClass: "col",
-                          attrs: {
-                            min: _vm.dataTime.rangeMin,
-                            max: _vm.dataTime.rangeMax,
-                            step: 1,
-                            "left-label-value": _vm.minTimeLabel,
-                            "right-label-value": _vm.maxTimeLabel,
-                            "label-always": ""
-                          },
-                          on: {
-                            change: function($event) {
-                              return _vm.UpdateMap()
-                            }
-                          },
-                          model: {
-                            value: _vm.locFilter.time,
-                            callback: function($$v) {
-                              _vm.$set(_vm.locFilter, "time", $$v)
-                            },
-                            expression: "locFilter.time"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row items-center" },
-                      [
-                        _c(
-                          "div",
-                          { staticClass: "col-shrink text-subtitle2 q-ma-md" },
-                          [_vm._v("備註")]
-                        ),
-                        _vm._v(" "),
-                        _c("q-input", {
-                          staticClass: "col q-ma-sm",
-                          attrs: { dense: "" },
-                          on: {
-                            input: function($event) {
-                              return _vm.UpdateMap()
-                            }
-                          },
-                          model: {
-                            value: _vm.locFilter.keyword,
-                            callback: function($$v) {
-                              _vm.$set(_vm.locFilter, "keyword", $$v)
-                            },
-                            expression: "locFilter.keyword"
-                          }
-                        })
-                      ],
-                      1
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c(
-                    "q-card-actions",
-                    { attrs: { align: "center" } },
-                    [
-                      _c("q-btn", {
-                        attrs: { flat: "", label: "確定" },
-                        on: {
-                          click: function($event) {
-                            _vm.openFilterPanel = false
-                          }
-                        }
-                      })
-                    ],
-                    1
-                  )
+                  _c("image-info-filter", {
+                    ref: "imageInfoFilter",
+                    attrs: { initFilter: _vm.curFilter },
+                    on: {
+                      update: function($event) {
+                        return _vm.UpdateFilterResult()
+                      }
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "q-card-actions",
+                { attrs: { align: "center" } },
+                [
+                  _c("q-btn", {
+                    attrs: { flat: "", label: "確定" },
+                    on: {
+                      click: function($event) {
+                        _vm.openFilterPanel = false
+                      }
+                    }
+                  })
                 ],
                 1
               )
             ],
             1
           )
-        : _vm._e()
+        ],
+        1
+      )
     ],
     1
   )
@@ -3372,6 +3389,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_statistic_vue_vue_type_template_id_20e466e9_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_dataset_statistic_vue_vue_type_template_id_20e466e9_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/vue/image-info-filter.vue":
+/*!***************************************!*\
+  !*** ./src/vue/image-info-filter.vue ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _image_info_filter_vue_vue_type_template_id_d7a6189a_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html& */ "./src/vue/image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html&");
+/* harmony import */ var _image_info_filter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./image-info-filter.vue?vue&type=script&lang=js& */ "./src/vue/image-info-filter.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./image-info-filter.vue?vue&type=style&index=0&lang=scss& */ "./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _image_info_filter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _image_info_filter_vue_vue_type_template_id_d7a6189a_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _image_info_filter_vue_vue_type_template_id_d7a6189a_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/vue/image-info-filter.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/vue/image-info-filter.vue?vue&type=script&lang=js&":
+/*!****************************************************************!*\
+  !*** ./src/vue/image-info-filter.vue?vue&type=script&lang=js& ***!
+  \****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib!../../node_modules/vue-loader/lib??vue-loader-options!./image-info-filter.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss&":
+/*!*************************************************************************!*\
+  !*** ./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss& ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/dist/cjs.js!../../node_modules/vue-loader/lib??vue-loader-options!./image-info-filter.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/sass-loader/dist/cjs.js!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_dist_cjs_js_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./src/vue/image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html&":
+/*!********************************************************************************!*\
+  !*** ./src/vue/image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html& ***!
+  \********************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_template_id_d7a6189a_lang_html___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/vue/image-info-filter.vue?vue&type=template&id=d7a6189a&lang=html&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_template_id_d7a6189a_lang_html___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_image_info_filter_vue_vue_type_template_id_d7a6189a_lang_html___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

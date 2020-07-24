@@ -1577,7 +1577,7 @@ __webpack_require__.r(__webpack_exports__);
       this.$emit("update");
     },
     GenerateID: function () {
-      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      return Math.random().toString(36).substring(2, 15);
     },
     ConfirmEdit: function () {
       this.$refs.type.validate();

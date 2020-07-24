@@ -10,7 +10,6 @@ export default {
 	name:"location-select",
 	props: {
 		mode: String,
-		initLoc: Object,
 	},
 	components:{
 		

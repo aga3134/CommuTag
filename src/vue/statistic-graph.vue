@@ -5,49 +5,37 @@
 				<div class="text-h6">標註標籤比例</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="tagRatio"></div>
-					<div class="option-panel column" v-show="openTagFilter">
-						<div class="text-subtitle2 q-mb-lg">時間篩選</div>
-						<q-range v-model="tagFilter.time" :min="dataTime.rangeMin" :max="dataTime.rangeMax" :step="1" :left-label-value="minTimeLabel" :right-label-value="maxTimeLabel" left-label-color="grey-8" right-label-color="grey-8" color="white" label-always @change="UpdateGraphTag();"></q-range>
-						<div class="text-subtitle2">
-							地點篩選
-							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect(tagFilter.location);"></q-btn>
-						</div>
+					<div class="option-panel column" v-show="tagFilter.open">
+						<image-info-filter ref="tagFilter" :initFilter="tagFilter.filter" disableTag @update="UpdateTagFilterResult();"></image-info-filter>
 
-						<div class="text-subtitle2">備註篩選</div>
-						<q-input class="q-ma-sm" dense dark color="white" v-model="tagFilter.keyword" @input="UpdateGraphTag();"></q-input>
 						<q-space></q-space>
 						<div class="row justify-center">
-							<q-btn class="bg-grey-8" label="確定" @click="openTagFilter = false;"></q-btn>
+							<q-btn class="bg-grey-8" label="確定" @click="tagFilter.open = false;"></q-btn>
 						</div>
 					</div>
 				</div>
-				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="OpenTagFilter();"></q-btn>
+				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="tagFilter.open = true;"></q-btn>
 			</div>
 
 			<div class="col-12 col-sm-6 column">
 				<div class="text-h6">資料時間分佈</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="timeline"></div>
-					<div class="option-panel column" v-show="openTimelineFilter">
+					<div class="option-panel column" v-show="timelineFilter.open">
 						<div class="text-subtitle2">
 							顯示類型
 							<q-select dense dark color="white" v-model="timelineFilter.type" :options="typeOption" option-value="value" option-label="label" emit-value map-options @input="UpdateGraphTimeline();"></q-select>
 						</div>
 
-						<div class="text-subtitle2">
-							地點篩選
-							<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect(timelineFilter.location);"></q-btn>
-						</div>
+						<image-info-filter ref="timelineFilter" :initFilter="timelineFilter.filter" disableTag @update="UpdateTimelineFilterResult();"></image-info-filter>
 
-						<div class="text-subtitle2">備註篩選</div>
-						<q-input class="q-ma-sm" dense dark color="white" v-model="timelineFilter.keyword" @input="UpdateGraphTimeline();"></q-input>
 						<q-space></q-space>
 						<div class="row justify-center">
-							<q-btn class="bg-grey-8" label="確定" @click="openTimelineFilter = false;"></q-btn>
+							<q-btn class="bg-grey-8" label="確定" @click="timelineFilter.open = false;"></q-btn>
 						</div>
 					</div>
 				</div>
-				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="OpenTimelineFilter();"></q-btn>
+				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="timelineFilter.open = true;"></q-btn>
 			</div>
 			
 			<div class="col-12 col-sm-6">
@@ -75,22 +63,6 @@
 				</div>
 			</div>
 
-			<q-dialog v-model="openRangeSelect" v-if="rangeTarget">
-				<q-card class="full-width q-pa-sm">
-					<div class="text-h6">選擇範圍</div>
-					<q-toggle v-model="rangeTarget.enable" left-label label="啟用範圍篩選" @input="UpdateRangeSelectMap();"></q-toggle>
-					<div class="text-subtitle2">
-						半徑(公里)
-						<q-slider label  v-model="rangeTarget.range" :min="10" :max="400" @change="UpdateRangeSelectMap();"></q-slider>
-					</div>
-					
-					<location-select mode="selectRange" ref="locationSelect"  @change="UpdateLoc();"></location-select>
-					<div v-if="$refs.locationSelect" class="text-center">{{$refs.locationSelect.status}}</div>
-					<q-card-actions align="center">
-						<q-btn flat label="確定" @click="openRangeSelect=false;UpdateGraph();"></q-btn>
-					</q-card-actions>
-				</q-card>
-			</q-dialog>
 		</div>
 	</div>
 </template>
@@ -98,7 +70,7 @@
 <script>
 
 import util from "../js/util.js"
-import locationSelect from "./location-select.vue"
+import imageInfoFilter from "./image-info-filter.vue"
 
 export default {
 	name:"statistic-graph",
@@ -106,116 +78,54 @@ export default {
 		
 	},
 	components:{
-		"location-select": locationSelect
+		"image-info-filter": imageInfoFilter
 	},
 	data: function () {
 		return {
 			dataset: null,
 			imageArr: [],
-			openTagFilter: false,
-			dataTime:{
-				min:null,
-				max:null,
-				rangeMin:0,
-				rangeMax:0
+			tagFilter:{
+				arr: [],
+				open: false,
+				filter: null
 			},
-			tagFilter: {
-				location:{
-					enable: false,
-					lat: null,
-					lng: null,
-					range: 50
-				},
-				time: {min:null,max:null},
-				keyword: ""
+			timelineFilter:{
+				type: "time",
+				arr: [],
+				open: false,
+				filter: null
 			},
-			openTimelineFilter: false,
 			typeOption:[
 				{label:"時間分佈",value:"time"},
 				{label:"小時變化",value:"hour"},
 				{label:"月份變化",value:"month"},
 			],
-			timelineFilter: {
-				type: "time",
-				location:{
-					enable: false,
-					lat: null,
-					lng: null,
-					range: 50
-				},
-				keyword: ""
-			},
-			openRangeSelect: false,
-			rangeTarget: null
 		};
 	},
 	mounted: function(){
 		
 	},
 	methods: {
-		OpenTagFilter: function(){
-			this.openTagFilter = true;
-		},
-		OpenTimelineFilter: function(){
-			this.openTimelineFilter = true;
-		},
-		OpenRangeSelect: function(target){
-			this.openRangeSelect = true;
-			Vue.set(this,"rangeTarget",target);
-			Vue.nextTick(function(){
-				this.$refs.locationSelect.range = this.rangeTarget.range;
-				this.UpdateRangeSelectMap();
-			}.bind(this));
-		},
-		UpdateRangeSelectMap: function(){
-			if(!this.rangeTarget) return;
-			var locationSelect = this.$refs.locationSelect;
-			locationSelect.range = this.rangeTarget.range;
-			if(this.rangeTarget.enable){
-				if(!this.rangeTarget.lat || !this.rangeTarget.lng){
-					locationSelect.GetGPS();
-				}
-				locationSelect.SetRange(this.rangeTarget.lat,this.rangeTarget.lng,this.rangeTarget.range);
-			}
-			else{
-				locationSelect.RemoveMarker();
-			}
-			this.UpdateGraph();
-		},
-		UpdateLoc(){
-			if(!this.rangeTarget) return;
-			this.rangeTarget.enable = true;
-			var loc = this.$refs.locationSelect.loc;
-			this.rangeTarget.lat = loc.lat;
-			this.rangeTarget.lng = loc.lng;
-			this.UpdateGraph();
-		},
-		InitTimeSelect: function(){
-			var tz = spacetime().name;
-			for(var i=0;i<this.imageArr.length;i++){
-				var t = spacetime(this.imageArr[i].dataTime).goto(tz);
-				if(!this.dataTime.min || this.dataTime.min.isAfter(t)){
-					this.dataTime.min = t.clone().last("day");
-				}
-				if(!this.dataTime.max || this.dataTime.max.isBefore(t)){
-					this.dataTime.max = t.clone().next("day");
-				}
-			}
-			if(this.dataTime.min && this.dataTime.max){
-				this.dataTime.rangeMin = 0;
-				this.dataTime.rangeMax = this.dataTime.min.diff(this.dataTime.max, "day")+1;
-				this.tagFilter.time.min = this.dataTime.rangeMin;
-				this.tagFilter.time.max = this.dataTime.rangeMax;
-			}
-			
-		},
 		SetGraphData: function(dataset,imageArr){
 			this.dataset = dataset;
 			this.imageArr = imageArr;
-			this.InitTimeSelect();
+			this.tagFilter.arr = imageArr;
+			this.timelineFilter.arr = imageArr;
 			Vue.nextTick(function(){
 				this.UpdateGraph();
 			}.bind(this));
+		},
+		UpdateTagFilterResult: function(){
+			var ref = this.$refs.tagFilter;
+			this.tagFilter.filter = ref.filter;
+			this.tagFilter.arr = ref.filterArr;
+			this.UpdateGraphTag();
+		},
+		UpdateTimelineFilterResult: function(){
+			var ref = this.$refs.timelineFilter;
+			this.timelineFilter.filter = Object.assign({"type":this.timelineFilter.type}, ref.filter);
+			this.timelineFilter.arr = ref.filterArr;
+			this.UpdateGraphTimeline();
 		},
 		UpdateGraph: function(){
 			this.UpdateGraphTag();
@@ -226,34 +136,7 @@ export default {
 			this.UpdateGraphVerifyRank();
 		},
 		UpdateGraphTag: function(){
-			var filterArr = this.imageArr;
-			//filter by location range
-			if(this.tagFilter.location.enable){
-				filterArr = filterArr.filter(function(d){
-					var loc = this.tagFilter.location;
-					var range = loc.range/111;
-					var latDiff = d.lat-loc.lat;
-					var lngDiff = d.lng-loc.lng;
-					return latDiff*latDiff+lngDiff*lngDiff<=range*range;
-				}.bind(this));
-			}
-			
-			//filter by time range
-			var tz = spacetime().name;
-			filterArr = filterArr.filter(function(d){
-				var t = spacetime(d.dataTime).goto(tz);
-				var min = this.dataTime.min.add(this.tagFilter.time.min,"day");
-				var max = this.dataTime.min.add(this.tagFilter.time.max,"day");
-				return t.isAfter(min) && t.isBefore(max);
-			}.bind(this));
-
-			//filter by keyword
-			filterArr = filterArr.filter(function(d){
-				if(this.tagFilter.keyword == "") return true;
-				else if(!d.remark) return false;
-				else return d.remark.indexOf(this.tagFilter.keyword) != -1;
-			}.bind(this));
-
+			var filterArr = this.tagFilter.arr;
 			var data = {};
 			switch(this.dataset.annotationType){
 				case "image":
@@ -327,32 +210,15 @@ export default {
 			Plotly.newPlot(this.$refs.tagRatio,[trace],layout,{displayModeBar: false});
 		},
 		UpdateGraphTimeline: function(){
-			var filterArr = this.imageArr;
-			//filter by location range
-			if(this.timelineFilter.location.enable){
-				filterArr = filterArr.filter(function(d){
-					var loc = this.timelineFilter.location;
-					var range = loc.range/111;
-					var latDiff = d.lat-loc.lat;
-					var lngDiff = d.lng-loc.lng;
-					return latDiff*latDiff+lngDiff*lngDiff<=range*range;
-				}.bind(this));
-			}
-
-			//filter by keyword
-			filterArr = filterArr.filter(function(d){
-				if(this.timelineFilter.keyword == "") return true;
-				else if(!d.remark) return false;
-				else return d.remark.indexOf(this.timelineFilter.keyword) != -1;
-			}.bind(this));
-
+			var filter = this.timelineFilter;
+			var filterArr = this.timelineFilter.arr;
 			var tz = spacetime().name;
 			var data = {};
 			var format = "";
 			var axisX = {
 				fixedrange: true,
 			};
-			switch(this.timelineFilter.type){
+			switch(filter.type){
 				case "time":
 					format = "yyyy-MM-dd";
 					axisX.tickformat = "%Y-%m-%d";
@@ -424,11 +290,23 @@ export default {
 			}
 
 			//fill zero to timestamp with no data
+			var s = spacetime.now();
+			var tMin,tMax;
+			for(var i=0;i<filterArr.length;i++){
+				var t = spacetime(filterArr[i].dataTime,s.timezone().name);
+				if(!tMin || tMin.isAfter(t)){
+					tMin = t.clone().last("day");
+				}
+				if(!tMax || tMax.isBefore(t)){
+					tMax = t.clone().next("day");
+				}
+			}
+			
 			for(var tag in data){
-				switch(this.timelineFilter.type){
+				switch(filter.type){
 					case "time":
-						var day = this.dataTime.min;
-						while(day.isBefore(this.dataTime.max)){
+						var day = tMin;
+						while(day.isBefore(tMax)){
 							var key = day.unixFmt(format);
 							if(!data[tag][key]){
 								data[tag][key] = {key:key,value:0};
@@ -689,18 +567,6 @@ export default {
 				};
 				Plotly.newPlot(this.$refs.verifyRank,[trace],layout,{displayModeBar: false});
 			}.bind(this));
-		}
-	},
-	computed:{
-		minTimeLabel: function(){
-			if(!this.dataTime.min) return "";
-			var day = this.dataTime.min.add(this.tagFilter.time.min,"day");
-			return day.unixFmt("yyyy-MM-dd");
-		},
-		maxTimeLabel: function(){
-			if(!this.dataTime.min) return "";
-			var day = this.dataTime.min.add(this.tagFilter.time.max,"day");
-			return day.unixFmt("yyyy-MM-dd");
 		}
 	}
 }
