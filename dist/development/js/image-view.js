@@ -1553,9 +1553,7 @@ __webpack_require__.r(__webpack_exports__);
 
       for (var i = 0; i < this.formData.itemArr.length; i++) {
         var item = this.formData.itemArr[i];
-        var reply = {
-          "id": item.id
-        };
+        var reply = {};
 
         if (item.type == "checkbox") {
           reply.value = [];
@@ -1574,9 +1572,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!item.option) item.option = [];
 
       if (!this.editReply[item.id]) {
-        var reply = {
-          "id": item.id
-        };
+        var reply = {};
 
         if (item.type == "checkbox") {
           reply.value = [];
@@ -1831,7 +1827,6 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function () {
-    console.log(this.image);
     var idArr = [];
     var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
     var hasAnnotator = this.image.annotation && this.image.annotation.user;

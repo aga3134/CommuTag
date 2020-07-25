@@ -61,7 +61,7 @@ export default {
 			var initReply = {};
 			for(var i=0;i<this.formData.itemArr.length;i++){
 				var item = this.formData.itemArr[i];
-				var reply = {"id":item.id};
+				var reply = {};
 				if(item.type == "checkbox"){
 					reply.value = [];
 				}
@@ -75,7 +75,7 @@ export default {
 			if(!item.attr) item.attr = {};
 			if(!item.option) item.option = [];
 			if(!this.editReply[item.id]){
-				var reply = {"id":item.id};
+				var reply = {};
 				if(item.type == "checkbox"){
 					reply.value = [];
 				}

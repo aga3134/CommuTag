@@ -133,7 +133,6 @@ export default {
 		};
 	},
 	mounted: function(){
-		console.log(this.image);
 		var idArr = [];
 		var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
 		var hasAnnotator = this.image.annotation && this.image.annotation.user;
