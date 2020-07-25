@@ -77,7 +77,9 @@ export default {
 			var s = spacetime.now();
 			info.dataTime = spacetime(this.dataTime,s.timezone().name).format("iso");
 			info.remark = this.remark;
-			info.formReply = this.$refs.formReply.editReply;
+			if(this.$refs.formReply){
+				info.formReply = this.$refs.formReply.editReply;
+			}
 			if(this.$refs.locationSelect){
 				info.loc = this.$refs.locationSelect.loc;
 			}
@@ -85,7 +87,7 @@ export default {
 		},
 		ConfirmSelect: function(){
 			var formReply = this.$refs.formReply;
-			if(!formReply.ValidateReply()) return;
+			if(formReply && !formReply.ValidateReply()) return;
 			this.$emit("confirm");
 		},
 		CancelSelect: function(){

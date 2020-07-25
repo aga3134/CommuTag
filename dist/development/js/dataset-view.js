@@ -3463,6 +3463,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     InitFormSelect: function () {
+      if (!this.dataset.form) return;
       var initForm = {};
 
       for (var i = 0; i < this.dataset.form.itemArr.length; i++) {
@@ -3613,6 +3614,8 @@ __webpack_require__.r(__webpack_exports__);
 
       if (!this.disableForm) {
         filterArr = filterArr.filter(function (d) {
+          if (!this.dataset.form) return true;
+
           for (var i = 0; i < this.dataset.form.itemArr.length; i++) {
             var item = this.dataset.form.itemArr[i];
             var cond = this.filter.form[item.id]; //此項目無篩選條件，繼續看下個項目
@@ -3773,7 +3776,10 @@ __webpack_require__.r(__webpack_exports__);
       var s = spacetime.now();
       info.dataTime = spacetime(this.dataTime, s.timezone().name).format("iso");
       info.remark = this.remark;
-      info.formReply = this.$refs.formReply.editReply;
+
+      if (this.$refs.formReply) {
+        info.formReply = this.$refs.formReply.editReply;
+      }
 
       if (this.$refs.locationSelect) {
         info.loc = this.$refs.locationSelect.loc;
@@ -3783,7 +3789,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     ConfirmSelect: function () {
       var formReply = this.$refs.formReply;
-      if (!formReply.ValidateReply()) return;
+      if (formReply && !formReply.ValidateReply()) return;
       this.$emit("confirm");
     },
     CancelSelect: function () {
@@ -10168,10 +10174,12 @@ var render = function() {
               _vm._v(" "),
               _c("div", { staticClass: "row text-subtitle2 q-gutter-xs" }, [
                 _c("div", [
-                  _vm._v("啟用:" + _vm._s(_vm.filter.loc.enable ? "是" : "否"))
+                  _vm._v(_vm._s(_vm.filter.loc.enable ? "已啟用" : "未啟用"))
                 ]),
                 _vm._v(" "),
-                _vm.filter.loc.lat && _vm.filter.loc.lng
+                _vm.filter.loc.enable &&
+                _vm.filter.loc.lat &&
+                _vm.filter.loc.lng
                   ? _c("div", [
                       _vm._v(
                         "中心點: (" +
@@ -10185,7 +10193,7 @@ var render = function() {
                     ])
                   : _vm._e(),
                 _vm._v(" "),
-                _vm.filter.loc.range
+                _vm.filter.loc.enable && _vm.filter.loc.range
                   ? _c("div", [
                       _vm._v("範圍:" + _vm._s(_vm.filter.loc.range + "公里"))
                     ])
@@ -10198,7 +10206,7 @@ var render = function() {
           )
         : _vm._e(),
       _vm._v(" "),
-      !_vm.disableForm && _vm.dataset
+      !_vm.disableForm && _vm.dataset && _vm.dataset.form
         ? _c(
             "div",
             [

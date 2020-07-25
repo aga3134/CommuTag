@@ -32,7 +32,7 @@ class GenVOC:
 					
 					serial+=1
 
-				csvStr = self.genInfo.GenCSVString(imageArr)
+				csvStr = self.genInfo.GenCSVString(dataset,imageArr)
 				outputZip.writestr("info.csv",csvStr)
 
 				kmlStr = self.genInfo.GenKMLString(dataset,imageArr)

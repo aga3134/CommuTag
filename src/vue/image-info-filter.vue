@@ -21,14 +21,14 @@
 				<q-btn class="bg-grey-8 text-white q-ma-sm" label="選擇範圍" @click="OpenRangeSelect();"></q-btn>
 			</div>
 			<div class="row text-subtitle2 q-gutter-xs">
-				<div>啟用:{{filter.loc.enable?"是":"否"}}</div>
-				<div v-if="filter.loc.lat && filter.loc.lng">中心點: ({{filter.loc.lat.toFixed(5)+" "+filter.loc.lng.toFixed(5)}})</div>
-				<div v-if="filter.loc.range">範圍:{{filter.loc.range+"公里"}}</div>
+				<div>{{filter.loc.enable?"已啟用":"未啟用"}}</div>
+				<div v-if="filter.loc.enable && filter.loc.lat && filter.loc.lng">中心點: ({{filter.loc.lat.toFixed(5)+" "+filter.loc.lng.toFixed(5)}})</div>
+				<div v-if="filter.loc.enable && filter.loc.range">範圍:{{filter.loc.range+"公里"}}</div>
 			</div>
 			<q-separator class="q-my-sm"></q-separator>
 		</div>
 
-		<div v-if="!disableForm && dataset">
+		<div v-if="!disableForm && dataset && dataset.form">
 			<div class="text-h6">表單篩選</div>
 			<div v-if="dataset.form">
 				<div v-for="(item,i) in dataset.form.itemArr">
@@ -184,6 +184,7 @@ export default {
 			}
 		},
 		InitFormSelect: function(){
+			if(!this.dataset.form) return;
 			var initForm = {};
 			for(var i=0;i<this.dataset.form.itemArr.length;i++){
 				var item = this.dataset.form.itemArr[i];
@@ -310,6 +311,7 @@ export default {
 			//filter by form reply
 			if(!this.disableForm){
 				filterArr = filterArr.filter(function(d){
+					if(!this.dataset.form) return true;
 					for(var i=0;i<this.dataset.form.itemArr.length;i++){
 						var item = this.dataset.form.itemArr[i];
 						var cond = this.filter.form[item.id];

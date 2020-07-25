@@ -141,7 +141,9 @@ router.post('/upload-image',util.CheckLogin,util.CheckBlacklist,util.CSRF, uploa
 	param.lng = req.body.lng;
 	param.remark = req.body.remark;
 	param.dataTime = req.body.dataTime;
-	param.formReply = JSON.parse(req.body.formReply);
+	if(req.body.formReply){
+		param.formReply = JSON.parse(req.body.formReply);
+	}
 	param.succFunc = function(result){
 		var imageParam = {};
 		imageParam.newPath = "/static/upload/dataset/"+req.body.dataset+"/image/";

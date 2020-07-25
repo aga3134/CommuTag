@@ -1,9 +1,10 @@
 import zipfile
 import os
+from GenInfo import GenInfo
 
 class GenFolderClassify:
 	def __init__(self):
-		pass
+		self.genInfo = GenInfo()
 		
 	def GenFile(self,dataset,imageArr,outFile):
 		if dataset["annotationType"] == "image":
@@ -22,7 +23,14 @@ class GenFolderClassify:
 					imageFile = imagePath+str(image["_id"])+".jpg"
 					if not os.path.isfile(imageFile):
 						continue
+					image["imageName"] = str(serial).zfill(5)+".jpg"
 					for tag in tagArr:
-						outputZip.write(imageFile, tag+"/"+str(serial).zfill(5)+".jpg")
+						outputZip.write(imageFile, tag+"/"+image["imageName"])
 					serial+=1
+
+				csvStr = self.genInfo.GenCSVString(dataset,imageArr)
+				outputZip.writestr("info.csv",csvStr)
+
+				kmlStr = self.genInfo.GenKMLString(dataset,imageArr)
+				outputZip.writestr("info.kml",kmlStr)
 
