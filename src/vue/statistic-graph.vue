@@ -5,37 +5,35 @@
 				<div class="text-h6">標註標籤比例</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="tagRatio"></div>
-					<div class="option-panel column" v-show="tagFilter.open">
+					<div class="option-panel" v-show="tagFilter.open">
 						<image-info-filter ref="tagFilter" :initFilter="tagFilter.filter" disableTag @update="UpdateTagFilterResult();"></image-info-filter>
 
-						<q-space></q-space>
 						<div class="row justify-center">
-							<q-btn class="bg-grey-8" label="確定" @click="tagFilter.open = false;"></q-btn>
+							<q-btn class="bg-grey-8 text-white" label="確定" @click="tagFilter.open = false;"></q-btn>
 						</div>
 					</div>
 				</div>
-				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="tagFilter.open = true;"></q-btn>
+				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="OpenTagFilter();"></q-btn>
 			</div>
 
 			<div class="col-12 col-sm-6 column">
 				<div class="text-h6">資料時間分佈</div>
 				<div class="graph-container bg-grey-1">
 					<div class="graph" ref="timeline"></div>
-					<div class="option-panel column" v-show="timelineFilter.open">
+					<div class="option-panel" v-show="timelineFilter.open">
 						<div class="text-subtitle2">
 							顯示類型
-							<q-select dense dark color="white" v-model="timelineFilter.type" :options="typeOption" option-value="value" option-label="label" emit-value map-options @input="UpdateGraphTimeline();"></q-select>
+							<q-select dense v-model="timelineFilter.type" :options="typeOption" option-value="value" option-label="label" emit-value map-options @input="UpdateGraphTimeline();"></q-select>
 						</div>
 
 						<image-info-filter ref="timelineFilter" :initFilter="timelineFilter.filter" disableTag @update="UpdateTimelineFilterResult();"></image-info-filter>
 
-						<q-space></q-space>
 						<div class="row justify-center">
-							<q-btn class="bg-grey-8" label="確定" @click="timelineFilter.open = false;"></q-btn>
+							<q-btn class="bg-grey-8 text-white" label="確定" @click="timelineFilter.open = false;"></q-btn>
 						</div>
 					</div>
 				</div>
-				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="timelineFilter.open = true;"></q-btn>
+				<q-btn dense class="bg-grey-6 text-white q-my-sm" label="篩選" @click="OpenTimelineFilter();"></q-btn>
 			</div>
 			
 			<div class="col-12 col-sm-6">
@@ -113,6 +111,18 @@ export default {
 			this.timelineFilter.arr = imageArr;
 			Vue.nextTick(function(){
 				this.UpdateGraph();
+			}.bind(this));
+		},
+		OpenTagFilter: function(){
+			this.tagFilter.open = true;
+			Vue.nextTick(function(){
+				this.$refs.tagFilter.SetData(this.dataset,this.imageArr);
+			}.bind(this));
+		},
+		OpenTimelineFilter: function(){
+			this.timelineFilter.open = true;
+			Vue.nextTick(function(){
+				this.$refs.timelineFilter.SetData(this.dataset,this.imageArr);
 			}.bind(this));
 		},
 		UpdateTagFilterResult: function(){
@@ -591,8 +601,7 @@ export default {
 			top: 0px;
 			left: 0px;
 			padding: 20px;
-			background-color: rgba(100,100,100,0.8);
-			color: white;
+			background-color: rgba(255,255,255,0.9);
 			overflow: auto;
 		}
 	}

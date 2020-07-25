@@ -255,6 +255,51 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "image-info-filter",
@@ -292,8 +337,10 @@ __webpack_require__.r(__webpack_exports__);
           max: null,
           rangeMin: 0,
           rangeMax: 0
-        }
+        },
+        form: {}
       },
+      openRangeSelect: false,
       rangeTarget: null,
       filterArr: []
     };
@@ -315,6 +362,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.initFilter) {
         this.InitTimeSelect();
         this.InitTagSelect();
+        this.InitFormSelect();
       }
 
       Vue.nextTick(function () {
@@ -361,6 +409,42 @@ __webpack_require__.r(__webpack_exports__);
         });
       }
     },
+    InitFormSelect: function () {
+      var initForm = {};
+
+      for (var i = 0; i < this.dataset.form.itemArr.length; i++) {
+        var item = this.dataset.form.itemArr[i];
+        var select = {
+          "id": item.id,
+          "use": false
+        };
+
+        if (item.type == "checkbox") {
+          select.value = [];
+        }
+
+        if (item.type == "number") {
+          var minValue = Number.MAX_VALUE;
+          var maxValue = Number.MIN_VALUE;
+
+          for (var j = 0; j < this.imageArr.length; j++) {
+            if (!this.imageArr[j].formReply) continue;
+            var reply = this.imageArr[j].formReply[item.id];
+            if (!reply) continue;
+            var value = parseFloat(reply.value);
+            if (value > maxValue) maxValue = value;
+            if (value < minValue) minValue = value;
+          }
+
+          select.minValue = minValue;
+          select.maxValue = maxValue;
+        }
+
+        initForm[item.id] = select;
+      }
+
+      this.filter.form = initForm;
+    },
     ToggleTagSelectAll: function () {
       if (this.disableTag) return;
 
@@ -371,9 +455,17 @@ __webpack_require__.r(__webpack_exports__);
 
       this.UpdateFilterResult();
     },
+    OpenRangeSelect: function () {
+      this.openRangeSelect = true;
+      Vue.nextTick(function () {
+        this.$refs.locationSelect.range = this.filter.loc.range;
+        this.UpdateRangeSelectMap();
+      }.bind(this));
+    },
     UpdateRangeSelectMap: function () {
       if (this.disableLocation) return;
       var locationSelect = this.$refs.locationSelect;
+      if (!locationSelect) return;
       locationSelect.range = this.filter.loc.range;
 
       if (this.filter.loc.enable) {
@@ -463,6 +555,53 @@ __webpack_require__.r(__webpack_exports__);
             return latDiff * latDiff + lngDiff * lngDiff <= range * range;
           }.bind(this));
         }
+      } //filter by form reply
+
+
+      if (!this.disableForm) {
+        filterArr = filterArr.filter(function (d) {
+          for (var i = 0; i < this.dataset.form.itemArr.length; i++) {
+            var item = this.dataset.form.itemArr[i];
+            var cond = this.filter.form[item.id]; //此項目無篩選條件，繼續看下個項目
+
+            if (!cond.use) continue; //若篩選條件有值但是沒回覆就篩掉
+
+            if (!d.formReply || !d.formReply[item.id]) return false;
+            var r = d.formReply[item.id].value;
+
+            switch (item.type) {
+              case "text":
+                if (!cond.value) continue;
+                if (cond.value.indexOf(r) == -1) return false;
+                break;
+
+              case "radio":
+                if (cond.value != r) return false;
+                break;
+
+              case "checkbox":
+                var hasValue = false;
+
+                for (var j = 0; j < cond.value.length; j++) {
+                  if (r.includes(cond.value[j])) {
+                    hasValue = true;
+                    break;
+                  }
+                }
+
+                if (!hasValue) return false;
+                break;
+
+              case "number":
+                if (!cond.value) continue;
+                if (cond.value.min > r) return false;
+                if (cond.value.max < r) return false;
+                break;
+            }
+          }
+
+          return true;
+        }.bind(this));
       } //filter by remark
 
 
@@ -470,7 +609,8 @@ __webpack_require__.r(__webpack_exports__);
         filterArr = filterArr.filter(function (d) {
           if (this.filter.remark == "") return true;else if (!d.remark) return false;else return d.remark.indexOf(this.filter.remark) != -1;
         }.bind(this));
-      }
+      } //console.log(filterArr);
+
 
       this.filterArr = filterArr;
       this.$emit("update");
@@ -744,8 +884,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -790,6 +928,18 @@ __webpack_require__.r(__webpack_exports__);
       this.timelineFilter.arr = imageArr;
       Vue.nextTick(function () {
         this.UpdateGraph();
+      }.bind(this));
+    },
+    OpenTagFilter: function () {
+      this.tagFilter.open = true;
+      Vue.nextTick(function () {
+        this.$refs.tagFilter.SetData(this.dataset, this.imageArr);
+      }.bind(this));
+    },
+    OpenTimelineFilter: function () {
+      this.timelineFilter.open = true;
+      Vue.nextTick(function () {
+        this.$refs.timelineFilter.SetData(this.dataset, this.imageArr);
       }.bind(this));
     },
     UpdateTagFilterResult: function () {
@@ -1679,7 +1829,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".statistic-graph {\n  width: 100%;\n  height: 100%;\n}\n.statistic-graph .graph-container {\n    width: 100%;\n    height: 350px;\n    position: relative;\n}\n.statistic-graph .graph-container .graph {\n      width: 100%;\n      height: 100%;\n}\n.statistic-graph .graph-container .option-panel {\n      width: 100%;\n      height: 100%;\n      position: absolute;\n      top: 0px;\n      left: 0px;\n      padding: 20px;\n      background-color: rgba(100, 100, 100, 0.8);\n      color: white;\n      overflow: auto;\n}\n", ""]);
+exports.push([module.i, ".statistic-graph {\n  width: 100%;\n  height: 100%;\n}\n.statistic-graph .graph-container {\n    width: 100%;\n    height: 350px;\n    position: relative;\n}\n.statistic-graph .graph-container .graph {\n      width: 100%;\n      height: 100%;\n}\n.statistic-graph .graph-container .option-panel {\n      width: 100%;\n      height: 100%;\n      position: absolute;\n      top: 0px;\n      left: 0px;\n      padding: 20px;\n      background-color: rgba(255, 255, 255, 0.9);\n      overflow: auto;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -2388,203 +2538,478 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "image-info-filter q-pa-sm" }, [
-    !_vm.disableTag
-      ? _c(
-          "div",
-          [
-            _c("div", { staticClass: "text-h6" }, [_vm._v("標籤篩選")]),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "row items-center" },
-              [
-                _c("q-checkbox", {
-                  staticClass: "text-bold",
-                  attrs: { label: "全選" },
-                  on: {
-                    input: function($event) {
-                      return _vm.ToggleTagSelectAll()
-                    }
-                  },
-                  model: {
-                    value: _vm.filter.selectAll,
-                    callback: function($$v) {
-                      _vm.$set(_vm.filter, "selectAll", $$v)
-                    },
-                    expression: "filter.selectAll"
-                  }
-                }),
-                _vm._v(" "),
-                _vm._l(_vm.filter.tag, function(tag) {
-                  return _c("q-checkbox", {
-                    key: tag.name,
-                    attrs: { label: tag.name },
+  return _c(
+    "div",
+    { staticClass: "image-info-filter q-pa-sm" },
+    [
+      !_vm.disableTag
+        ? _c(
+            "div",
+            [
+              _c("div", { staticClass: "text-h6" }, [_vm._v("標籤篩選")]),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "row items-center" },
+                [
+                  _c("q-checkbox", {
+                    staticClass: "text-bold",
+                    attrs: { label: "全選" },
                     on: {
                       input: function($event) {
+                        return _vm.ToggleTagSelectAll()
+                      }
+                    },
+                    model: {
+                      value: _vm.filter.selectAll,
+                      callback: function($$v) {
+                        _vm.$set(_vm.filter, "selectAll", $$v)
+                      },
+                      expression: "filter.selectAll"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _vm._l(_vm.filter.tag, function(tag) {
+                    return _c("q-checkbox", {
+                      key: tag.name,
+                      attrs: { label: tag.name },
+                      on: {
+                        input: function($event) {
+                          return _vm.UpdateFilterResult()
+                        }
+                      },
+                      model: {
+                        value: tag.value,
+                        callback: function($$v) {
+                          _vm.$set(tag, "value", $$v)
+                        },
+                        expression: "tag.value"
+                      }
+                    })
+                  })
+                ],
+                2
+              ),
+              _vm._v(" "),
+              _c("q-separator", { staticClass: "q-my-sm" })
+            ],
+            1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      !_vm.disableTime
+        ? _c(
+            "div",
+            [
+              _c("div", { staticClass: "text-h6 q-mb-lg" }, [
+                _vm._v("時間篩選")
+              ]),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "q-px-md" },
+                [
+                  _c("q-range", {
+                    attrs: {
+                      min: _vm.filter.timeLimit.rangeMin,
+                      max: _vm.filter.timeLimit.rangeMax,
+                      step: 1,
+                      "left-label-value": _vm.minTimeLabel,
+                      "right-label-value": _vm.maxTimeLabel,
+                      "left-label-color": "grey-8",
+                      "right-label-color": "grey-8",
+                      "label-always": ""
+                    },
+                    on: {
+                      change: function($event) {
                         return _vm.UpdateFilterResult()
                       }
                     },
                     model: {
-                      value: tag.value,
+                      value: _vm.filter.time,
                       callback: function($$v) {
-                        _vm.$set(tag, "value", $$v)
+                        _vm.$set(_vm.filter, "time", $$v)
                       },
-                      expression: "tag.value"
+                      expression: "filter.time"
                     }
                   })
-                })
-              ],
-              2
-            ),
-            _vm._v(" "),
-            _c("q-separator", { staticClass: "q-my-sm" })
-          ],
-          1
-        )
-      : _vm._e(),
-    _vm._v(" "),
-    !_vm.disableTime
-      ? _c(
-          "div",
-          [
-            _c("div", { staticClass: "text-h6 q-mb-lg" }, [_vm._v("時間篩選")]),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "q-px-md" },
-              [
-                _c("q-range", {
-                  attrs: {
-                    min: _vm.filter.timeLimit.rangeMin,
-                    max: _vm.filter.timeLimit.rangeMax,
-                    step: 1,
-                    "left-label-value": _vm.minTimeLabel,
-                    "right-label-value": _vm.maxTimeLabel,
-                    "left-label-color": "grey-8",
-                    "right-label-color": "grey-8",
-                    "label-always": ""
-                  },
-                  on: {
-                    change: function($event) {
-                      return _vm.UpdateFilterResult()
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("q-separator", { staticClass: "q-my-sm" })
+            ],
+            1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      !_vm.disableLocation
+        ? _c(
+            "div",
+            [
+              _c(
+                "div",
+                { staticClass: "row items-center" },
+                [
+                  _c("div", { staticClass: "text-h6" }, [_vm._v("地點篩選")]),
+                  _vm._v(" "),
+                  _c("q-btn", {
+                    staticClass: "bg-grey-8 text-white q-ma-sm",
+                    attrs: { label: "選擇範圍" },
+                    on: {
+                      click: function($event) {
+                        return _vm.OpenRangeSelect()
+                      }
                     }
-                  },
-                  model: {
-                    value: _vm.filter.time,
-                    callback: function($$v) {
-                      _vm.$set(_vm.filter, "time", $$v)
-                    },
-                    expression: "filter.time"
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("div", { staticClass: "row text-subtitle2 q-gutter-xs" }, [
+                _c("div", [
+                  _vm._v("啟用:" + _vm._s(_vm.filter.loc.enable ? "是" : "否"))
+                ]),
+                _vm._v(" "),
+                _vm.filter.loc.lat && _vm.filter.loc.lng
+                  ? _c("div", [
+                      _vm._v(
+                        "中心點: (" +
+                          _vm._s(
+                            _vm.filter.loc.lat.toFixed(5) +
+                              " " +
+                              _vm.filter.loc.lng.toFixed(5)
+                          ) +
+                          ")"
+                      )
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.filter.loc.range
+                  ? _c("div", [
+                      _vm._v("範圍:" + _vm._s(_vm.filter.loc.range + "公里"))
+                    ])
+                  : _vm._e()
+              ]),
+              _vm._v(" "),
+              _c("q-separator", { staticClass: "q-my-sm" })
+            ],
+            1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      !_vm.disableForm && _vm.dataset
+        ? _c(
+            "div",
+            [
+              _c("div", { staticClass: "text-h6" }, [_vm._v("表單篩選")]),
+              _vm._v(" "),
+              _vm.dataset.form
+                ? _c(
+                    "div",
+                    _vm._l(_vm.dataset.form.itemArr, function(item, i) {
+                      return _c("div", [
+                        _c(
+                          "div",
+                          { staticClass: "text-subtitle2" },
+                          [
+                            _c("q-checkbox", {
+                              key: item.quest,
+                              attrs: { label: i + 1 + "." + item.quest },
+                              on: {
+                                input: function($event) {
+                                  return _vm.UpdateFilterResult()
+                                }
+                              },
+                              model: {
+                                value: _vm.filter.form[item.id].use,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.filter.form[item.id], "use", $$v)
+                                },
+                                expression: "filter.form[item.id].use"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _vm.filter.form[item.id].use
+                          ? _c("div", { staticClass: "q-mx-md" }, [
+                              item.type == "text"
+                                ? _c(
+                                    "div",
+                                    [
+                                      _c("q-input", {
+                                        ref: item.id,
+                                        refInFor: true,
+                                        attrs: {
+                                          dense: "",
+                                          placeholder: "請輸入篩選文字"
+                                        },
+                                        on: {
+                                          blur: function($event) {
+                                            return _vm.UpdateFilterResult()
+                                          }
+                                        },
+                                        model: {
+                                          value: _vm.filter.form[item.id].value,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.filter.form[item.id],
+                                              "value",
+                                              $$v
+                                            )
+                                          },
+                                          expression:
+                                            "filter.form[item.id].value"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                : _vm._e(),
+                              _vm._v(" "),
+                              item.type == "radio"
+                                ? _c(
+                                    "div",
+                                    _vm._l(item.option, function(op, j) {
+                                      return _c("q-radio", {
+                                        key: op,
+                                        attrs: { label: op, val: op },
+                                        on: {
+                                          input: function($event) {
+                                            return _vm.UpdateFilterResult()
+                                          }
+                                        },
+                                        model: {
+                                          value: _vm.filter.form[item.id].value,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.filter.form[item.id],
+                                              "value",
+                                              $$v
+                                            )
+                                          },
+                                          expression:
+                                            "filter.form[item.id].value"
+                                        }
+                                      })
+                                    }),
+                                    1
+                                  )
+                                : _vm._e(),
+                              _vm._v(" "),
+                              item.type == "checkbox"
+                                ? _c(
+                                    "div",
+                                    _vm._l(item.option, function(op, j) {
+                                      return _c("q-checkbox", {
+                                        key: op,
+                                        attrs: { label: op, val: op },
+                                        on: {
+                                          input: function($event) {
+                                            return _vm.UpdateFilterResult()
+                                          }
+                                        },
+                                        model: {
+                                          value: _vm.filter.form[item.id].value,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.filter.form[item.id],
+                                              "value",
+                                              $$v
+                                            )
+                                          },
+                                          expression:
+                                            "filter.form[item.id].value"
+                                        }
+                                      })
+                                    }),
+                                    1
+                                  )
+                                : _vm._e(),
+                              _vm._v(" "),
+                              item.type == "number"
+                                ? _c("div", [
+                                    _c(
+                                      "div",
+                                      { staticClass: "q-mt-lg q-mx-md" },
+                                      [
+                                        _c("q-range", {
+                                          attrs: {
+                                            min:
+                                              _vm.filter.form[item.id].minValue,
+                                            max:
+                                              _vm.filter.form[item.id].maxValue,
+                                            step: 1,
+                                            "label-always": ""
+                                          },
+                                          on: {
+                                            change: function($event) {
+                                              return _vm.UpdateFilterResult()
+                                            }
+                                          },
+                                          model: {
+                                            value:
+                                              _vm.filter.form[item.id].value,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.filter.form[item.id],
+                                                "value",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "filter.form[item.id].value"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ])
+                                : _vm._e()
+                            ])
+                          : _vm._e()
+                      ])
+                    }),
+                    0
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _c("q-separator", { staticClass: "q-my-sm" })
+            ],
+            1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      !_vm.disableRemark
+        ? _c(
+            "div",
+            [
+              _c("div", { staticClass: "text-h6" }, [_vm._v("備註篩選")]),
+              _vm._v(" "),
+              _c("q-input", {
+                staticClass: "q-ma-sm",
+                attrs: { dense: "" },
+                on: {
+                  blur: function($event) {
+                    return _vm.UpdateFilterResult()
                   }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c("q-separator", { staticClass: "q-my-sm" })
-          ],
-          1
-        )
-      : _vm._e(),
-    _vm._v(" "),
-    !_vm.disableLocation
-      ? _c(
-          "div",
-          [
-            _c("div", { staticClass: "text-h6" }, [_vm._v("地點篩選")]),
-            _vm._v(" "),
-            _c("q-toggle", {
-              attrs: { "left-label": "", label: "啟用範圍篩選" },
-              on: {
-                input: function($event) {
-                  return _vm.UpdateRangeSelectMap()
-                }
-              },
-              model: {
-                value: _vm.filter.loc.enable,
-                callback: function($$v) {
-                  _vm.$set(_vm.filter.loc, "enable", $$v)
                 },
-                expression: "filter.loc.enable"
-              }
-            }),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "text-subtitle2" },
-              [
-                _vm._v("\n\t\t\t半徑(公里)\n\t\t\t"),
-                _c("q-slider", {
-                  attrs: { label: "", min: 10, max: 400 },
-                  on: {
-                    change: function($event) {
-                      return _vm.UpdateRangeSelectMap()
+                model: {
+                  value: _vm.filter.remark,
+                  callback: function($$v) {
+                    _vm.$set(_vm.filter, "remark", $$v)
+                  },
+                  expression: "filter.remark"
+                }
+              }),
+              _vm._v(" "),
+              _c("q-separator", { staticClass: "q-my-sm" })
+            ],
+            1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "q-dialog",
+        {
+          model: {
+            value: _vm.openRangeSelect,
+            callback: function($$v) {
+              _vm.openRangeSelect = $$v
+            },
+            expression: "openRangeSelect"
+          }
+        },
+        [
+          _c(
+            "q-card",
+            { staticClass: "full-width q-pa-sm" },
+            [
+              _c("div", { staticClass: "text-h6" }, [_vm._v("選擇範圍")]),
+              _vm._v(" "),
+              _c("q-toggle", {
+                attrs: { "left-label": "", label: "啟用範圍篩選" },
+                on: {
+                  input: function($event) {
+                    return _vm.UpdateRangeSelectMap()
+                  }
+                },
+                model: {
+                  value: _vm.filter.loc.enable,
+                  callback: function($$v) {
+                    _vm.$set(_vm.filter.loc, "enable", $$v)
+                  },
+                  expression: "filter.loc.enable"
+                }
+              }),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "text-subtitle2" },
+                [
+                  _vm._v("\n\t\t\t\t半徑(公里)\n\t\t\t\t"),
+                  _c("q-slider", {
+                    attrs: { label: "", min: 10, max: 400 },
+                    on: {
+                      change: function($event) {
+                        return _vm.UpdateRangeSelectMap()
+                      }
+                    },
+                    model: {
+                      value: _vm.filter.loc.range,
+                      callback: function($$v) {
+                        _vm.$set(_vm.filter.loc, "range", $$v)
+                      },
+                      expression: "filter.loc.range"
                     }
-                  },
-                  model: {
-                    value: _vm.filter.loc.range,
-                    callback: function($$v) {
-                      _vm.$set(_vm.filter.loc, "range", $$v)
-                    },
-                    expression: "filter.loc.range"
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("location-select", {
+                ref: "locationSelect",
+                attrs: { mode: "selectRange" },
+                on: {
+                  change: function($event) {
+                    return _vm.UpdateLoc()
                   }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c("location-select", {
-              ref: "locationSelect",
-              attrs: { mode: "selectRange" },
-              on: {
-                change: function($event) {
-                  return _vm.UpdateLoc()
                 }
-              }
-            }),
-            _vm._v(" "),
-            _vm.$refs.locationSelect
-              ? _c("div", { staticClass: "text-center" }, [
-                  _vm._v(_vm._s(_vm.$refs.locationSelect.status))
-                ])
-              : _vm._e(),
-            _vm._v(" "),
-            _c("q-separator", { staticClass: "q-my-sm" })
-          ],
-          1
-        )
-      : _vm._e(),
-    _vm._v(" "),
-    !_vm.disableRemark
-      ? _c(
-          "div",
-          [
-            _c("div", { staticClass: "text-h6" }, [_vm._v("備註篩選")]),
-            _vm._v(" "),
-            _c("q-input", {
-              staticClass: "q-ma-sm",
-              attrs: { dense: "" },
-              on: {
-                input: function($event) {
-                  return _vm.UpdateFilterResult()
-                }
-              },
-              model: {
-                value: _vm.filter.remark,
-                callback: function($$v) {
-                  _vm.$set(_vm.filter, "remark", $$v)
-                },
-                expression: "filter.remark"
-              }
-            }),
-            _vm._v(" "),
-            _c("q-separator", { staticClass: "q-my-sm" })
-          ],
-          1
-        )
-      : _vm._e()
-  ])
+              }),
+              _vm._v(" "),
+              _vm.$refs.locationSelect
+                ? _c("div", { staticClass: "text-center" }, [
+                    _vm._v(_vm._s(_vm.$refs.locationSelect.status))
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "q-card-actions",
+                { attrs: { align: "center" } },
+                [
+                  _c("q-btn", {
+                    attrs: { flat: "", label: "確定" },
+                    on: {
+                      click: function($event) {
+                        _vm.openRangeSelect = false
+                        _vm.UpdateFilterResult()
+                      }
+                    }
+                  })
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -2657,7 +3082,7 @@ var render = function() {
                         expression: "tagFilter.open"
                       }
                     ],
-                    staticClass: "option-panel column"
+                    staticClass: "option-panel"
                   },
                   [
                     _c("image-info-filter", {
@@ -2673,14 +3098,12 @@ var render = function() {
                       }
                     }),
                     _vm._v(" "),
-                    _c("q-space"),
-                    _vm._v(" "),
                     _c(
                       "div",
                       { staticClass: "row justify-center" },
                       [
                         _c("q-btn", {
-                          staticClass: "bg-grey-8",
+                          staticClass: "bg-grey-8 text-white",
                           attrs: { label: "確定" },
                           on: {
                             click: function($event) {
@@ -2701,7 +3124,7 @@ var render = function() {
                 attrs: { dense: "", label: "篩選" },
                 on: {
                   click: function($event) {
-                    _vm.tagFilter.open = true
+                    return _vm.OpenTagFilter()
                   }
                 }
               })
@@ -2729,7 +3152,7 @@ var render = function() {
                         expression: "timelineFilter.open"
                       }
                     ],
-                    staticClass: "option-panel column"
+                    staticClass: "option-panel"
                   },
                   [
                     _c(
@@ -2740,8 +3163,6 @@ var render = function() {
                         _c("q-select", {
                           attrs: {
                             dense: "",
-                            dark: "",
-                            color: "white",
                             options: _vm.typeOption,
                             "option-value": "value",
                             "option-label": "label",
@@ -2778,14 +3199,12 @@ var render = function() {
                       }
                     }),
                     _vm._v(" "),
-                    _c("q-space"),
-                    _vm._v(" "),
                     _c(
                       "div",
                       { staticClass: "row justify-center" },
                       [
                         _c("q-btn", {
-                          staticClass: "bg-grey-8",
+                          staticClass: "bg-grey-8 text-white",
                           attrs: { label: "確定" },
                           on: {
                             click: function($event) {
@@ -2806,7 +3225,7 @@ var render = function() {
                 attrs: { dense: "", label: "篩選" },
                 on: {
                   click: function($event) {
-                    _vm.timelineFilter.open = true
+                    return _vm.OpenTimelineFilter()
                   }
                 }
               })

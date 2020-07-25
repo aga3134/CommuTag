@@ -74,6 +74,13 @@ export default {
 			var item = this.formData.itemArr[i];
 			if(!item.attr) item.attr = {};
 			if(!item.option) item.option = [];
+			if(!this.editReply[item.id]){
+				var reply = {"id":item.id};
+				if(item.type == "checkbox"){
+					reply.value = [];
+				}
+				Vue.set(this.editReply,item.id,reply);
+			}
 			//依問題產生validate rule
 			//radio跟checkbox沒內建validation，另外處理
 			item.rule = [];
