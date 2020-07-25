@@ -52,6 +52,9 @@ router.post('/upload-image', upload.UploadImageToMem, function(req, res){
 	param.lng = req.body.lng;
 	param.remark = req.body.remark;
 	param.dataTime = req.body.dataTime;
+	if(req.body.formReply){
+		param.formReply = JSON.parse(req.body.formReply);
+	}
 	param.apiKey = req.body.apiKey;
 
 	param.succFunc = function(result){

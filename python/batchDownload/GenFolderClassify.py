@@ -13,7 +13,7 @@ class GenFolderClassify:
 				serial = 1
 				for image in imageArr:
 					if image["annotation"] is None:
-						tagArr = "未分類"
+						tagArr = ["未分類"]
 					else:
 						tagArr = []
 						for tag in image["annotation"]["annotation"]:

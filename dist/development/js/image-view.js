@@ -1831,6 +1831,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function () {
+    console.log(this.image);
     var idArr = [];
     var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
     var hasAnnotator = this.image.annotation && this.image.annotation.user;

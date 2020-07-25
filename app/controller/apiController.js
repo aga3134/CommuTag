@@ -94,6 +94,7 @@ apiController.UploadImage = function(param){
 		newImage.lng = param.lng;
 		newImage.remark = param.remark;
 		newImage.dataTime = param.dataTime;
+		newImage.formReply = param.formReply;
 		newImage.uploadFrom = "api";
 		newImage.uploader = param.apiKey;
 		Image.create(newImage,function(err, result){
