@@ -1787,6 +1787,18 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2717,7 +2729,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".image-control {\n  width: 100%;\n  height: 100%;\n}\n", ""]);
+exports.push([module.i, ".image-control {\n  width: 100%;\n  height: 100%;\n}\n.image-control .form-area {\n    margin: 5px;\n    padding: 5px 10px;\n    border: 1px solid #888888;\n    border-radius: 5px;\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -5087,12 +5099,6 @@ var render = function() {
                       )
                     : _vm._e(),
                   _vm._v(" "),
-                  _vm.image.remark && _vm.image.remark != ""
-                    ? _c("pre", { staticClass: "q-mx-sm q-my-none" }, [
-                        _vm._v(_vm._s(_vm.image.remark))
-                      ])
-                    : _vm._e(),
-                  _vm._v(" "),
                   _c("div", { staticClass: "row" }, [
                     _vm.uploader
                       ? _c(
@@ -5137,7 +5143,57 @@ var render = function() {
                           ]
                         )
                       : _vm._e()
-                  ])
+                  ]),
+                  _vm._v(" "),
+                  _vm.image.remark && _vm.image.remark != ""
+                    ? _c("pre", { staticClass: "q-mx-sm q-my-none" }, [
+                        _vm._v(_vm._s(_vm.image.remark))
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.dataset.form && _vm.image.formReply
+                    ? _c(
+                        "div",
+                        { staticClass: "form-area" },
+                        [
+                          _c("div", { staticClass: "text-subtitle1" }, [
+                            _vm._v("表單資料")
+                          ]),
+                          _vm._v(" "),
+                          _vm._l(_vm.dataset.form.itemArr, function(item, i) {
+                            return _c(
+                              "div",
+                              { staticClass: "row q-gutter-sm" },
+                              [
+                                _c("div", [
+                                  _vm._v(
+                                    _vm._s(i + 1) + ". " + _vm._s(item.quest)
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _vm.image.formReply[item.id]
+                                  ? _c("div", [
+                                      _vm._v(
+                                        "\n\t\t\t\t\t\t" +
+                                          _vm._s(
+                                            item.type == "checkbox"
+                                              ? _vm.image.formReply[
+                                                  item.id
+                                                ].value.join(", ")
+                                              : _vm.image.formReply[item.id]
+                                                  .value
+                                          ) +
+                                          "\n\t\t\t\t\t"
+                                      )
+                                    ])
+                                  : _vm._e()
+                              ]
+                            )
+                          })
+                        ],
+                        2
+                      )
+                    : _vm._e()
                 ],
                 1
               ),

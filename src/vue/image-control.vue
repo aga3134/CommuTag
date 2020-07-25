@@ -19,13 +19,25 @@
 				<q-chip class="transparent" dense v-if="image.time" icon="access_time">{{image.time}}</q-chip>
 				<q-chip class="transparent" dense clickable v-if="image.lat && image.lng" icon="room" @click="ViewLocation();">觀看地點</q-chip>
 				<q-chip class="transparent" dense v-if="image.annotation">{{'認同數 / 驗證數 : '+AgreeVerifyRatio}}</q-chip>
-				<pre class="q-mx-sm q-my-none" v-if="image.remark && image.remark != '' ">{{image.remark}}</pre>
+
 				<div class="row">
 					<div class="q-pa-sm" v-if="uploader" @click="OpenUserInfo(uploader)">上傳者:
 						<span class="cursor-pointer text-blue-10">{{uploader.name}}</span>
 					</div>
 					<div class="q-pa-sm" v-if="annotator" @click="OpenUserInfo(annotator);">標註者:
 						<span class="cursor-pointer  text-blue-10">{{annotator.name}}</span>
+					</div>
+				</div>
+
+				<pre class="q-mx-sm q-my-none" v-if="image.remark && image.remark != '' ">{{image.remark}}</pre>
+
+				<div class="form-area" v-if="dataset.form && image.formReply">
+					<div class="text-subtitle1">表單資料</div>
+					<div class="row q-gutter-sm" v-for="(item,i) in dataset.form.itemArr">
+						<div>{{i+1}}. {{item.quest}}</div>
+						<div v-if="image.formReply[item.id]">
+							{{item.type=="checkbox"?image.formReply[item.id].value.join(", "):image.formReply[item.id].value}}
+						</div>
 					</div>
 				</div>
 			</q-card-section>
@@ -321,5 +333,11 @@ export default {
 .image-control{
 	width: 100%;
 	height: 100%;
+	.form-area{
+		margin: 5px;
+		padding: 5px 10px;
+		border: 1px solid #888888;
+		border-radius: 5px;
+	}
 }
 </style>

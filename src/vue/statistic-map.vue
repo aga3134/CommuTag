@@ -141,7 +141,9 @@ export default {
 						content += "<div class='popup-bt'  onclick=\"window.open('"+link+"','_blank');\">前往紫豹在哪裡</div>";
 						break;
 				}
+				content += "<a href='/image?dataset="+this.dataset._id+"&image="+d._id+"' target='_blank'>";
 				content += "<img src='"+d.url+"' class='popup-image' />";
+				content += "</a>";
 				content += "<div class='popup-info'>"+tagInfo+"</div>";
 				var marker = L.marker({lat:d.lat,lng:d.lng}).bindPopup(content);
 				this.markerGroup.addLayer(marker);

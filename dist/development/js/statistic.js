@@ -1658,7 +1658,9 @@ __webpack_require__.r(__webpack_exports__);
             break;
         }
 
+        content += "<a href='/image?dataset=" + this.dataset._id + "&image=" + d._id + "' target='_blank'>";
         content += "<img src='" + d.url + "' class='popup-image' />";
+        content += "</a>";
         content += "<div class='popup-info'>" + tagInfo + "</div>";
         var marker = L.marker({
           lat: d.lat,

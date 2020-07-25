@@ -21,7 +21,7 @@
 			</div>
 
 			<div class="row q-px-md q-gutter-sm">
-				<q-select dense class="col-shrink" v-model="filterKey" :options="viewFilter" option-value="value" option-label="label" emit-value map-options label="篩選" @input="FilterData();"></q-select>
+				<q-btn dense v-if="info" icon="filter_alt" label="篩選" flat @click="OpenFilterPanel();"></q-btn>
 				<q-btn dense v-if="info && info.enableUpload" icon="add_photo_alternate" label="新增照片" flat @click="openUploader = true;"></q-btn>
 				<q-btn dense v-if="info && info.enableDownload && user" icon="cloud_download" label="整包下載" flat @click="OpenBatchDownload();"></q-btn>
 				<q-btn dense v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
@@ -31,9 +31,9 @@
 			</div>
 
 			
-			<q-infinite-scroll @load="LoadMoreImage" ref="imageScroll">
+			<q-infinite-scroll @load="ShowMoreImage" ref="imageScroll">
 				<div class="row q-pa-md q-col-gutter-md">
-					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in filterArr" :key="i" transition="scale">
+					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in showArr" :key="i" transition="scale">
 						<q-card class="bg-grey-7 text-white" @click="ViewImage(image,i);">
 							<q-img :src="image.url" :ratio="16/9">
 								<div v-if="image.verifyFinish" class="absolute-bottom">
@@ -59,7 +59,7 @@
 			</div>
 
 			<q-dialog v-model="openViewImage" v-if="targetImage">
-				<image-control showNavigate editable :user="user" :dataset="info" :image="targetImage" @reload="ReloadImage();"  @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></image-control>
+				<image-control showNavigate editable :user="user" :dataset="info" :image="targetImage" @reload="ReloadDataset();"  @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></image-control>
 			</q-dialog>
 
 			<q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="info && info.enableUpload">
@@ -69,7 +69,7 @@
 			</q-page-sticky>
 
 			<q-dialog maximized v-model="openUploader">
-				<uploader :user="user" :dataset="info" @uploaded="ReloadImage();"></uploader>
+				<uploader :user="user" :dataset="info" @uploaded="LoadDatasetInfo();"></uploader>
 				<div>
 					<q-btn round class="bg-teal text-white q-ma-md absolute-top-right" icon="close" v-close-popup></q-btn>
 				</div>
@@ -101,6 +101,18 @@
 				<dataset-editor :info="editInfo" @confirm="ReloadDataset();" @cancel="openDatasetEditor=false;"></dataset-editor>
 			</q-dialog>
 
+			<q-dialog v-model="openFilterPanel">
+				<q-card class="full-width q-px-md">
+					<q-card-section class="column">
+						<image-info-filter ref="imageInfoFilter" :initFilter="curFilter" @update="UpdateFilterResult();"></image-info-filter>
+					</q-card-section>
+
+					<q-card-actions align="center">
+						<q-btn flat label="確定" @click="openFilterPanel = false;"></q-btn>
+					</q-card-actions>
+				</q-card>
+			</q-dialog>
+
 		</q-page-container>
 
 		<q-footer>
@@ -117,6 +129,8 @@ import topbar from "./topbar.vue"
 import uploader from "./uploader.vue"
 import datasetEditor from "./dataset-editor.vue"
 import imageControl from "./image-control.vue"
+import imageInfoFilter from "./image-info-filter.vue"
+
 
 export default {
 	name:"dataset-view",
@@ -124,18 +138,13 @@ export default {
 		"topbar":topbar,
 		"uploader":uploader,
 		"dataset-editor":datasetEditor,
-		"image-control":imageControl
+		"image-control":imageControl,
+		"image-info-filter":imageInfoFilter
 	},
 	data: function () {
 		return {
 			tab: "",
 			user: null,
-			filterKey: "all",
-			viewFilter: [
-				{label: "全部",value:"all"},
-				{label: "已標註",value:"withTag"},
-				{label: "未標註",value:"withoutTag"},
-			],
 			downloadFilter: [
 				{label: "全部",value:"all"},
 				{label: "標註完成",value:"annotateFinish"},
@@ -146,15 +155,17 @@ export default {
 				filter: "all",
 				format: ""
 			},
+			curFilter: null,
 			datasetID: null,
 			info: null,
 			badgeArr: [],
 			imageArr: [],
 			filterArr: [],
+			showArr: [],
 			targetImage: null,
 			targetIndex: -1,
 			openViewImage: false,
-			hasMore: true,
+			openFilterPanel: false,
 			openUploader: false,
 			openDatasetEditor: false,
 			openBatchDownload: false,
@@ -188,6 +199,12 @@ export default {
 		this.LoadDatasetInfo();
 	},
 	methods: {
+		OpenFilterPanel: function(){
+			this.openFilterPanel = true;
+			Vue.nextTick(function(){
+				this.$refs.imageInfoFilter.SetData(this.info,this.imageArr);
+			}.bind(this));
+		},
 		LoadDatasetInfo: function(){
 			$.get("/dataset/view-dataset?id="+this.datasetID, function(result){
 				if(result.status != "ok") return window.location.href="/?message="+encodeURIComponent("無法顯示資料集");;
@@ -215,6 +232,27 @@ export default {
 							break;
 					}
 				}
+
+				//load all image info
+				var url = "/dataset/list-image";
+				url += "?all=1&dataset="+this.datasetID;
+				$.get(url,function(result){
+					if(result.status != "ok") return;
+					this.imageArr = [];
+					var tz = spacetime().name;	//get browser time zone
+					for(var i=0;i<result.data.length;i++){
+						var image = result.data[i];
+						if(image.dataTime){
+							var t = spacetime(image.dataTime).goto(tz);
+							image.time = t.unixFmt("yyyy-MM-dd HH:mm:ss");
+						}
+						image.url = "/static/upload/dataset/"+this.datasetID+"/image/"+image._id+".jpg";
+						this.imageArr.push(image);
+					}
+					this.filterArr = this.imageArr;
+					this.ResetShowArr();
+					this.CheckVerifyFinish();
+				}.bind(this));
 				
 			}.bind(this));
 		},
@@ -231,62 +269,32 @@ export default {
 		GoToStatistic: function(){
 			window.location.href="/statistic?id="+this.datasetID;
 		},
-		ReloadImage: function(){
-			this.imageArr = [];
-			this.filterArr = [];
+		ResetShowArr: function(){
+			this.showArr = [];
 			this.$refs.imageScroll.reset();
 			this.$refs.imageScroll.resume();
 			this.$refs.imageScroll.poll();
 			this.targetImage = null;
 			this.openViewImage = false;
 		},
-		LoadMoreImage: function(index,done){
-			var url = "/dataset/list-image";
-			url += "?dataset="+this.datasetID;
-			url += "&page="+(index-1);
-			$.get(url,function(result){
-				if(result.status != "ok") return;
-				this.hasMore = result.data.hasMore;
-				if(!this.hasMore){
-					this.$refs.imageScroll.stop();
-				}
-				var tz = spacetime().name;	//get browser time zone
-				for(var i=0;i<result.data.images.length;i++){
-					var image = result.data.images[i];
-					if(image.dataTime){
-						var t = spacetime(image.dataTime).goto(tz);
-						image.time = t.unixFmt("yyyy-MM-dd HH:mm:ss");
-					}
-					image.url = "/static/upload/dataset/"+this.datasetID+"/image/"+image._id+".jpg";
-					this.imageArr.push(image);
-				}
-				this.CheckVerifyFinish();
-				this.FilterData();
-				done();
-			}.bind(this));
-		},
-		FilterData: function(){
-			this.filterArr = [];
-			switch(this.filterKey){
-				case "all":
-					this.filterArr = this.imageArr;
-					break;
-				case "withTag":
-					for(var i=0;i<this.imageArr.length;i++){
-						if(this.imageArr[i].annotation){
-							this.filterArr.push(this.imageArr[i]);
-						}
-					}
-					break;
-				case "withoutTag":
-					for(var i=0;i<this.imageArr.length;i++){
-						if(!this.imageArr[i].annotation){
-							this.filterArr.push(this.imageArr[i]);
-						}
-					}
-					break;
-			}
+		ShowMoreImage: function(index,done){
+			var picNum = 10;
+			var startIndex = (index-1)*picNum;
+			var endIndex = Math.min(index*picNum,this.filterArr.length);
 			
+			for(var i=startIndex;i<endIndex;i++){
+				this.showArr.push(this.filterArr[i]);
+			}
+			if(endIndex == this.filterArr.length){
+				this.$refs.imageScroll.stop();
+			}
+			done();
+		},
+		UpdateFilterResult: function(){
+			var filter = this.$refs.imageInfoFilter;
+			this.curFilter = filter.filter;
+			this.filterArr = filter.filterArr;
+			this.ResetShowArr();
 		},
 		CheckVerifyFinish: function(){
 			for(var i=0;i<this.imageArr.length;i++){
