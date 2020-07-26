@@ -32,6 +32,7 @@ router.get('/list-user', util.CheckLogin, function(req, res) {
 
 router.get('/list-name', function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.id = req.query.id;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});

@@ -80,11 +80,11 @@
 			</q-card>
 		</q-dialog>
 
-		<q-dialog v-model="openUserInfo" v-if="targetUser">
+		<q-dialog v-model="openUserInfo" v-if="user && targetUser">
 			<q-card class="q-pa-lg">
 				<div class="row justify-center q-pa-sm">
 					<q-avatar size="150px">
-						<img style="object-fit:cover;" :src="user.photo"/>
+						<img style="object-fit:cover;" :src="targetUser.photo"/>
 					</q-avatar>
 				</div>
 				<div class="column q-pa-sm">

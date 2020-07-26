@@ -74,7 +74,12 @@ userController.ListName = function(param){
 	if(!param.id) return param.failFunc({err:"no id"});
 	var query = {};
 	query._id = param.id.split(",");
-	User.find(query,{"name":1,"photo":1,"contactEmail":1},function(err, user) {
+	var attr = {"name":1};
+	if(param.user){	//登入才能看到別的使用者的照片和email
+		attr.photo = 1;
+		attr.contactEmail = 1;
+	}
+	User.find(query,attr,function(err, user) {
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"list name fail"});
