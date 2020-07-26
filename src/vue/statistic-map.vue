@@ -34,12 +34,14 @@ export default {
 	},
 	data: function () {
 		return {
+			map: null,
 			openFilterPanel: false,
 			markerGroup: null,
 			dataset: null,
 			imageArr: [],
 			filterArr: [],
-			curFilter:null
+			curFilter:null,
+			rangeMarker: null
 		};
 	},
 	created: function(){
@@ -148,9 +150,28 @@ export default {
 				var marker = L.marker({lat:d.lat,lng:d.lng}).bindPopup(content);
 				this.markerGroup.addLayer(marker);
 			}
+
+			//draw range marker if has range limit
+			if(this.curFilter){
+				var loc = this.curFilter.loc;
+				if(loc.enable && loc.lat && loc.lng && loc.range){
+					this.rangeMarker = L.circle(loc,{
+						weight: 1,
+						fillOpacity: 0,
+						color: "#ff0000",
+						dashArray: "10, 10",
+						radius: loc.range*1000,
+					});
+					this.rangeMarker.addTo(this.map);
+				}
+			}
 		},
 		ClearMarker: function(){
 			this.markerGroup.clearLayers();
+			if(this.rangeMarker){
+				this.map.removeLayer(this.rangeMarker);
+				this.rangeMarker = null;
+			}
 		},
 	}
 }

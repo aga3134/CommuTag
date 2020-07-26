@@ -26,7 +26,7 @@
 				<q-btn dense v-if="info && info.enableDownload && user" icon="cloud_download" label="整包下載" flat @click="OpenBatchDownload();"></q-btn>
 				<q-btn dense v-if="favorite" icon="star" label="取消收藏" flat @click="RemoveFavorite()"></q-btn>
 				<q-btn dense v-else icon="star_border" label="收藏" flat @click="AddFavorite()"></q-btn>
-				<q-btn dense icon="bar_chart" label="資料統計" flat @click="GoToStatistic();"></q-btn>
+				<q-btn dense icon="bar_chart" label="統計分析" flat @click="GoToStatistic();"></q-btn>
 				<q-btn dense v-if="CheckMasterAuth" icon="edit" label="修改" flat @click="ModifyDataset();"></q-btn>
 			</div>
 

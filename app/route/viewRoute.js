@@ -7,6 +7,7 @@ var meta = {};
 meta.version = Config.version;
 meta.hostname = Config.hostname;
 meta.logo = Config.logo;
+meta.ga = Config.googleAnalytics.id;
 
 router.get('/', util.CSRF, function(req, res) {
 	meta.title = Config.siteName;

@@ -3349,6 +3349,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "image-info-filter",
@@ -8202,7 +8207,7 @@ var render = function() {
                 attrs: {
                   dense: "",
                   icon: "bar_chart",
-                  label: "資料統計",
+                  label: "統計分析",
                   flat: ""
                 },
                 on: {
@@ -10412,6 +10417,22 @@ var render = function() {
               _c("q-separator", { staticClass: "q-my-sm" })
             ],
             1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.imageArr && _vm.filterArr
+        ? _c(
+            "div",
+            { staticClass: "row justify-center q-gutter-sm text-red" },
+            [
+              _c("div", [
+                _vm._v("原始資料 " + _vm._s(_vm.imageArr.length) + " 筆")
+              ]),
+              _vm._v(" "),
+              _c("div", [
+                _vm._v("篩選後 " + _vm._s(_vm.filterArr.length) + " 筆")
+              ])
+            ]
           )
         : _vm._e(),
       _vm._v(" "),

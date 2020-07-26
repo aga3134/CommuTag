@@ -300,6 +300,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "image-info-filter",
@@ -1546,12 +1551,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function () {
     return {
+      map: null,
       openFilterPanel: false,
       markerGroup: null,
       dataset: null,
       imageArr: [],
       filterArr: [],
-      curFilter: null
+      curFilter: null,
+      rangeMarker: null
     };
   },
   created: function () {
@@ -1670,10 +1677,31 @@ __webpack_require__.r(__webpack_exports__);
           lng: d.lng
         }).bindPopup(content);
         this.markerGroup.addLayer(marker);
+      } //draw range marker if has range limit
+
+
+      if (this.curFilter) {
+        var loc = this.curFilter.loc;
+
+        if (loc.enable && loc.lat && loc.lng && loc.range) {
+          this.rangeMarker = L.circle(loc, {
+            weight: 1,
+            fillOpacity: 0,
+            color: "#ff0000",
+            dashArray: "10, 10",
+            radius: loc.range * 1000
+          });
+          this.rangeMarker.addTo(this.map);
+        }
       }
     },
     ClearMarker: function () {
       this.markerGroup.clearLayers();
+
+      if (this.rangeMarker) {
+        this.map.removeLayer(this.rangeMarker);
+        this.rangeMarker = null;
+      }
     }
   }
 });
@@ -2915,6 +2943,22 @@ var render = function() {
               _c("q-separator", { staticClass: "q-my-sm" })
             ],
             1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.imageArr && _vm.filterArr
+        ? _c(
+            "div",
+            { staticClass: "row justify-center q-gutter-sm text-red" },
+            [
+              _c("div", [
+                _vm._v("原始資料 " + _vm._s(_vm.imageArr.length) + " 筆")
+              ]),
+              _vm._v(" "),
+              _c("div", [
+                _vm._v("篩選後 " + _vm._s(_vm.filterArr.length) + " 筆")
+              ])
+            ]
           )
         : _vm._e(),
       _vm._v(" "),

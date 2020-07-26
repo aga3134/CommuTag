@@ -62,6 +62,11 @@
 			<q-separator class="q-my-sm"></q-separator>
 		</div>
 
+		<div v-if="imageArr && filterArr" class="row justify-center q-gutter-sm text-red">
+			<div>原始資料 {{imageArr.length}} 筆</div>
+			<div>篩選後 {{filterArr.length}} 筆</div>
+		</div>
+
 		<q-dialog v-model="openRangeSelect">
 			<q-card class="full-width q-pa-sm">
 				<div class="text-h6">選擇範圍</div>
