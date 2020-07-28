@@ -80,14 +80,31 @@ export default {
 					}
 					//console.log(this.exif);
 
-					var img = new Image();
-					img.onload = function(){	//image load ready
-						this.FitCanvasFromImage(img);
-						if(this.OnChange){
-							this.OnChange();
-						}
+					var ShowImage = function(result){
+						var img = new Image();
+						img.onload = function(){	//image load ready
+							this.FitCanvasFromImage(img);
+							if(this.OnChange){
+								this.OnChange();
+							}
+						}.bind(this);
+						img.src = result;
 					}.bind(this);
-					img.src = reader.result;
+
+					var ext = this.file.name.substr(this.file.name.length-5);
+					if(ext.toLowerCase() == ".heic"){
+						heic2any({
+							blob: this.file,
+							toType: "image/jpeg",
+						}).then(function(result){
+							var url = URL.createObjectURL(result);
+							ShowImage(url);
+						});
+					}
+					else{
+						ShowImage(reader.result);
+					}
+
 				}.bind(this);
 				this.file = files[0];
 				reader.readAsDataURL(files[0]);
