@@ -1799,6 +1799,7 @@ __webpack_require__.r(__webpack_exports__);
         }.bind(this);
 
         this.file = files[0];
+        this.$emit("loading");
         reader.readAsDataURL(files[0]);
       }
     },

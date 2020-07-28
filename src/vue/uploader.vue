@@ -34,7 +34,7 @@
 			<image-info ref="imageInfo" :dataset="datasetSelect" :initLat="initLoc.lat" :initLng="initLoc.lng" :initDataTime="initDataTime" @confirm="UpdateImageInfo();NextStep();" @cancel="PrevStep();"></image-info>
 		</q-dialog>
 
-		<image-upload ref="uploader" v-show="false"></image-upload>
+		<image-upload ref="uploader" v-show="false" @loading="$q.loading.show();"></image-upload>
 
 		<q-page-sticky position="bottom-left" :offset="[9,9]" v-if="stepArr[step]">
 			<q-badge color="secondary q-pa-sm">
@@ -116,6 +116,7 @@ export default {
 				};
 				this.initDataTime = uploader.exif.time;
 				this.$refs.imageEdit.SetImage(uploader.imageData);
+				this.$q.loading.hide();
 				this.NextStep();
 			}.bind(this);
 			uploader.SelectFile();

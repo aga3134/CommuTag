@@ -2837,6 +2837,7 @@ __webpack_require__.r(__webpack_exports__);
         }.bind(this);
 
         this.file = files[0];
+        this.$emit("loading");
         reader.readAsDataURL(files[0]);
       }
     },
@@ -3554,6 +3555,7 @@ __webpack_require__.r(__webpack_exports__);
         };
         this.initDataTime = uploader.exif.time;
         this.$refs.imageEdit.SetImage(uploader.imageData);
+        this.$q.loading.hide();
         this.NextStep();
       }.bind(this);
 
@@ -8881,7 +8883,12 @@ var render = function() {
         directives: [
           { name: "show", rawName: "v-show", value: false, expression: "false" }
         ],
-        ref: "uploader"
+        ref: "uploader",
+        on: {
+          loading: function($event) {
+            return _vm.$q.loading.show()
+          }
+        }
       }),
       _vm._v(" "),
       _vm.stepArr[_vm.step]

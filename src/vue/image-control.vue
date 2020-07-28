@@ -258,6 +258,7 @@ export default {
 					link += "&time="+t.unixFmt("HH:mm");
 					link += "&lat="+this.image.lat;
 					link += "&lng="+this.image.lng;
+					link += "&marker="+this.image.lat+","+this.image.lng;
 					link += "&zoom=16";
 					window.open(link,"_blank");
 					break;
@@ -267,6 +268,7 @@ export default {
 					link += "&date="+t.unixFmt("M/d");
 					link += "&lat="+this.image.lat;
 					link += "&lng="+this.image.lng;
+					link += "&marker="+this.image.lat+","+this.image.lng;
 					link += "&zoom=16";
 					window.open(link,"_blank");
 					break;

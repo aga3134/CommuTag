@@ -107,6 +107,7 @@ export default {
 
 				}.bind(this);
 				this.file = files[0];
+				this.$emit("loading");
 				reader.readAsDataURL(files[0]);
 			}
 		},
