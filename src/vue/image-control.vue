@@ -3,17 +3,6 @@
 		<q-card class="full-width">
 			<div style="height: 400px;">
 				<annotator-view :dataset="dataset" :image="image"></annotator-view>
-				<div v-if="showNavigate">
-					<q-page-sticky position="left" :offset="[18, 0]">
-						<q-btn round color="accent" icon="arrow_back" @click="GoToPrev();"></q-btn>
-					</q-page-sticky>
-					<q-page-sticky position="right" :offset="[18, 0]">
-						<q-btn round color="accent" icon="arrow_upward" class="rotate-90" @click="GoToNext();"></q-btn>
-					</q-page-sticky>
-					<q-page-sticky position="top-right" :offset="[18, -18]">
-						<q-btn round color="primary" icon="close" @click="CloseView();"></q-btn>
-					</q-page-sticky>
-				</div>
 			</div>
 			<q-card-section>
 				<q-chip class="transparent" dense v-if="image.time" icon="access_time">{{image.time}}</q-chip>
@@ -55,6 +44,18 @@
 				<q-btn v-if="dataset && dataset.externalLink=='riverlog' " flat label="前往山河事件簿" @click="GoToExternalLink();"></q-btn>
 				<q-btn v-if="dataset && dataset.externalLink=='purbao' " flat label="前往紫豹在哪裡" @click="GoToExternalLink();"></q-btn>
 			</q-card-actions>
+
+			<div v-if="showNavigate">
+				<q-page-sticky position="left" :offset="[9, 0]">
+					<q-btn round color="accent" icon="arrow_back" @click="GoToPrev();"></q-btn>
+				</q-page-sticky>
+				<q-page-sticky position="right" :offset="[9, 0]">
+					<q-btn round color="accent" icon="arrow_upward" class="rotate-90" @click="GoToNext();"></q-btn>
+				</q-page-sticky>
+				<q-page-sticky position="top-right" :offset="[9, -9]">
+					<q-btn round color="primary" icon="close" @click="CloseView();"></q-btn>
+				</q-page-sticky>
+			</div>
 		</q-card>
 
 		<q-dialog maximized persistent v-model="openAnnotator" v-if="dataset">
@@ -257,7 +258,7 @@ export default {
 					link += "&time="+t.unixFmt("HH:mm");
 					link += "&lat="+this.image.lat;
 					link += "&lng="+this.image.lng;
-					link += "&zoom=12";
+					link += "&zoom=16";
 					window.open(link,"_blank");
 					break;
 				case "purbao":
@@ -266,7 +267,7 @@ export default {
 					link += "&date="+t.unixFmt("M/d");
 					link += "&lat="+this.image.lat;
 					link += "&lng="+this.image.lng;
-					link += "&zoom=12";
+					link += "&zoom=16";
 					window.open(link,"_blank");
 					break;
 			}

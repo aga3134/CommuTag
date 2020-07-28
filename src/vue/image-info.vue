@@ -62,11 +62,13 @@ export default {
 			this.dataTime = spacetime.now().unixFmt("yyyy-MM-ddTHH:mm");
 		}
 		
-		if(this.initLat && this.initLng){
-			this.$refs.locationSelect.SetPosition(this.initLat,this.initLng);
-		}
-		else if(this.dataset.enableGPS){
-			this.$refs.locationSelect.GetGPS();
+		if(this.$refs.locationSelect){
+			if(this.initLat && this.initLng){
+				this.$refs.locationSelect.SetPosition(this.initLat,this.initLng);
+			}
+			else if(this.dataset.enableGPS){
+				this.$refs.locationSelect.GetGPS();
+			}
 		}
 
 		if(this.initRemark) this.remark = this.initRemark;

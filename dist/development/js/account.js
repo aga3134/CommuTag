@@ -1735,33 +1735,43 @@ __webpack_require__.r(__webpack_exports__);
 
         reader.onload = function () {
           //read file ready
+          //convert dataUrl to arraybuffer
+          function _base64ToArrayBuffer(base64) {
+            var binary_string = atob(base64);
+            var len = binary_string.length;
+            var bytes = new Uint8Array(len);
+
+            for (var i = 0; i < len; i++) {
+              bytes[i] = binary_string.charCodeAt(i);
+            }
+
+            return bytes.buffer;
+          }
+
+          var data = _base64ToArrayBuffer(reader.result.split(",")[1]);
+
+          var tags = ExifReader.load(data); //console.log(tags);
+          //get gps & time data from exif
+
+          var lat = parseFloat(tags.GPSLatitude.description);
+          var lng = parseFloat(tags.GPSLongitude.description);
+
+          if (lat && lng) {
+            this.exif.lat = lat;
+            this.exif.lng = lng;
+          }
+
+          if (tags.DateTime) {
+            var t = tags.DateTime.description.split(" ");
+            var d = t[0].replace(/:/g, "-");
+            this.exif.time = d + " " + t[1];
+          } //console.log(this.exif);
+
+
           var img = new Image();
 
           img.onload = function () {
             //image load ready
-            //get gps position & time if exist
-            EXIF.getData(img, function () {
-              function ToDegree(arr, dir) {
-                if (!arr) return null;
-                var deg = arr[0] + arr[1] / 60 + arr[2] / 3600;
-                if (dir == "S" || dir == "W") deg *= -1;
-                return deg;
-              }
-
-              var lat = ToDegree(img.exifdata.GPSLatitude, img.exifdata.GPSLatitudeRef);
-              var lng = ToDegree(img.exifdata.GPSLongitude, img.exifdata.GPSLongitudeRef);
-
-              if (lat && lng) {
-                this.exif.lat = lat;
-                this.exif.lng = lng;
-              }
-
-              if (img.exifdata.DateTime) {
-                var t = img.exifdata.DateTime.split(" ");
-                var d = t[0].replace(/:/g, "-");
-                this.exif.time = d + " " + t[1];
-              }
-            }.bind(this));
             this.FitCanvasFromImage(img);
 
             if (this.OnChange) {

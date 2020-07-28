@@ -2911,6 +2911,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 
@@ -3075,7 +3076,7 @@ __webpack_require__.r(__webpack_exports__);
           link += "&time=" + t.unixFmt("HH:mm");
           link += "&lat=" + this.image.lat;
           link += "&lng=" + this.image.lng;
-          link += "&zoom=12";
+          link += "&zoom=16";
           window.open(link, "_blank");
           break;
 
@@ -3085,7 +3086,7 @@ __webpack_require__.r(__webpack_exports__);
           link += "&date=" + t.unixFmt("M/d");
           link += "&lat=" + this.image.lat;
           link += "&lng=" + this.image.lng;
-          link += "&zoom=12";
+          link += "&zoom=16";
           window.open(link, "_blank");
           break;
       }
@@ -3763,10 +3764,12 @@ __webpack_require__.r(__webpack_exports__);
       this.dataTime = spacetime.now().unixFmt("yyyy-MM-ddTHH:mm");
     }
 
-    if (this.initLat && this.initLng) {
-      this.$refs.locationSelect.SetPosition(this.initLat, this.initLng);
-    } else if (this.dataset.enableGPS) {
-      this.$refs.locationSelect.GetGPS();
+    if (this.$refs.locationSelect) {
+      if (this.initLat && this.initLng) {
+        this.$refs.locationSelect.SetPosition(this.initLat, this.initLng);
+      } else if (this.dataset.enableGPS) {
+        this.$refs.locationSelect.GetGPS();
+      }
     }
 
     if (this.initRemark) this.remark = this.initRemark;
@@ -3872,33 +3875,43 @@ __webpack_require__.r(__webpack_exports__);
 
         reader.onload = function () {
           //read file ready
+          //convert dataUrl to arraybuffer
+          function _base64ToArrayBuffer(base64) {
+            var binary_string = atob(base64);
+            var len = binary_string.length;
+            var bytes = new Uint8Array(len);
+
+            for (var i = 0; i < len; i++) {
+              bytes[i] = binary_string.charCodeAt(i);
+            }
+
+            return bytes.buffer;
+          }
+
+          var data = _base64ToArrayBuffer(reader.result.split(",")[1]);
+
+          var tags = ExifReader.load(data); //console.log(tags);
+          //get gps & time data from exif
+
+          var lat = parseFloat(tags.GPSLatitude.description);
+          var lng = parseFloat(tags.GPSLongitude.description);
+
+          if (lat && lng) {
+            this.exif.lat = lat;
+            this.exif.lng = lng;
+          }
+
+          if (tags.DateTime) {
+            var t = tags.DateTime.description.split(" ");
+            var d = t[0].replace(/:/g, "-");
+            this.exif.time = d + " " + t[1];
+          } //console.log(this.exif);
+
+
           var img = new Image();
 
           img.onload = function () {
             //image load ready
-            //get gps position & time if exist
-            EXIF.getData(img, function () {
-              function ToDegree(arr, dir) {
-                if (!arr) return null;
-                var deg = arr[0] + arr[1] / 60 + arr[2] / 3600;
-                if (dir == "S" || dir == "W") deg *= -1;
-                return deg;
-              }
-
-              var lat = ToDegree(img.exifdata.GPSLatitude, img.exifdata.GPSLatitudeRef);
-              var lng = ToDegree(img.exifdata.GPSLongitude, img.exifdata.GPSLongitudeRef);
-
-              if (lat && lng) {
-                this.exif.lat = lat;
-                this.exif.lng = lng;
-              }
-
-              if (img.exifdata.DateTime) {
-                var t = img.exifdata.DateTime.split(" ");
-                var d = t[0].replace(/:/g, "-");
-                this.exif.time = d + " " + t[1];
-              }
-            }.bind(this));
             this.FitCanvasFromImage(img);
 
             if (this.OnChange) {
@@ -9322,81 +9335,7 @@ var render = function() {
                 [
                   _c("annotator-view", {
                     attrs: { dataset: _vm.dataset, image: _vm.image }
-                  }),
-                  _vm._v(" "),
-                  _vm.showNavigate
-                    ? _c(
-                        "div",
-                        [
-                          _c(
-                            "q-page-sticky",
-                            { attrs: { position: "left", offset: [18, 0] } },
-                            [
-                              _c("q-btn", {
-                                attrs: {
-                                  round: "",
-                                  color: "accent",
-                                  icon: "arrow_back"
-                                },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.GoToPrev()
-                                  }
-                                }
-                              })
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c(
-                            "q-page-sticky",
-                            { attrs: { position: "right", offset: [18, 0] } },
-                            [
-                              _c("q-btn", {
-                                staticClass: "rotate-90",
-                                attrs: {
-                                  round: "",
-                                  color: "accent",
-                                  icon: "arrow_upward"
-                                },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.GoToNext()
-                                  }
-                                }
-                              })
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c(
-                            "q-page-sticky",
-                            {
-                              attrs: {
-                                position: "top-right",
-                                offset: [18, -18]
-                              }
-                            },
-                            [
-                              _c("q-btn", {
-                                attrs: {
-                                  round: "",
-                                  color: "primary",
-                                  icon: "close"
-                                },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.CloseView()
-                                  }
-                                }
-                              })
-                            ],
-                            1
-                          )
-                        ],
-                        1
-                      )
-                    : _vm._e()
+                  })
                 ],
                 1
               ),
@@ -9643,7 +9582,76 @@ var render = function() {
                     : _vm._e()
                 ],
                 1
-              )
+              ),
+              _vm._v(" "),
+              _vm.showNavigate
+                ? _c(
+                    "div",
+                    [
+                      _c(
+                        "q-page-sticky",
+                        { attrs: { position: "left", offset: [9, 0] } },
+                        [
+                          _c("q-btn", {
+                            attrs: {
+                              round: "",
+                              color: "accent",
+                              icon: "arrow_back"
+                            },
+                            on: {
+                              click: function($event) {
+                                return _vm.GoToPrev()
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "q-page-sticky",
+                        { attrs: { position: "right", offset: [9, 0] } },
+                        [
+                          _c("q-btn", {
+                            staticClass: "rotate-90",
+                            attrs: {
+                              round: "",
+                              color: "accent",
+                              icon: "arrow_upward"
+                            },
+                            on: {
+                              click: function($event) {
+                                return _vm.GoToNext()
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "q-page-sticky",
+                        { attrs: { position: "top-right", offset: [9, -9] } },
+                        [
+                          _c("q-btn", {
+                            attrs: {
+                              round: "",
+                              color: "primary",
+                              icon: "close"
+                            },
+                            on: {
+                              click: function($event) {
+                                return _vm.CloseView()
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e()
             ],
             1
           ),
