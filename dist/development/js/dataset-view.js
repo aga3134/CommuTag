@@ -3431,7 +3431,7 @@ __webpack_require__.r(__webpack_exports__);
       var s = spacetime.now();
 
       for (var i = 0; i < this.imageArr.length; i++) {
-        var t = spacetime(this.imageArr[i].dataTime, s.timezone().name);
+        var t = spacetime(this.imageArr[i].dataTime).goto(s.timezone().name);
 
         if (!this.filter.timeLimit.min || this.filter.timeLimit.min.isAfter(t)) {
           this.filter.timeLimit.min = t.clone().last("day");
@@ -3595,7 +3595,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.disableTime) {
         var s = spacetime.now();
         filterArr = filterArr.filter(function (d) {
-          var t = spacetime(d.dataTime, s.timezone().name);
+          var t = spacetime(d.dataTime).goto(s.timezone().name);
           var min = this.filter.timeLimit.min.add(this.filter.time.min, "day");
           var max = this.filter.timeLimit.min.add(this.filter.time.max, "day");
           return t.isAfter(min) && t.isBefore(max);
@@ -3892,7 +3892,8 @@ __webpack_require__.r(__webpack_exports__);
 
           var data = _base64ToArrayBuffer(reader.result.split(",")[1]);
 
-          var tags = ExifReader.load(data); //console.log(tags);
+          var tags = ExifReader.load(data);
+          this.exif = {}; //console.log(tags);
           //get gps & time data from exif
 
           if (tags.GPSLatitude && tags.GPSLongitude) {

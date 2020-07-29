@@ -64,6 +64,7 @@ export default {
 					}
 					var data = _base64ToArrayBuffer(reader.result.split(",")[1]);
 					var tags = ExifReader.load(data);
+					this.exif = {};
 					//console.log(tags);
 
 					//get gps & time data from exif

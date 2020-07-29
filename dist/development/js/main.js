@@ -2788,7 +2788,8 @@ __webpack_require__.r(__webpack_exports__);
 
           var data = _base64ToArrayBuffer(reader.result.split(",")[1]);
 
-          var tags = ExifReader.load(data); //console.log(tags);
+          var tags = ExifReader.load(data);
+          this.exif = {}; //console.log(tags);
           //get gps & time data from exif
 
           if (tags.GPSLatitude && tags.GPSLongitude) {
