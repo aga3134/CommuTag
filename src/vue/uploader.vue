@@ -119,6 +119,10 @@ export default {
 				this.$q.loading.hide();
 				this.NextStep();
 			}.bind(this);
+			uploader.OnFail = function(errorMessage){
+				this.$q.notify("無法讀取檔案");
+				this.$q.loading.hide();
+			}.bind(this);
 			uploader.SelectFile();
 		},
 		NextStep: function(){

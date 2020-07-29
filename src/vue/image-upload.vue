@@ -67,12 +67,15 @@ export default {
 					//console.log(tags);
 
 					//get gps & time data from exif
-					var lat = parseFloat(tags.GPSLatitude.description);
-					var lng = parseFloat(tags.GPSLongitude.description);
-					if(lat && lng){
-						this.exif.lat = lat;
-						this.exif.lng = lng;
+					if(tags.GPSLatitude && tags.GPSLongitude){
+						var lat = parseFloat(tags.GPSLatitude.description);
+						var lng = parseFloat(tags.GPSLongitude.description);
+						if(lat && lng){
+							this.exif.lat = lat;
+							this.exif.lng = lng;
+						}
 					}
+					
 					if(tags.DateTime){
 						var t = tags.DateTime.description.split(" ");
 						var d = t[0].replace(/:/g,"-");
@@ -88,11 +91,17 @@ export default {
 								this.OnChange();
 							}
 						}.bind(this);
+						img.onerror = function(){
+							if(this.OnFail){
+								this.OnFail("Load File fail");
+							}
+						}.bind(this);
 						img.src = result;
 					}.bind(this);
 
 					var ext = this.file.name.substr(this.file.name.length-5);
-					if(ext.toLowerCase() == ".heic"){
+					if(ext.toLowerCase() == ".heic" && this.$q.platform.is.desktop){
+						//console.log("convert heic to jpg");
 						heic2any({
 							blob: this.file,
 							toType: "image/jpeg",
@@ -102,6 +111,7 @@ export default {
 						});
 					}
 					else{
+						//console.log("show image");
 						ShowImage(reader.result);
 					}
 

@@ -3895,12 +3895,14 @@ __webpack_require__.r(__webpack_exports__);
           var tags = ExifReader.load(data); //console.log(tags);
           //get gps & time data from exif
 
-          var lat = parseFloat(tags.GPSLatitude.description);
-          var lng = parseFloat(tags.GPSLongitude.description);
+          if (tags.GPSLatitude && tags.GPSLongitude) {
+            var lat = parseFloat(tags.GPSLatitude.description);
+            var lng = parseFloat(tags.GPSLongitude.description);
 
-          if (lat && lng) {
-            this.exif.lat = lat;
-            this.exif.lng = lng;
+            if (lat && lng) {
+              this.exif.lat = lat;
+              this.exif.lng = lng;
+            }
           }
 
           if (tags.DateTime) {
@@ -3922,12 +3924,19 @@ __webpack_require__.r(__webpack_exports__);
               }
             }.bind(this);
 
+            img.onerror = function () {
+              if (this.OnFail) {
+                this.OnFail("Load File fail");
+              }
+            }.bind(this);
+
             img.src = result;
           }.bind(this);
 
           var ext = this.file.name.substr(this.file.name.length - 5);
 
-          if (ext.toLowerCase() == ".heic") {
+          if (ext.toLowerCase() == ".heic" && this.$q.platform.is.desktop) {
+            //console.log("convert heic to jpg");
             heic2any({
               blob: this.file,
               toType: "image/jpeg"
@@ -3936,6 +3945,7 @@ __webpack_require__.r(__webpack_exports__);
               ShowImage(url);
             });
           } else {
+            //console.log("show image");
             ShowImage(reader.result);
           }
         }.bind(this);
@@ -4572,6 +4582,11 @@ __webpack_require__.r(__webpack_exports__);
         this.$refs.imageEdit.SetImage(uploader.imageData);
         this.$q.loading.hide();
         this.NextStep();
+      }.bind(this);
+
+      uploader.OnFail = function (errorMessage) {
+        this.$q.notify("無法讀取檔案");
+        this.$q.loading.hide();
       }.bind(this);
 
       uploader.SelectFile();
