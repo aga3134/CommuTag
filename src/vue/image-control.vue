@@ -181,6 +181,8 @@ export default {
 		},
 		UpdateContributer: function(){
 			Vue.nextTick(function(){
+				this.uploader = null;
+				this.annotator = null;
 				var idArr = [];
 				var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
 				var hasAnnotator = this.image.annotation && this.image.annotation.user;
