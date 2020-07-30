@@ -1828,36 +1828,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function () {
-    var idArr = [];
-    var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
-    var hasAnnotator = this.image.annotation && this.image.annotation.user;
-
-    if (hasUploader) {
-      idArr.push(this.image.uploader);
-    }
-
-    if (hasAnnotator) {
-      idArr.push(this.image.annotation.user);
-    }
-
-    if (idArr.length == 0) return;
-    $.get("/user/list-name?id=" + idArr.join(), function (result) {
-      if (result.status != "ok") return alert("取得貢獻者資料失敗");
-      var userHash = {};
-
-      for (var i = 0; i < result.data.length; i++) {
-        var d = result.data[i];
-        userHash[d._id] = d;
-      }
-
-      if (hasUploader) {
-        this.uploader = userHash[this.image.uploader];
-      }
-
-      if (hasAnnotator) {
-        this.annotator = userHash[this.image.annotation.user];
-      }
-    }.bind(this));
+    this.UpdateContributer();
   },
   methods: {
     GoToPrev: function () {
@@ -1903,6 +1874,40 @@ __webpack_require__.r(__webpack_exports__);
     OpenUserInfo: function (user) {
       this.targetUser = user;
       this.openUserInfo = true;
+    },
+    UpdateContributer: function () {
+      Vue.nextTick(function () {
+        var idArr = [];
+        var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
+        var hasAnnotator = this.image.annotation && this.image.annotation.user;
+
+        if (hasUploader) {
+          idArr.push(this.image.uploader);
+        }
+
+        if (hasAnnotator) {
+          idArr.push(this.image.annotation.user);
+        }
+
+        if (idArr.length == 0) return;
+        $.get("/user/list-name?id=" + idArr.join(), function (result) {
+          if (result.status != "ok") return alert("取得貢獻者資料失敗");
+          var userHash = {};
+
+          for (var i = 0; i < result.data.length; i++) {
+            var d = result.data[i];
+            userHash[d._id] = d;
+          }
+
+          if (hasUploader) {
+            this.uploader = userHash[this.image.uploader];
+          }
+
+          if (hasAnnotator) {
+            this.annotator = userHash[this.image.annotation.user];
+          }
+        }.bind(this));
+      }.bind(this));
     },
     UpdateImageInfo: function () {
       var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -5076,9 +5081,17 @@ var render = function() {
                   ]),
                   _vm._v(" "),
                   _vm.image.remark && _vm.image.remark != ""
-                    ? _c("pre", { staticClass: "q-mx-sm q-my-none" }, [
-                        _vm._v(_vm._s(_vm.image.remark))
-                      ])
+                    ? _c(
+                        "div",
+                        {
+                          staticClass: "q-mx-sm q-my-none",
+                          staticStyle: {
+                            "white-space": "pre-line",
+                            "word-wrap": "break-word"
+                          }
+                        },
+                        [_vm._v(_vm._s(_vm.image.remark))]
+                      )
                     : _vm._e(),
                   _vm._v(" "),
                   _vm.dataset.form && _vm.image.formReply

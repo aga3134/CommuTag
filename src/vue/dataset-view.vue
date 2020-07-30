@@ -9,7 +9,7 @@
 				<div class="text-h4 q-ma-sm">
 					{{info.name}}
 					<q-badge class="q-ma-xs" v-for="badge in badgeArr" outline color="primary" :label="badge" :key="badge"></q-badge>
-					<div class="text-subtitle2 q-ma-sm" style="white-space:pre-line;" v-html="info.descWithLink"></div>
+					<div class="text-subtitle2 q-ma-sm" style="white-space:pre-line; word-wrap: break-word;" v-html="info.descWithLink"></div>
 				</div>
 				
 				<q-chip icon="image">影像數: {{info.picNum}}</q-chip>
@@ -31,9 +31,9 @@
 			</div>
 
 			
-			<q-infinite-scroll @load="ShowMoreImage" ref="imageScroll">
-				<div class="row q-pa-md q-col-gutter-md">
-					<div class="col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer" v-for="(image,i) in showArr" :key="i" transition="scale">
+			<q-infinite-scroll class="q-pa-md" @load="ShowMoreImage" ref="imageScroll">
+				<div class="row q-col-gutter-md">
+					<div class="col-12 col-sm-6 col-md-3 cursor-pointer" v-for="(image,i) in showArr" :key="i" transition="scale">
 						<q-card class="bg-grey-7 text-white" @click="ViewImage(image,i);">
 							<q-img :src="image.url" :ratio="16/9">
 								<div v-if="image.verifyFinish" class="absolute-bottom">
@@ -59,7 +59,7 @@
 			</div>
 
 			<q-dialog v-model="openViewImage" v-if="targetImage">
-				<image-control showNavigate editable :user="user" :dataset="info" :image="targetImage" @reload="ReloadDataset();"  @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></image-control>
+				<image-control ref="imageControl" showNavigate editable :user="user" :dataset="info" :image="targetImage" @reload="ReloadDataset();"  @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></image-control>
 			</q-dialog>
 
 			<q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="info && info.enableUpload">
@@ -326,11 +326,13 @@ export default {
 			this.targetIndex--;
 			if(this.targetIndex < 0) this.targetIndex = 0;
 			this.targetImage = this.filterArr[this.targetIndex];
+			this.$refs.imageControl.UpdateContributer();
 		},
 		GoToNext: function(){
 			this.targetIndex++;
 			if(this.targetIndex >= this.filterArr.length) this.targetIndex = this.filterArr.length-1;
 			this.targetImage = this.filterArr[this.targetIndex];
+			this.$refs.imageControl.UpdateContributer();
 		},
 		AddFavorite: function(){
 			var csrfToken = $("meta[name='csrf-token']").attr("content");

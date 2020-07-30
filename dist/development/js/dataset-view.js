@@ -2263,11 +2263,13 @@ __webpack_require__.r(__webpack_exports__);
       this.targetIndex--;
       if (this.targetIndex < 0) this.targetIndex = 0;
       this.targetImage = this.filterArr[this.targetIndex];
+      this.$refs.imageControl.UpdateContributer();
     },
     GoToNext: function () {
       this.targetIndex++;
       if (this.targetIndex >= this.filterArr.length) this.targetIndex = this.filterArr.length - 1;
       this.targetImage = this.filterArr[this.targetIndex];
+      this.$refs.imageControl.UpdateContributer();
     },
     AddFavorite: function () {
       var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -2944,36 +2946,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function () {
-    var idArr = [];
-    var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
-    var hasAnnotator = this.image.annotation && this.image.annotation.user;
-
-    if (hasUploader) {
-      idArr.push(this.image.uploader);
-    }
-
-    if (hasAnnotator) {
-      idArr.push(this.image.annotation.user);
-    }
-
-    if (idArr.length == 0) return;
-    $.get("/user/list-name?id=" + idArr.join(), function (result) {
-      if (result.status != "ok") return alert("取得貢獻者資料失敗");
-      var userHash = {};
-
-      for (var i = 0; i < result.data.length; i++) {
-        var d = result.data[i];
-        userHash[d._id] = d;
-      }
-
-      if (hasUploader) {
-        this.uploader = userHash[this.image.uploader];
-      }
-
-      if (hasAnnotator) {
-        this.annotator = userHash[this.image.annotation.user];
-      }
-    }.bind(this));
+    this.UpdateContributer();
   },
   methods: {
     GoToPrev: function () {
@@ -3019,6 +2992,40 @@ __webpack_require__.r(__webpack_exports__);
     OpenUserInfo: function (user) {
       this.targetUser = user;
       this.openUserInfo = true;
+    },
+    UpdateContributer: function () {
+      Vue.nextTick(function () {
+        var idArr = [];
+        var hasUploader = this.image.uploadFrom == "user" && this.image.uploader;
+        var hasAnnotator = this.image.annotation && this.image.annotation.user;
+
+        if (hasUploader) {
+          idArr.push(this.image.uploader);
+        }
+
+        if (hasAnnotator) {
+          idArr.push(this.image.annotation.user);
+        }
+
+        if (idArr.length == 0) return;
+        $.get("/user/list-name?id=" + idArr.join(), function (result) {
+          if (result.status != "ok") return alert("取得貢獻者資料失敗");
+          var userHash = {};
+
+          for (var i = 0; i < result.data.length; i++) {
+            var d = result.data[i];
+            userHash[d._id] = d;
+          }
+
+          if (hasUploader) {
+            this.uploader = userHash[this.image.uploader];
+          }
+
+          if (hasAnnotator) {
+            this.annotator = userHash[this.image.annotation.user];
+          }
+        }.bind(this));
+      }.bind(this));
     },
     UpdateImageInfo: function () {
       var csrfToken = $("meta[name='csrf-token']").attr("content");
@@ -8144,7 +8151,10 @@ var render = function() {
                       _vm._v(" "),
                       _c("div", {
                         staticClass: "text-subtitle2 q-ma-sm",
-                        staticStyle: { "white-space": "pre-line" },
+                        staticStyle: {
+                          "white-space": "pre-line",
+                          "word-wrap": "break-word"
+                        },
                         domProps: { innerHTML: _vm._s(_vm.info.descWithLink) }
                       })
                     ],
@@ -8284,6 +8294,7 @@ var render = function() {
             "q-infinite-scroll",
             {
               ref: "imageScroll",
+              staticClass: "q-pa-md",
               on: { load: _vm.ShowMoreImage },
               scopedSlots: _vm._u([
                 {
@@ -8309,14 +8320,13 @@ var render = function() {
             [
               _c(
                 "div",
-                { staticClass: "row q-pa-md q-col-gutter-md" },
+                { staticClass: "row q-col-gutter-md" },
                 _vm._l(_vm.showArr, function(image, i) {
                   return _c(
                     "div",
                     {
                       key: i,
-                      staticClass:
-                        "col-12 col-sm-6 col-md-3 q-pa-sm cursor-pointer",
+                      staticClass: "col-12 col-sm-6 col-md-3 cursor-pointer",
                       attrs: { transition: "scale" }
                     },
                     [
@@ -8390,6 +8400,7 @@ var render = function() {
                 },
                 [
                   _c("image-control", {
+                    ref: "imageControl",
                     attrs: {
                       showNavigate: "",
                       editable: "",
@@ -9465,9 +9476,17 @@ var render = function() {
                   ]),
                   _vm._v(" "),
                   _vm.image.remark && _vm.image.remark != ""
-                    ? _c("pre", { staticClass: "q-mx-sm q-my-none" }, [
-                        _vm._v(_vm._s(_vm.image.remark))
-                      ])
+                    ? _c(
+                        "div",
+                        {
+                          staticClass: "q-mx-sm q-my-none",
+                          staticStyle: {
+                            "white-space": "pre-line",
+                            "word-wrap": "break-word"
+                          }
+                        },
+                        [_vm._v(_vm._s(_vm.image.remark))]
+                      )
                     : _vm._e(),
                   _vm._v(" "),
                   _vm.dataset.form && _vm.image.formReply
