@@ -443,38 +443,23 @@ export default {
 			}
 			this.stage.batchDraw();
 		},
-		AddAnnotation: function(){
-			if(!this.newRect) return;
-			var tag = this.$refs.tagSelect.selectTag;
-			if(!tag || tag == "") return alert("請選擇標籤");
-
-			var pos = this.newRect.position();
-			var size = this.newRect.size();
-			if(size.width < 0){
-				pos.x = pos.x+size.width;
-				size.width = -size.width;
-			}
-			if(size.height < 0){
-				pos.y = pos.y+size.height;
-				size.height = -size.height;
-			}
-
+		GenBBox: function(x,y,w,h,tag,addControl){
 			var group = new Konva.Group();
 			this.bboxLayer.add(group);
 
 			//add bbox
 			var bbox = new Konva.Rect({
-				x: pos.x,
-				y: pos.y,
-				width: size.width,
-				height: size.height,
+				x: x,
+				y: y,
+				width: w,
+				height: h,
 				fill: "rgba(0,0,0,0)",
 				stroke: this.labelColor[tag].bg,
+				strokeWidth: 1
 			});
 			group.add(bbox);
 
 			//add annotation label
-
 			var label = new Konva.Label({});
 			label.add(new Konva.Tag({
 				fill: this.labelColor[tag].bg,
@@ -494,118 +479,164 @@ export default {
 				}.bind(this));
 			}.bind(this));
 			label.position({
-				x:pos.x,
-				y:pos.y-label.height()
+				x:x,
+				y:y-label.height()
 			});
 			group.add(label);
 
+			//hover放大
+			var hoverScale = 1.5;
+			var mouseoverFn = function(group,bbox,label){
+				return function (evt) {
+					label.scaleX(hoverScale);
+					label.scaleY(hoverScale);
+					label.y(bbox.y()-label.height()*hoverScale);
+					label.draw();
+					bbox.strokeWidth(3);
+					group.moveToTop();
+				};
+			};
+			var mouseoutFn = function(group,bbox,label){
+				return function (evt) {
+					label.scaleX(1);
+					label.scaleY(1);
+					label.y(bbox.y()-label.height());
+					label.draw();
+					bbox.strokeWidth(1);
+				}
+			};
+			group.on('mouseover', mouseoverFn(group,bbox,label));
+			group.on('mouseout', mouseoutFn(group,bbox,label));
+
 			var annotation = {
 				tag: tag,
-				x: pos.x,
-				y: pos.y,
-				width: size.width,
-				height: size.height,
+				x: x,
+				y: y,
+				width: w,
+				height: h,
 				node: group,
 				index: this.annotationArr.length
 			};
 			this.annotationArr.push(annotation);
 
-			//add corner control
-			var updateBBox = function(active){
-				//adjust corner to maintain rect shape
-				var lt = group.find(".LT")[0];
-				var rt = group.find(".RT")[0];
-				var rb = group.find(".RB")[0];
-				var lb = group.find(".LB")[0];
-				switch(active.getName()){
-					case "LT":
-						lb.x(active.x());
-						rt.y(active.y());
-						break;
-					case "RT":
-						rb.x(active.x());
-						lt.y(active.y());
-						break;
-					case "RB":
-						rt.x(active.x());
-						lb.y(active.y());
-						break;
-					case "LB":
-						lt.x(active.x());
-						rb.y(active.y());
-						break;
-				}
+			if(addControl){
+				//add corner control
+				var updateBBox = function(active){
+					//adjust corner to maintain rect shape
+					var lt = group.find(".LT")[0];
+					var rt = group.find(".RT")[0];
+					var rb = group.find(".RB")[0];
+					var lb = group.find(".LB")[0];
+					switch(active.getName()){
+						case "LT":
+							lb.x(active.x());
+							rt.y(active.y());
+							break;
+						case "RT":
+							rb.x(active.x());
+							lt.y(active.y());
+							break;
+						case "RB":
+							rt.x(active.x());
+							lb.y(active.y());
+							break;
+						case "LB":
+							lt.x(active.x());
+							rb.y(active.y());
+							break;
+					}
 
-				//get bbox corner
-				var ctlArr = [lt,rt,rb,lb];
-				var minX = Number.MAX_VALUE;
-				var minY = Number.MAX_VALUE;
-				var maxX = Number.MIN_VALUE;
-				var maxY = Number.MIN_VALUE;
-				for(var i=0;i<ctlArr.length;i++){
-					var pos = ctlArr[i].position();
-					var size = ctlArr[i].size();
-					var cx = pos.x+size.width*0.5;
-					var cy = pos.y+size.height*0.5;
-					if(cx < minX) minX = cx;
-					if(cx > maxX) maxX = cx;
-					if(cy < minY) minY = cy;
-					if(cy > maxY) maxY = cy;
-				}
-				//update bbox size
-				var w = maxX-minX;
-				var h = maxY-minY;
-				bbox.setAttrs({
-					x: minX,
-					y: minY,
-					width: w,
-					height: h
-				});
-				annotation.x = minX;
-				annotation.y = minY;
-				annotation.width = w;
-				annotation.height = h;
+					//get bbox corner
+					var ctlArr = [lt,rt,rb,lb];
+					var minX = Number.MAX_VALUE;
+					var minY = Number.MAX_VALUE;
+					var maxX = Number.MIN_VALUE;
+					var maxY = Number.MIN_VALUE;
+					for(var i=0;i<ctlArr.length;i++){
+						var pos = ctlArr[i].position();
+						var size = ctlArr[i].size();
+						var cx = pos.x+size.width*0.5;
+						var cy = pos.y+size.height*0.5;
+						if(cx < minX) minX = cx;
+						if(cx > maxX) maxX = cx;
+						if(cy < minY) minY = cy;
+						if(cy > maxY) maxY = cy;
+					}
+					//update bbox size
+					var w = maxX-minX;
+					var h = maxY-minY;
+					bbox.setAttrs({
+						x: minX,
+						y: minY,
+						width: w,
+						height: h
+					});
+					annotation.x = minX;
+					annotation.y = minY;
+					annotation.width = w;
+					annotation.height = h;
 
-				//update label pos
-				label.setAttrs({
-					x:minX,
-					y:minY-label.height(),
-				});
-				this.stage.batchDraw();
-			}.bind(this);
+					//update label pos
+					label.setAttrs({
+						x:minX,
+						y:minY-label.height(),
+					});
+					group.on('mouseover', mouseoverFn(group,bbox,label));
+					group.on('mouseout', mouseoutFn(group,bbox,label));
 
-			var AddControl = function(group,x,y,name){
-				var ctlSize = 10;
-				var offset = ctlSize*0.5;
-				var ctl = new Konva.Rect({
-					x: x-offset,
-					y: y-offset,
-					width: ctlSize,
-					height: ctlSize,
-					fill: "#ffffff",
-					stroke: "#3333ff",
-					name: name,
-					draggable:true,
-					dragBoundFunc: function(pos){
-						pos.x += offset;
-						pos.y += offset;
-						pos = this.BoundInImage(pos);
-						pos.x -= offset;
-						pos.y -= offset;
-						return pos; 
-					}.bind(this)
-				});
-				ctl.on("dragmove", function() {
-					updateBBox(ctl);
-				}.bind(this));
+					this.stage.batchDraw();
+				}.bind(this);
 
-				group.add(ctl);
-			}.bind(this);
+				var AddControl = function(group,x,y,name){
+					var ctlSize = 10;
+					var offset = ctlSize*0.5;
+					var ctl = new Konva.Rect({
+						x: x-offset,
+						y: y-offset,
+						width: ctlSize,
+						height: ctlSize,
+						fill: "#ffffff",
+						stroke: "#3333ff",
+						name: name,
+						draggable:true,
+						dragBoundFunc: function(pos){
+							pos.x += offset;
+							pos.y += offset;
+							pos = this.BoundInImage(pos);
+							pos.x -= offset;
+							pos.y -= offset;
+							return pos; 
+						}.bind(this)
+					});
+					ctl.on("dragmove", function() {
+						updateBBox(ctl);
+					}.bind(this));
 
-			AddControl(group,pos.x,pos.y,"LT");
-			AddControl(group,pos.x+size.width,pos.y,"RT");
-			AddControl(group,pos.x+size.width,pos.y+size.height,"RB");
-			AddControl(group,pos.x,pos.y+size.height,"LB");
+					group.add(ctl);
+				}.bind(this);
+
+				AddControl(group,x,y,"LT");
+				AddControl(group,x+w,y,"RT");
+				AddControl(group,x+w,y+h,"RB");
+				AddControl(group,x,y+h,"LB");
+			}
+		},
+		AddAnnotation: function(){
+			if(!this.newRect) return;
+			var tag = this.$refs.tagSelect.selectTag;
+			if(!tag || tag == "") return alert("請選擇標籤");
+
+			var pos = this.newRect.position();
+			var size = this.newRect.size();
+			if(size.width < 0){
+				pos.x = pos.x+size.width;
+				size.width = -size.width;
+			}
+			if(size.height < 0){
+				pos.y = pos.y+size.height;
+				size.height = -size.height;
+			}
+			this.GenBBox(pos.x,pos.y,size.width,size.height,tag,true);
 
 			this.openTagSelect = false;
 			this.newRect.destroy();
@@ -651,6 +682,9 @@ export default {
 			if(this.task == "view" || this.task == "verify"){
 				this.DrawAnnotation();
 			}
+			this.tool = this.task=="annotate"?"bbox":"move";
+			this.ChangeTool();
+
 			this.stage.batchDraw();
 		},
 		DrawAnnotation: function(){
@@ -665,8 +699,6 @@ export default {
 				var y = parseFloat(annotation.y);
 				var w = parseFloat(annotation.width);
 				var h = parseFloat(annotation.height);
-				var group = new Konva.Group();
-				this.bboxLayer.add(group);
 
 				var lt = {x:x,y:y};
 				var rb = {x:x+w,y:y+h};
@@ -676,45 +708,7 @@ export default {
 				rb.x = rb.x*imSize.width/srcImage.width+imPos.x;
 				rb.y = rb.y*imSize.height/srcImage.height+imPos.y;
 
-				//add bbox
-				var bbox = new Konva.Rect({
-					x: lt.x,
-					y: lt.y,
-					width: rb.x-lt.x,
-					height: rb.y-lt.y,
-					fill: "rgba(0,0,0,0)",
-					stroke: this.labelColor[annotation.tag].bg,
-				});
-				group.add(bbox);
-
-				//add annotation label
-				var label = new Konva.Label({});
-				label.add(new Konva.Tag({
-					fill: this.labelColor[annotation.tag].bg,
-				}));
-				label.add(new Konva.Text({
-					text: annotation.tag,
-					fontSize: 10,
-					padding: 1,
-					fill: this.labelColor[annotation.tag].fg,
-					name: "BBoxLabel"
-				}));
-				label.position({
-					x:lt.x,
-					y:lt.y-label.height()
-				});
-				group.add(label);
-
-				var a = {
-					tag: annotation.tag,
-					x: bbox.x(),
-					y: bbox.y(),
-					width: bbox.width(),
-					height: bbox.height(),
-					node: group,
-					index: this.annotationArr.length
-				};
-				this.annotationArr.push(a);
+				this.GenBBox(lt.x,lt.y,rb.x-lt.x,rb.y-lt.y,annotation.tag,false);
 			}
 			this.stage.batchDraw();
 		},

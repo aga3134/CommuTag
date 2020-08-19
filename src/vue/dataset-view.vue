@@ -58,7 +58,7 @@
 				<div class="text-h5">無資料</div>
 			</div>
 
-			<q-dialog v-model="openViewImage" v-if="targetImage">
+			<q-dialog full-width v-model="openViewImage" v-if="targetImage">
 				<image-control ref="imageControl" showNavigate editable :user="user" :dataset="info" :image="targetImage" @reload="ReloadDataset();"  @goToPrev="GoToPrev();" @goToNext="GoToNext();" @closeView="openViewImage = false;"></image-control>
 			</q-dialog>
 

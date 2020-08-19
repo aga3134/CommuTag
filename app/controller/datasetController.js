@@ -349,6 +349,7 @@ datasetController.UpdateImageInfo = function(param){
 			console.log(err);
 			return param.failFunc({err:"update image fail"});
 		}
+		util.UpdateDatasetStatistic({dataset: param.dataset});
 		param.succFunc(image);
 	});
 };

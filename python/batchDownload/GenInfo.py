@@ -18,10 +18,14 @@ class GenInfo:
 			t = field.replace(tzinfo=pytz.utc)
 			t = t.astimezone(taiwan)
 			return t.strftime("%Y-%m-%d %H:%M:%S")
+		elif isinstance(field, str):
+			s = str(field)
+			#若欄位裡有雙引號，用兩個雙引號取代
+			s = s.replace("\"","\"\"")
+			#把字串用雙引號括住，避免影響分隔跟換行
+			return "\""+s+"\""
 		else:
 			s = str(field)
-			#若欄位裡有\n用空格代替，避免csv換錯行
-			s = s.replace("\n"," ")
 			return s
 
 	def GenCSVString(self,dataset,imageArr):
@@ -29,21 +33,21 @@ class GenInfo:
 			line = ""
 			for field in fieldArr:
 				if field in image:
-					line += self.ConvertField(image[field])+"\t"
+					line += self.ConvertField(image[field])+","
 				else:
-					line += "\t"
+					line += ","
 			if "form" in dataset:
 				if isinstance(dataset["form"],dict) and "itemArr" in dataset["form"]:
 					for item in dataset["form"]["itemArr"]:
 						if "formReply" not in image:
-							line += "\t"
+							line += ","
 						elif item["id"] not in image["formReply"]:
-							line += "\t"
+							line += ","
 						else:
 							reply = image["formReply"][item["id"]]["value"]
 							if isinstance(reply, list):
 								reply = (" ".join(reply))
-							line += reply+"\t"
+							line += reply+","
 			line += self.hostname+"/static/upload/dataset/"+str(dataset["_id"])+"/image/"+str(image["_id"])+".jpg";
 			line += "\n"
 			return line
@@ -55,11 +59,11 @@ class GenInfo:
 				for item in dataset["form"]["itemArr"]:
 					formArr.append(item["quest"])
 
-		csvStr = ("\t".join(fieldArr))
+		csvStr = (",".join(fieldArr))
 		if(len(formArr) > 0):
-			csvStr += "\t"
-		csvStr += ("\t".join(formArr))
-		csvStr += "\timageUrl"
+			csvStr += ","
+		csvStr += (",".join(formArr))
+		csvStr += ",imageUrl"
 		csvStr += "\n"
 
 		for image in imageArr:

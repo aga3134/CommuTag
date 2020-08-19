@@ -64,7 +64,7 @@ export default {
 		
 		if(this.$refs.locationSelect){
 			if(this.initLat && this.initLng){
-				this.$refs.locationSelect.SetPosition(this.initLat,this.initLng);
+				this.$refs.locationSelect.SetPosition(this.initLat,this.initLng,true);
 			}
 			else if(this.dataset.enableGPS){
 				this.$refs.locationSelect.GetGPS();

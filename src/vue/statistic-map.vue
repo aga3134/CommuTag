@@ -86,14 +86,13 @@ export default {
 			for(var i=0;i<filterArr.length;i++){
 				var d = filterArr[i];
 				if(!d.lat || !d.lng) continue;
-				var tagInfo = "";
+				var tagInfo = "<div class='tag'>";
 				if(!d.annotation){
-					tagInfo = "未標註";
+					tagInfo += "未標註";
 				}
 				else{
 					switch(this.dataset.annotationType){
 						case "image":
-							tagInfo = "";
 							var tagArr = d.annotation.annotation;
 							for(var j=0;j<tagArr.length;j++){
 								var tag = tagArr[j];
@@ -110,15 +109,24 @@ export default {
 								if(!info[tag]) info[tag] = 1;
 								else info[tag]++;
 							}
-							tagInfo = Object.keys(info).map(function(key){
+							tagInfo += Object.keys(info).map(function(key){
 								return key+":"+info[key];
 							}).join("<br>");
 							break;
 					}
 				}
-				if(d.remark) tagInfo +="<pre>"+d.remark+"</pre>"
+				tagInfo += "</div>";
+				if(d.remark) tagInfo +="<div class='remark'>"+d.remark+"</div>"
 				
 				var content = "";
+				content += "<a href='/image?dataset="+this.dataset._id+"&image="+d._id+"' target='_blank'>";
+				content += "<img src='"+d.url+"' class='popup-image' />";
+				content += "</a>";
+				content += "<div class='popup-info'>"+tagInfo+"</div>";
+
+				var link = "/image?dataset="+this.dataset._id+"&image="+d._id;
+				content += "<div class='popup-bt' onclick=\"window.open('"+link+"','_blank');\">前往影像</div>";
+
 				var tz = spacetime().name;
 				var t = spacetime(d.dataTime).goto(tz);
 				t = t.subtract(t.minute()%10, "minute");
@@ -143,10 +151,7 @@ export default {
 						content += "<div class='popup-bt'  onclick=\"window.open('"+link+"','_blank');\">前往紫豹在哪裡</div>";
 						break;
 				}
-				content += "<a href='/image?dataset="+this.dataset._id+"&image="+d._id+"' target='_blank'>";
-				content += "<img src='"+d.url+"' class='popup-image' />";
-				content += "</a>";
-				content += "<div class='popup-info'>"+tagInfo+"</div>";
+
 				var marker = L.marker({lat:d.lat,lng:d.lng}).bindPopup(content);
 				this.markerGroup.addLayer(marker);
 			}
@@ -194,10 +199,18 @@ export default {
 	}
 	.popup-info{
 		margin: 5px 0px;
+		.tag{
+			font-size: 1.1em;
+			padding: 5px 0px;
+		}
+		.remark{
+			white-space:pre-line;
+			word-wrap: break-word;
+		}
 	}
 	.popup-bt{
 		display: inline-block;
-		margin: 5px 0px;
+		margin: 5px;
 		padding: 5px 10px;
 		background-color: #555555;
 		color: #ffffff;

@@ -52,7 +52,7 @@ export default {
 			}
 			
 		},
-		SetPosition: function(lat,lng){
+		SetPosition: function(lat,lng,updateMapCenter){
 			if(!lat || !lng) return;
 			this.loc = {"lat":lat,"lng":lng};
 			this.status = "座標: "+lat.toFixed(5)+" "+lng.toFixed(5);
@@ -71,6 +71,9 @@ export default {
 				}.bind(this));
 
 				this.locMarker.addTo(this.map);
+			}
+			if(updateMapCenter){
+				this.map.setView([lat,lng], 12);
 			}
 			this.$emit("change");
 		},
@@ -123,6 +126,8 @@ export default {
 			//取得gps權限
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(function(position){
+					//以GPS位置為中心顯示地圖
+					this.map.setView([position.coords.latitude, position.coords.longitude], 12);
 					switch(this.mode){
 						case "selectLoc":
 							this.SetPosition(position.coords.latitude,position.coords.longitude);

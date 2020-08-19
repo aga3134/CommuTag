@@ -1,7 +1,7 @@
 <template lang="html">
 	<div class="image-control" v-if="dataset && image">
-		<q-card class="full-width">
-			<div style="height: 400px;">
+		<q-card flat class="full-width">
+			<div style="height: 60vh;">
 				<annotator-view :dataset="dataset" :image="image"></annotator-view>
 			</div>
 			<q-card-section>
@@ -44,19 +44,19 @@
 				<q-btn v-if="dataset && dataset.externalLink=='riverlog' " flat label="前往山河事件簿" @click="GoToExternalLink();"></q-btn>
 				<q-btn v-if="dataset && dataset.externalLink=='purbao' " flat label="前往紫豹在哪裡" @click="GoToExternalLink();"></q-btn>
 			</q-card-actions>
-
-			<div v-if="showNavigate">
-				<q-page-sticky position="left" :offset="[9, 0]">
-					<q-btn round color="accent" icon="arrow_back" @click="GoToPrev();"></q-btn>
-				</q-page-sticky>
-				<q-page-sticky position="right" :offset="[9, 0]">
-					<q-btn round color="accent" icon="arrow_upward" class="rotate-90" @click="GoToNext();"></q-btn>
-				</q-page-sticky>
-				<q-page-sticky position="top-right" :offset="[9, -9]">
-					<q-btn round color="primary" icon="close" @click="CloseView();"></q-btn>
-				</q-page-sticky>
-			</div>
 		</q-card>
+
+		<div v-if="showNavigate">
+			<q-page-sticky position="left" :offset="[9, 0]">
+				<q-btn round color="accent" icon="arrow_back" @click="GoToPrev();"></q-btn>
+			</q-page-sticky>
+			<q-page-sticky position="right" :offset="[9, 0]">
+				<q-btn round color="accent" icon="arrow_upward" class="rotate-90" @click="GoToNext();"></q-btn>
+			</q-page-sticky>
+			<q-page-sticky position="top-right" :offset="[9, -9]">
+				<q-btn round color="primary" icon="close" @click="CloseView();"></q-btn>
+			</q-page-sticky>
+		</div>
 
 		<q-dialog maximized persistent v-model="openAnnotator" v-if="dataset">
 			<annotator :user="user" :dataset="dataset" :image="image" @done="FinishAnnotation();" @skip="openAnnotator = false;"></annotator>
@@ -157,7 +157,7 @@ export default {
 		ViewLocation: function(){
 			this.openLocationView = true;
 			Vue.nextTick(function(){
-				this.$refs.locationSelect.SetPosition(this.image.lat,this.image.lng);
+				this.$refs.locationSelect.SetPosition(this.image.lat,this.image.lng,true);
 			}.bind(this));
 		},
 		OpenInfoEditor: function(){
@@ -317,8 +317,8 @@ export default {
 			//使用者可以刪除自己的標註
 			if(this.image.annotation.user == this.user._id) return true;
 			//確認目前使用者是不是在master list裡
-			if(!this.info) return false;
-			var isMaster = this.info.master.filter(function(master){
+			if(!this.dataset) return false;
+			var isMaster = this.dataset.master.filter(function(master){
 				return master._id == this.user._id;
 			}.bind(this));
 			if(isMaster.length > 0) return true;
@@ -342,7 +342,8 @@ export default {
 <style lang="scss">
 .image-control{
 	width: 100%;
-	height: 100%;
+	padding: 5px;
+	background-color: #eeeeee;
 	.form-area{
 		margin: 5px;
 		padding: 5px 10px;
