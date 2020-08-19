@@ -13,7 +13,7 @@ class GenInfo:
 			config = json.load(file)
 			self.hostname = config["hostname"]
 
-	def ConvertField(self,field):
+	def ConvertFieldCSV(self,field):
 		if isinstance(field, datetime.datetime):
 			t = field.replace(tzinfo=pytz.utc)
 			t = t.astimezone(taiwan)
@@ -33,7 +33,7 @@ class GenInfo:
 			line = ""
 			for field in fieldArr:
 				if field in image:
-					line += self.ConvertField(image[field])+","
+					line += self.ConvertFieldCSV(image[field])+","
 				else:
 					line += ","
 			if "form" in dataset:
@@ -70,6 +70,14 @@ class GenInfo:
 			csvStr += GenCSVLine(image,fieldArr,formArr)
 		return csvStr
 
+	def ConvertFieldKML(self,field):
+		if isinstance(field, datetime.datetime):
+			t = field.replace(tzinfo=pytz.utc)
+			t = t.astimezone(taiwan)
+			return t.strftime("%Y-%m-%d %H:%M:%S")
+		else:
+			s = str(field)
+			return s
 
 	def GenKMLString(self,dataset,imageArr):
 
@@ -97,7 +105,7 @@ class GenInfo:
 				data = etree.SubElement(extraData,"Data")
 				data.attrib["name"] = field
 				value = etree.SubElement(data,"value")
-				value.text = self.ConvertField(image[field])
+				value.text = self.ConvertFieldKML(image[field])
 
 			
 			if "form" in dataset:
