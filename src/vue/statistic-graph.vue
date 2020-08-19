@@ -439,12 +439,19 @@ export default {
 				}
 			}
 			var idArr = Object.keys(data).sort(function(a,b){
-				return data[a].value - data[b].value;
+				return data[b].value - data[a].value;
 			}).slice(0,10);
 			$.get("/user/list-name?id="+idArr.join(","), function(result){
 				if(result.status != "ok") return;
+				//nameHash用在有同名同姓情形下，在名字後面加序號
+				var nameHash = {};
 				for(var i=0;i<result.data.length;i++){
 					var d = result.data[i];
+					if(d.name in nameHash){
+						d.name += nameHash[d.name];
+						nameHash[d.name]++;
+					}
+					else nameHash[d.name] = 1;
 					data[d._id].name = d.name;
 				}
 				var trace = {
@@ -463,6 +470,7 @@ export default {
 						title:"影像數"
 					},
 					yaxis:{
+						autorange:"reversed",
 						fixedrange: true,
 						title:""
 					},
@@ -491,12 +499,19 @@ export default {
 				}
 			}
 			var idArr = Object.keys(data).sort(function(a,b){
-				return data[a].value - data[b].value;
+				return data[b].value - data[a].value;
 			}).slice(0,10);
 			$.get("/user/list-name?id="+idArr.join(","), function(result){
 				if(result.status != "ok") return;
+				//nameHash用在有同名同姓情形下，在名字後面加序號
+				var nameHash = {};
 				for(var i=0;i<result.data.length;i++){
 					var d = result.data[i];
+					if(d.name in nameHash){
+						d.name += nameHash[d.name];
+						nameHash[d.name]++;
+					}
+					else nameHash[d.name] = 1;
 					data[d._id].name = d.name;
 				}
 				var trace = {
@@ -515,6 +530,7 @@ export default {
 						title:"影像數"
 					},
 					yaxis:{
+						autorange:"reversed",
 						fixedrange: true,
 						title:""
 					},
@@ -544,12 +560,19 @@ export default {
 				}
 			}
 			var idArr = Object.keys(data).sort(function(a,b){
-				return data[a].value - data[b].value;
+				return data[b].value - data[a].value;
 			}).slice(0,10);
 			$.get("/user/list-name?id="+idArr.join(","), function(result){
 				if(result.status != "ok") return;
+				//nameHash用在有同名同姓情形下，在名字後面加序號
+				var nameHash = {};
 				for(var i=0;i<result.data.length;i++){
 					var d = result.data[i];
+					if(d.name in nameHash){
+						d.name += nameHash[d.name];
+						nameHash[d.name]++;
+					}
+					else nameHash[d.name] = 1;
 					data[d._id].name = d.name;
 				}
 				var trace = {
@@ -568,6 +591,7 @@ export default {
 						title:"影像數"
 					},
 					yaxis:{
+						autorange:"reversed",
 						fixedrange: true,
 						title:""
 					},
