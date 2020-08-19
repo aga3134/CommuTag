@@ -2,6 +2,7 @@ import datetime
 import pytz
 from lxml import etree
 import json
+import re
 #using Asia/Taipei will cause offset to be +0806
 #taiwan = pytz.timezone('Asia/Taipei')
 taiwan = datetime.timezone(offset = datetime.timedelta(hours = 8))
@@ -71,12 +72,23 @@ class GenInfo:
 		return csvStr
 
 	def ConvertFieldKML(self,field):
+		def remove_control_characters(html):
+			def str_to_int(s, default, base=10):
+				if int(s, base) < 0x10000:
+					return chr(int(s, base))
+				return default
+			html = re.sub(u"&#(\d+);?", lambda c: str_to_int(c.group(1), c.group(0)), html)
+			html = re.sub(u"&#[xX]([0-9a-fA-F]+);?", lambda c: str_to_int(c.group(1), c.group(0), base=16), html)
+			html = re.sub(u"[\x00-\x08\x0b\x0e-\x1f\x7f]", "", html)
+			return html
+
 		if isinstance(field, datetime.datetime):
 			t = field.replace(tzinfo=pytz.utc)
 			t = t.astimezone(taiwan)
 			return t.strftime("%Y-%m-%d %H:%M:%S")
 		else:
 			s = str(field)
+			s = remove_control_characters(s)
 			return s
 
 	def GenKMLString(self,dataset,imageArr):
