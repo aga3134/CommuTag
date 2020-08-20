@@ -5,8 +5,9 @@ import os
 from GenInfo import GenInfo
 
 class GenVOC:
-	def __init__(self):
-		self.genInfo = GenInfo()
+	def __init__(self,db):
+		self.db = db
+		self.genInfo = GenInfo(db)
 		
 	def GenFile(self,dataset,imageArr,outFile):
 		if dataset["annotationType"] == "bbox":

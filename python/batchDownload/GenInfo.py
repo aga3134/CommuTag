@@ -9,7 +9,8 @@ taiwan = datetime.timezone(offset = datetime.timedelta(hours = 8))
 
 
 class GenInfo:
-	def __init__(self):
+	def __init__(self,db):
+		self.db = db
 		with open("config.json","r",encoding="utf-8") as file:
 			config = json.load(file)
 			self.hostname = config["hostname"]
@@ -71,10 +72,19 @@ class GenInfo:
 		csvStr += ",imageUrl"
 		csvStr += "\n"
 
+		#get user name from db (預期影像數會遠大於user數，直接把user全部撈出來應該比從image抓出貢獻者快)
+		userArr = self.db["user"].find({},{"name": 1})
+		nameHash = {}
+		for user in userArr:
+			nameHash[str(user["_id"])] = user["name"]
+
+		#輸出貢獻者
 		for image in imageArr:
-			image["上傳者"] = image["uploader"]
+			userID = str(image["uploader"])
+			image["上傳者"] = userID+"_"+nameHash[userID]
 			if "annotation" in image and image["annotation"] is not None:
-				image["標註者"] = image["annotation"]["user"]
+				userID = str(image["annotation"]["user"])
+				image["標註者"] = userID+"_"+nameHash[userID]
 				image["標籤"] = []
 				if dataset["annotationType"] == "image":
 					for a in image["annotation"]["annotation"]:
@@ -87,7 +97,8 @@ class GenInfo:
 			if "verification" in image and image["verification"] is not None:
 				image["驗證者"] = []
 				for v in image["verification"]:
-					image["驗證者"].append(v["user"])
+					userID = str(v["user"])
+					image["驗證者"].append(userID+"_"+nameHash[userID])
 			
 			csvStr += GenCSVLine(image,fieldArr,formArr)
 		return csvStr

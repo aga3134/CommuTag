@@ -64,9 +64,9 @@ if __name__ == "__main__":
 	
 	#generate file according to args
 	if args.format == "folder":
-		genFile = GenFolderClassify()
+		genFile = GenFolderClassify(db)
 	elif args.format == "voc":
-		genFile = GenVOC()
+		genFile = GenVOC(db)
 
 	if genFile is not None:
 		genFile.GenFile(dataset,filterArr,outFile)
