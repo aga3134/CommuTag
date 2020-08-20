@@ -37,8 +37,8 @@
 					<q-btn flat label="影像網址" @click="GoToImageUrl();"></q-btn>
 					<q-btn flat label="下載影像" @click="DownloadImage();"></q-btn>
 					<q-btn v-if="CheckAnnotationDelete" flat label="刪除標註" @click="DeleteAnnotation();"></q-btn>
-					<q-btn v-if="CheckMasterAuth" flat label="編輯資訊" @click="OpenInfoEditor();"></q-btn>
-					<q-btn v-if="CheckMasterAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
+					<q-btn v-if="CheckEditAuth" flat label="編輯資訊" @click="OpenInfoEditor();"></q-btn>
+					<q-btn v-if="CheckEditAuth" flat label="刪除影像" @click="DeleteImage();"></q-btn>
 				</div>
 
 				<q-btn v-if="dataset && dataset.externalLink=='riverlog' " flat label="前往山河事件簿" @click="GoToExternalLink();"></q-btn>
@@ -324,9 +324,11 @@ export default {
 			if(isMaster.length > 0) return true;
 			return false;
 		},
-		CheckMasterAuth: function(){
+		CheckEditAuth: function(){
 			if(!this.user) return false;
 			if(this.user.authType == "admin") return true;
+			//確認是否是自己上傳的影像
+			if(this.image.uploader == this.user._id) return true;
 			//確認目前使用者是不是在master list裡
 			if(!this.dataset) return false;
 			var isMaster = this.dataset.master.filter(function(master){

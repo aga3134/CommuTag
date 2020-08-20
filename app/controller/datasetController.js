@@ -343,26 +343,40 @@ datasetController.ListImageForAnnotation = function(param){
 };
 
 datasetController.UpdateImageInfo = function(param){
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	Image.updateOne({_id:param.image},param,function(err,image){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"update image fail"});
-		}
-		util.UpdateDatasetStatistic({dataset: param.dataset});
-		param.succFunc(image);
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true,
+	})
+	.then(function(dataset){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		Image.updateOne({_id:param.image},param,function(err,image){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"update image fail"});
+			}
+			util.UpdateDatasetStatistic({dataset: param.dataset});
+			param.succFunc(image);
+		});
 	});
 };
 
 datasetController.DeleteImage = function(param){
-	var Image = mongoose.model("image"+param.dataset, ImageSchema);
-	Image.deleteOne({_id:param.image},function(err){
-		if(err){
-			console.log(err);
-			return param.failFunc({err:"delete image fail"});
-		}
-		util.UpdateDatasetStatistic({dataset: param.dataset});
-		param.succFunc({_id:param.image});
+	CheckDatasetAuth({
+		dataset: param.dataset,
+		user: param.user,
+		checkView: true,
+	})
+	.then(function(dataset){
+		var Image = mongoose.model("image"+param.dataset, ImageSchema);
+		Image.deleteOne({_id:param.image},function(err){
+			if(err){
+				console.log(err);
+				return param.failFunc({err:"delete image fail"});
+			}
+			util.UpdateDatasetStatistic({dataset: param.dataset});
+			param.succFunc({_id:param.image});
+		});
 	});
 };
 

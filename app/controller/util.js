@@ -76,6 +76,48 @@ util.CheckMaster = function (req, res, next) {
 	
 };
 
+util.CheckImageEdit = function (req, res, next) {
+	function PermissionDenied(){
+		var isAjax = req.xhr;
+		if(isAjax) res.send({"status":"fail","message":"permission denied"});
+		else res.redirect("/?message="+encodeURIComponent("權限不足"));
+	}
+	if(req.user){
+		if (req.user.authType == "admin") return next();
+		var id = req.query.dataset || req.body.dataset;
+		if(!id) return PermissionDenied();
+
+		Dataset.findOne({"_id": id}, function(err, dataset) {
+			if(err){
+				console.log(err);
+				return PermissionDenied();
+			}
+			if(!dataset) return PermissionDenied();
+			var isMaster = dataset.master.filter(function(master){
+				return req.user._id.toString() == master._id.toString();
+			});
+			if(isMaster.length > 0) return next();
+			else{
+				//確認是否為使用者自己上傳的影像
+				var Image = mongoose.model("image"+id, ImageSchema);
+				Image.findOne({_id:req.body.image},function(err, image){
+					if(err){
+						console.log(err);
+						return PermissionDenied();
+					}
+					if(!image) return PermissionDenied();
+					if(req.user._id.toString() == image.uploader.toString()){
+						return next();
+					}
+					return PermissionDenied();
+				});
+			}
+		});
+	}
+	else PermissionDenied();
+	
+};
+
 util.CheckBlacklist = function (req, res, next) {
 	if(req.user){
 		if (req.user.status != "blacklist") return next();

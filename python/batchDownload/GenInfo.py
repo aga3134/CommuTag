@@ -34,7 +34,10 @@ class GenInfo:
 			line = ""
 			for field in fieldArr:
 				if field in image:
-					line += self.ConvertFieldCSV(image[field])+","
+					d = image[field]
+					if isinstance(d, list):
+						d = ("|".join(d))
+					line += self.ConvertFieldCSV(d)+","
 				else:
 					line += ","
 			if "form" in dataset:
@@ -47,13 +50,14 @@ class GenInfo:
 						else:
 							reply = image["formReply"][item["id"]]["value"]
 							if isinstance(reply, list):
-								reply = (" ".join(reply))
-							line += reply+","
+								reply = ("|".join(reply))
+							line += self.ConvertFieldCSV(reply)+","
 			line += self.hostname+"/static/upload/dataset/"+str(dataset["_id"])+"/image/"+str(image["_id"])+".jpg";
 			line += "\n"
 			return line
 
-		fieldArr = ["imageName","lat","lng","dataTime","remark","createdAt","updatedAt"]
+		fieldArr = ["imageName","lat","lng","dataTime","remark","上傳者","標註者","驗證者","標籤","createdAt","updatedAt"]
+
 		formArr = []
 		if "form" in dataset:
 			if isinstance(dataset["form"],dict) and "itemArr" in dataset["form"]:
@@ -68,6 +72,23 @@ class GenInfo:
 		csvStr += "\n"
 
 		for image in imageArr:
+			image["上傳者"] = image["uploader"]
+			if "annotation" in image and image["annotation"] is not None:
+				image["標註者"] = image["annotation"]["user"]
+				image["標籤"] = []
+				if dataset["annotationType"] == "image":
+					for a in image["annotation"]["annotation"]:
+						if a["value"] == "true":
+							image["標籤"].append(a["name"])
+				elif dataset["annotationType"] == "bbox":
+					for a in image["annotation"]["annotation"]:
+						image["標籤"].append(a["tag"])
+
+			if "verification" in image and image["verification"] is not None:
+				image["驗證者"] = []
+				for v in image["verification"]:
+					image["驗證者"].append(v["user"])
+			
 			csvStr += GenCSVLine(image,fieldArr,formArr)
 		return csvStr
 

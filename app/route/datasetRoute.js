@@ -179,7 +179,7 @@ router.get('/list-image', function(req, res) {
 	datasetController.ListImage(param);
 });
 
-router.post('/update-image-info', util.CheckMaster, util.CSRF, function(req, res) {
+router.post('/update-image-info', util.CheckImageEdit, util.CSRF, function(req, res) {
 	var param = {};
 	param.dataset = req.body.dataset;
 	param.image = req.body.image;
@@ -197,7 +197,7 @@ router.post('/update-image-info', util.CheckMaster, util.CSRF, function(req, res
 	datasetController.UpdateImageInfo(param);
 });
 
-router.post('/delete-image', util.CheckMaster, util.CSRF, function(req, res) {
+router.post('/delete-image', util.CheckImageEdit, util.CSRF, function(req, res) {
 	var param = {};
 	param.dataset = req.body.dataset;
 	param.image = req.body.image;
