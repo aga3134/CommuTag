@@ -358,6 +358,9 @@ datasetController.UpdateImageInfo = function(param){
 			util.UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc(image);
 		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
 };
 
@@ -377,6 +380,9 @@ datasetController.DeleteImage = function(param){
 			util.UpdateDatasetStatistic({dataset: param.dataset});
 			param.succFunc({_id:param.image});
 		});
+	})
+	.catch(function(err){
+		param.failFunc(err);
 	});
 };
 

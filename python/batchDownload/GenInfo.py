@@ -43,7 +43,7 @@ class GenInfo:
 			if "form" in dataset:
 				if isinstance(dataset["form"],dict) and "itemArr" in dataset["form"]:
 					for item in dataset["form"]["itemArr"]:
-						if "formReply" not in image:
+						if "formReply" not in image or image["formReply"] is None:
 							line += ","
 						elif item["id"] not in image["formReply"]:
 							line += ","

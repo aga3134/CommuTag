@@ -181,6 +181,7 @@ router.get('/list-image', function(req, res) {
 
 router.post('/update-image-info', util.CheckImageEdit, util.CSRF, function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.dataset = req.body.dataset;
 	param.image = req.body.image;
 	param.dataTime = req.body.dataTime;
@@ -199,6 +200,7 @@ router.post('/update-image-info', util.CheckImageEdit, util.CSRF, function(req, 
 
 router.post('/delete-image', util.CheckImageEdit, util.CSRF, function(req, res) {
 	var param = {};
+	param.user = req.user;
 	param.dataset = req.body.dataset;
 	param.image = req.body.image;
 	param.succFunc = function(result){
