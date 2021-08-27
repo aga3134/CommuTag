@@ -31,6 +31,7 @@ app.port = Config.serverPort || 8001;
 app.set('view engine', 'ejs');
 app.set("views", rootDir + "/view");
 app.use('/static',express.static(rootDir + '/static'));
+app.use('/dist',express.static(rootDir + '/dist'));
 
 //setup auth
 var options = {
