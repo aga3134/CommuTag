@@ -18,6 +18,8 @@ class GenFolderClassify:
 					else:
 						tagArr = []
 						for tag in image["annotation"]["annotation"]:
+							if "value" not in tag:
+								continue
 							if tag["value"] == "true":
 								tagArr.append(tag["name"])
 

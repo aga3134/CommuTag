@@ -88,6 +88,8 @@ class GenInfo:
 				image["標籤"] = []
 				if dataset["annotationType"] == "image":
 					for a in image["annotation"]["annotation"]:
+						if "value" not in a:
+							continue
 						if a["value"] == "true":
 							image["標籤"].append(a["name"])
 				elif dataset["annotationType"] == "bbox":
