@@ -81,6 +81,8 @@ class GenInfo:
 		#輸出貢獻者
 		for image in imageArr:
 			userID = str(image["uploader"])
+			if userID not in nameHash:
+				continue
 			image["上傳者"] = userID+"_"+nameHash[userID]
 			if "annotation" in image and image["annotation"] is not None:
 				userID = str(image["annotation"]["user"])

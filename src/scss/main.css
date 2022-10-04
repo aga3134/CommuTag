@@ -1,0 +1,14 @@
+@charset "UTF-8";
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #edffef;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  font-family: "微軟正黑體", "Microsoft JhengHei";
+}
+/*# sourceMappingURL=main.css.map */
