@@ -62,6 +62,9 @@ router.post('/upload-image', upload.UploadImageToMem, function(req, res){
 		imageParam.newPath = "/static/upload/dataset/"+req.body.dataset+"/image/";
 		imageParam.newName = result._id+".jpg";
 		imageParam.encode = "base64";
+		if(!req.body.uploadImage){
+			res.status(200).json({status: "fail", message: "no upload image"});
+		}
 		imageParam.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
 		imageParam.succFunc = function(result){
 			res.status(200).json({status: "ok", "data": result});
