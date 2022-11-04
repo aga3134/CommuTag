@@ -106,7 +106,7 @@ router.get('/view-image', function(req, res) {
 	datasetController.ViewImage(param);
 });
 
-router.post('/change-cover', util.CheckMaster, util.CSRF, upload.UploadImageToMem, function(req, res){	
+router.post('/change-cover',util.CSRF, upload.UploadImageToMem,util.CheckMaster, function(req, res){	
 	var param = {};
 	param.id = req.body.dataset;
 	var newPath = "/static/upload/dataset/"+req.body.dataset+"/";
