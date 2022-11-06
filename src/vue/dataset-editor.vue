@@ -125,6 +125,7 @@ export default {
 
 			uploader.OnSucc = function(result){
 				if(result.status != "ok") return alert("更新圖片失敗");
+				this.info.picCover = result.data.picCover;
 				this.uploadCover = false;
 				this.$emit("updateCover");
 			}.bind(this);

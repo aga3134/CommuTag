@@ -31,10 +31,10 @@
 				
 			</div>
 			<q-card-actions align="center">
-				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="add_photo_alternate" label="變更圖片" @click="ChangePhoto();" :loading="uploadPhoto"></q-btn>
-				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="edit" label="修改資料" @click="EditUserInfo();"></q-btn>
-				<q-btn v-if="user.provider=='local' " flat class="bg-grey-8 text-white q-px-sm" icon="key" label="變更密碼" @click="openPasswordPanel = true;"></q-btn>
-				<q-btn flat class="bg-red-8 text-white q-px-sm" icon="delete" label="刪除帳號" @click="DeleteUserAccount();"></q-btn>
+				<q-btn flat class="bg-grey-8 text-white q-px-sm q-ma-xs" icon="add_photo_alternate" label="變更圖片" @click="ChangePhoto();" :loading="uploadPhoto"></q-btn>
+				<q-btn flat class="bg-grey-8 text-white q-px-sm q-ma-xs" icon="edit" label="修改資料" @click="EditUserInfo();"></q-btn>
+				<q-btn v-if="user.provider=='local' " flat class="bg-grey-8 text-white q-px-sm q-ma-xs" icon="key" label="變更密碼" @click="openPasswordPanel = true;"></q-btn>
+				<q-btn flat class="bg-red-8 text-white q-px-sm q-ma-xs" icon="delete" label="刪除帳號" @click="DeleteUserAccount();"></q-btn>
 			</q-card-actions>
 			<image-upload :maxResW="640" :maxResH="640" ref="uploader"></image-upload>
 		</q-card>

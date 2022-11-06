@@ -118,7 +118,7 @@ router.post('/change-cover',util.CSRF, upload.UploadImageToMem,util.CheckMaster,
 		imageParam.newName = newName;
 		imageParam.encode = "base64";
 		imageParam.content = req.body.uploadImage.replace(/^data:image\/jpeg;base64,/, "");
-		imageParam.succFunc = function(result){
+		imageParam.succFunc = function(uploadResult){
 			res.status(200).json({status: "ok", "data": result});
 		};
 		imageParam.failFunc = function(result){
