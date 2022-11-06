@@ -103,6 +103,7 @@
 							<div class="q-pa-md">
 								<q-chip clickable icon="code" @click="GoToUrl('https://github.com/aga3134/CommuTag','_blank');">開放原始碼</q-chip>
 								<q-chip clickable icon="computer" @click="GoToUrl('https://agawork.tw/','_blank');">其他專案</q-chip>
+								<q-chip clickable icon="policy" @click="GoToUrl('https://paper.dropbox.com/doc/c3xDK0qJYwekuosuSzyYJ','_blank');">始用說明及隱私權政策</q-chip>
 							</div>
 						</q-card-section>
 					</q-card>
