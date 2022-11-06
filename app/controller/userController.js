@@ -105,4 +105,24 @@ userController.UpdateAuth = function(param){
 	});
 };
 
+userController.DeleteUser = function(param){
+	if(!param.user) return param.failFunc({err:"no user"});
+	var query = {provider: param.user.provider};
+	switch(param.user.provider){
+		case "google": case "facebook":
+			query.oauthID = param.user.oauthID;
+			break;
+		case "local":
+			query.signupEmail = param.user.signupEmail;
+			break;
+	}
+
+	User.deleteOne(query).then(function(){
+    param.succFunc();
+	}).catch(function(error){
+			console.log(error);
+			param.failFunc({"err": "delete user fail"});
+	});
+};
+
 module.exports = userController;

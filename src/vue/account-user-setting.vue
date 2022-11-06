@@ -33,6 +33,8 @@
 			<q-card-actions align="center">
 				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="add_photo_alternate" label="變更圖片" @click="ChangePhoto();" :loading="uploadPhoto"></q-btn>
 				<q-btn flat class="bg-grey-8 text-white q-px-sm" icon="edit" label="修改資料" @click="EditUserInfo();"></q-btn>
+				<q-btn v-if="user.provider=='local' " flat class="bg-grey-8 text-white q-px-sm" icon="key" label="變更密碼" @click="openPasswordPanel = true;"></q-btn>
+				<q-btn flat class="bg-red-8 text-white q-px-sm" icon="delete" label="刪除帳號" @click="DeleteUserAccount();"></q-btn>
 			</q-card-actions>
 			<image-upload :maxResW="640" :maxResH="640" ref="uploader"></image-upload>
 		</q-card>
@@ -51,6 +53,27 @@
 
 				<q-card-actions align="right">
 					<q-btn flat label="儲存" color="primary" @click="SubmitUserInfo();" />
+					<q-btn flat label="取消" color="primary" v-close-popup />
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
+
+		<q-dialog v-model="openPasswordPanel">
+			<q-card class="full-width">
+				<q-card-section>
+					<div class="text-h6">修改密碼</div>
+					<q-form>
+						<q-input class="q-my-sm" type="password" v-model="editPassword.oldPassword" label="原始密碼">
+						</q-input>
+						<q-input class="q-my-sm" type="password" v-model="editPassword.newPassword" label="新密碼">
+						</q-input>
+						<q-input class="q-my-sm" type="password" v-model="editPassword.confirmPassword" label="確認密碼" @keyup.enter="SubmitPassword();">
+						</q-input>
+					</q-form>
+				</q-card-section>
+
+				<q-card-actions align="right">
+					<q-btn flat label="儲存" color="primary" @click="SubmitPassword();" />
 					<q-btn flat label="取消" color="primary" v-close-popup />
 				</q-card-actions>
 			</q-card>
@@ -75,6 +98,8 @@ export default {
 			editInfo: {},
 			uploadPhoto: false,
 			openInputPanel: false,
+			editPassword: {},
+			openPasswordPanel: false
 		};
 	},
 	created: function(){
@@ -124,6 +149,31 @@ export default {
 				alert(result.status == "ok"?"修改成功":"修改失敗");
 				window.location.reload();
 			}.bind(this));
+		},
+		SubmitPassword: function(){
+			if(!this.editPassword.oldPassword){
+				return alert("請輸入原始密碼");
+			}
+			if(!this.editPassword.newPassword){
+				return alert("請輸入新密碼");
+			}
+			if(this.editPassword.newPassword != this.editPassword.confirmPassword){
+				return alert("請確認密碼一致");
+			}
+			var csrfToken = $("meta[name='csrf-token']").attr("content");
+			$.post("/auth/change-password", {data:this.editPassword,_csrf: csrfToken}, function(result){
+				alert(result.status == "ok"?"修改成功":"修改失敗");
+				this.openPasswordPanel = false;
+			}.bind(this));
+		},
+		DeleteUserAccount: function(){
+			if(confirm("帳號刪除後您將無法繼續使用本系統，確定繼續?")){
+				var csrfToken = $("meta[name='csrf-token']").attr("content");
+				$.post("/user/delete", {_csrf: csrfToken}, function(result){
+					alert(result.status == "ok"?"刪除成功":"刪除失敗");
+					window.location.href="/";
+				}.bind(this));
+			}
 		}
 	},
 	computed: {

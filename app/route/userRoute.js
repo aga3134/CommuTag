@@ -99,3 +99,17 @@ router.post('/update-auth', util.CheckAdmin,util.CSRF, function(req, res){
 	};
 	userController.UpdateAuth(param);
 });
+
+router.post('/delete', util.CheckLogin, util.CSRF, function(req, res) {
+	var param = {};
+	param.user = req.user;
+	param.succFunc = function(result){
+		res.status(200).json({"status": "ok", "data": result});
+	};
+	param.failFunc = function(result){
+		console.log(result);
+		res.status(200).json({status: "fail", message: result.err});
+	};
+	req.logout();
+	userController.DeleteUser(param);
+});

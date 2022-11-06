@@ -167,10 +167,35 @@ auth.ResetPassword = function(req, res, next){
 				if(!user) return res.json({status: "fail", message: 'reset password fail'});
 				else{
 					var hash = bcrypt.hashSync(password, saltRounds);
-					User.update({_id: decoded.id}, {password: hash}, function(){
+					User.updateOne({_id: decoded.id}, {password: hash}, function(){
 						res.json({status: "ok", message: 'reset password ok'});
 					});
 				}
+			});
+		}
+	});
+}
+
+auth.ChangePassword = function(req, res, next){
+	var oldPassword = req.body.data.oldPassword;
+	var newPassword = req.body.data.newPassword;
+	User.findOne({_id: req.user._id},function(err, user){
+		if(err) console.log(err);
+		if(!user) return res.json({status: "fail", message: 'user not found'});
+		else{
+			if(user.provider != "local") return res.json({status: "fail", message: 'not local user'});
+			bcrypt.compare(oldPassword, user.password, function(err, result) {
+				if(err){
+					console.log(err);
+					res.json({status: "fail", message: 'invalid password'});
+				}
+				if(result){
+					var hash = bcrypt.hashSync(newPassword, saltRounds);
+					User.updateOne({_id: user._id}, {password: hash}, function(){
+						res.json({status: "ok", message: 'change password ok'});
+					});
+				}
+				else return res.json({status: "fail", message: 'password not match'});
 			});
 		}
 	});
