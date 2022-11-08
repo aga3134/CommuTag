@@ -55,7 +55,7 @@ app.use(session({
     cookie: { path: '/', httpOnly: true,maxAge: 1000*60*60*24*100}	//session保留100天
 }));
 
-app.use(bodyParser.urlencoded({extended: true,limit: '1mb'}));
+app.use(bodyParser.urlencoded({extended: true,limit: '5mb'}));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
