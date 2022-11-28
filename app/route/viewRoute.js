@@ -42,7 +42,7 @@ router.get('/dataset', util.CSRF, function(req, res) {
 	meta.path = req.originalUrl;
 	meta.ogImage = meta.logo;
 	if(req.query.id){
-		meta.ogImage = "/static/upload/dataset/"+req.query.id+"/cover.jpg";
+		meta.ogImage = "static/upload/dataset/"+req.query.id+"/cover.jpg";
 	}
 	meta.csrfToken = req.csrfToken();
 	res.render("dataset-view.ejs",{meta: meta, user:req.user,mode:Config.mode});
@@ -54,7 +54,7 @@ router.get('/image', util.CSRF, function(req, res) {
 	meta.path = req.originalUrl;
 	meta.ogImage = meta.logo;
 	if(req.query.dataset && req.query.image){
-		meta.ogImage = "/static/upload/dataset/"+req.query.dataset+"/image/"+req.query.image+".jpg";
+		meta.ogImage = "static/upload/dataset/"+req.query.dataset+"/image/"+req.query.image+".jpg";
 	}
 	meta.csrfToken = req.csrfToken();
 	res.render("image-view.ejs",{meta: meta, user:req.user,mode:Config.mode});
@@ -66,7 +66,7 @@ router.get('/statistic', util.CSRF, function(req, res) {
 	meta.path = req.originalUrl;
 	meta.ogImage = meta.logo;
 	if(req.query.id){
-		meta.ogImage = "/static/upload/dataset/"+req.query.id+"/cover.jpg";
+		meta.ogImage = "static/upload/dataset/"+req.query.id+"/cover.jpg";
 	}
 	meta.csrfToken = req.csrfToken();
 	res.render("statistic.ejs",{meta: meta, user:req.user,mode:Config.mode});
