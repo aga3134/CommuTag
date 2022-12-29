@@ -9,6 +9,17 @@ var ImageSchema = require("../db/imageSchema");
 
 var util = {};
 
+function FailDenied(message, message_query_param){
+	return function(req, res) {
+		var isAjax = req.xhr;
+		if (isAjax) res.send({"status": "fail", "message": message});
+		else res.redirect("/?message=" + encodeURIComponent(message_query_param));
+	}
+}
+
+var PermissionDenied = FailDenied("permission denied", "權限不足");
+var BlackListDenied = FailDenied("blacklist", "黑名單使用者無此權限");
+
 util.StoreIntentUrl = function(req, res, next){
 	if(req.query.intentUrl){
 		req.session.intentUrl = decodeURIComponent(req.query.intentUrl);
@@ -34,65 +45,49 @@ util.RandomInt = function(max) {
 
 util.CheckLogin = function (req, res, next) {
 	if (req.isAuthenticated()) return next();
-	var isAjax = req.xhr;
-	if(isAjax) res.send({"status":"fail","message":"please login"});
-	else res.redirect("/login?intentUrl="+encodeURIComponent(req.originalUrl));
+	PermissionDenied(req, res);
 };
 
 util.CheckAdmin = function (req, res, next) {
-	if(req.user){
-		if (req.user.authType == "admin") return next();
+	if(req.user && req.user.authType == "admin"){
+		return next();
 	}
-	var isAjax = req.xhr;
-	if(isAjax) res.send({"status":"fail","message":"permission denied"});
-	else res.redirect("/?message="+encodeURIComponent("權限不足"));
+	PermissionDenied(req, res);
 };
 
 util.CheckMaster = function (req, res, next) {
-	function PermissionDenied(){
-		var isAjax = req.xhr;
-		if(isAjax) res.send({"status":"fail","message":"permission denied"});
-		else res.redirect("/?message="+encodeURIComponent("權限不足"));
-	}
-	if(req.user){
-		if (req.user.authType == "admin") return next();
-		var id = req.query.dataset || req.body.dataset;
-		if(!id) return PermissionDenied();
+	if (!req.user) return PermissionDenied(req, res);
+	if (req.user.authType == "admin") return next();
 
-		Dataset.findOne({"_id": id}, function(err, dataset) {
-			if(err){
-				console.log(err);
-				return PermissionDenied();
-			}
-			if(!dataset) return PermissionDenied();
-			var isMaster = dataset.master.filter(function(master){
-				return req.user._id.toString() == master._id.toString();
-			});
-			if(isMaster.length > 0) return next();
-			else return PermissionDenied();
+	var id = req.query.dataset || req.body.dataset;
+	if(!id) return PermissionDenied(req, res);
+
+	Dataset.findOne({"_id": id}, function(err, dataset) {
+		if(err){
+			console.log(err);
+			return PermissionDenied(req, res);
+		}
+		if(!dataset) return PermissionDenied(req, res);
+		var isMaster = dataset.master.filter(function(master){
+			return req.user._id.toString() == master._id.toString();
 		});
-	}
-	else PermissionDenied();
-	
+		if(isMaster.length > 0) return next();
+		else return PermissionDenied(req, res);
+	});
 };
 
 util.CheckImageEdit = function (req, res, next) {
-	function PermissionDenied(){
-		var isAjax = req.xhr;
-		if(isAjax) res.send({"status":"fail","message":"permission denied"});
-		else res.redirect("/?message="+encodeURIComponent("權限不足"));
-	}
 	if(req.user){
 		if (req.user.authType == "admin") return next();
 		var id = req.query.dataset || req.body.dataset;
-		if(!id) return PermissionDenied();
+		if(!id) return PermissionDenied(req, res);
 
 		Dataset.findOne({"_id": id}, function(err, dataset) {
 			if(err){
 				console.log(err);
-				return PermissionDenied();
+				return PermissionDenied(req, res);
 			}
-			if(!dataset) return PermissionDenied();
+			if(!dataset) return PermissionDenied(req, res);
 			var isMaster = dataset.master.filter(function(master){
 				return req.user._id.toString() == master._id.toString();
 			});
@@ -103,18 +98,18 @@ util.CheckImageEdit = function (req, res, next) {
 				Image.findOne({_id:req.body.image},function(err, image){
 					if(err){
 						console.log(err);
-						return PermissionDenied();
+						return PermissionDenied(req, res);
 					}
-					if(!image) return PermissionDenied();
+					if(!image) return PermissionDenied(req, res);
 					if(req.user._id.toString() == image.uploader.toString()){
 						return next();
 					}
-					return PermissionDenied();
+					return PermissionDenied(req, res);
 				});
 			}
 		});
 	}
-	else PermissionDenied();
+	else PermissionDenied(req, res);
 	
 };
 
@@ -122,9 +117,7 @@ util.CheckBlacklist = function (req, res, next) {
 	if(req.user){
 		if (req.user.status != "blacklist") return next();
 	}
-	var isAjax = req.xhr;
-	if(isAjax) res.send({"status":"fail","message":"blacklist"});
-	else res.redirect("/?message="+encodeURIComponent("黑名單使用者無此權限"));
+	BlackListDenied(req, res);
 };
 
 util.FailRedirect = function(req, res, redirect, message){
