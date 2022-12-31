@@ -1,5 +1,5 @@
 pymongo
 pascal_voc_writer
-opencv-python
+opencv-python-headless
 pytz
 lxml
