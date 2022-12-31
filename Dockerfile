@@ -7,9 +7,4 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -\
     && npm install \
     && pip install -r requirements.txt
 COPY . ./
-
-from base as test
-CMD ["npm","run","test"]
-
-from base as prod
 CMD ["node","server.js"]
