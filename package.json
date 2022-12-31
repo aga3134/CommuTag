@@ -16,7 +16,7 @@
     "csurf": "^1.10.0",
     "dayjs": "^1.8.16",
     "ejs": "^2.7.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-mysql-session": "^2.1.6",
     "express-session": "^1.17.0",
     "fs-extra": "^8.1.0",
