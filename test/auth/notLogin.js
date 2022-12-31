@@ -9,6 +9,8 @@ var User = require("../../app/db/user");
 var bcrypt = require('bcrypt');
 var async = require("async");
 var rimraf = require("rimraf");
+var cheerio = require('cheerio');
+var ImageSchema = require("../../app/db/imageSchema");
 
 chai.use(chaiHttp);
 var agent = chai.request.agent(app);
@@ -44,6 +46,8 @@ var datasetAdd = {
 var testImage = "data:image/jpeg;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7";
 
 var dataset = {};
+var image = {};
+var csrfToken = null;
 
 describe("未登入權限測試", function() { 
 	this.timeout(5000);
@@ -65,6 +69,30 @@ describe("未登入權限測試", function() {
 					next();
 				});
 			},
+			function(next){
+				var Image = mongoose.model("image"+dataset.allOn._id.toString(), ImageSchema);
+				Image.create({},function(err, result){
+					if(err) console.log(err);
+					image.allOn = result;
+					next();
+				});
+			},
+			function(next){
+				var Image = mongoose.model("image"+dataset.allOff._id.toString(), ImageSchema);
+				Image.create({},function(err, result){
+					if(err) console.log(err);
+					image.allOff = result;
+					next();
+				});
+			},
+			function(next){
+				var Image = mongoose.model("image"+dataset.allOn._id.toString(), ImageSchema);
+				Image.create({annotation:{user:{_id:"123"}, annotation:[]}},function(err, result){
+					if(err) console.log(err);
+					image.hasAnnotation = result;
+					next();
+				});
+			}
 		],
 		function(err,results){
 			if(err) console.log(err);
@@ -74,6 +102,16 @@ describe("未登入權限測試", function() {
 	});
 
 	//===========================================================
+	it("get csrf token", function(done){ 
+		agent.get("/")
+		.end(function(err,res){
+			expect(res.statusCode).to.equal(200);
+			var html = cheerio.load(res.text);
+			csrfToken = html("meta[name='csrf-token']").attr("content");
+			done(); 
+		}); 
+	});
+
 	it("user info", function(done){ 
 		agent.get("/user/info")
 		.set("x-requested-with","XMLHttpRequest")
@@ -81,7 +119,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -93,7 +131,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -113,12 +151,13 @@ describe("未登入權限測試", function() {
 	it("edit user info", function(done){ 
 		agent.post("/user/edit")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({data:{name: "123"}})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -126,12 +165,13 @@ describe("未登入權限測試", function() {
 	it("upload user photo", function(done){ 
 		agent.post("/user/upload-image")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({uploadImage: testImage})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -139,6 +179,7 @@ describe("未登入權限測試", function() {
 	it("update user auth", function(done){ 
 		agent.post("/user/update-auth")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			id:mongoose.Types.ObjectId().toString(),
 			authType: "user",
@@ -156,12 +197,13 @@ describe("未登入權限測試", function() {
 	it("add favorite", function(done){ 
 		agent.post("/favorite/add-favorite")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({dataset: dataset.allOn._id.toString()})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -169,12 +211,13 @@ describe("未登入權限測試", function() {
 	it("remove favorite", function(done){ 
 		agent.post("/favorite/remove-favorite")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({dataset: dataset.allOn._id.toString()})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -186,7 +229,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -194,6 +237,7 @@ describe("未登入權限測試", function() {
 	it("create dataset", function(done){ 
 		agent.post("/dataset/create-dataset")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
@@ -206,6 +250,7 @@ describe("未登入權限測試", function() {
 	it("update dataset", function(done){ 
 		agent.post("/dataset/update-dataset")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			dataset:dataset.allOn._id.toString(),
 			info:{}
@@ -222,6 +267,7 @@ describe("未登入權限測試", function() {
 	it("delete dataset", function(done){ 
 		agent.post("/dataset/delete-dataset")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({id:mongoose.Types.ObjectId().toString()})
 		.end(function(err,res){
 			expect(res.statusCode).to.equal(200);
@@ -271,6 +317,7 @@ describe("未登入權限測試", function() {
 	it("change dataset cover", function(done){ 
 		agent.post("/dataset/change-cover")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOn._id.toString(),
 			"uploadImage": testImage
@@ -287,6 +334,7 @@ describe("未登入權限測試", function() {
 	it("upload image to dataset allOn", function(done){ 
 		agent.post("/dataset/upload-image")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOn._id.toString(),
 			"uploadImage": testImage
@@ -295,7 +343,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -303,6 +351,7 @@ describe("未登入權限測試", function() {
 	it("upload image to dataset allOff", function(done){ 
 		agent.post("/dataset/upload-image")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOff._id.toString(),
 			"uploadImage": testImage
@@ -311,7 +360,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -344,6 +393,7 @@ describe("未登入權限測試", function() {
 	it("update image info", function(done){ 
 		agent.post("/dataset/update-image-info")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": mongoose.Types.ObjectId().toString(),
 			"image": mongoose.Types.ObjectId().toString()
@@ -360,6 +410,7 @@ describe("未登入權限測試", function() {
 	it("delete image", function(done){ 
 		agent.post("/dataset/delete-image")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": mongoose.Types.ObjectId().toString(),
 			"image": mongoose.Types.ObjectId().toString()
@@ -401,6 +452,7 @@ describe("未登入權限測試", function() {
 	it("set annotation allOn", function(done){ 
 		agent.post("/dataset/set-annotation")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOn._id.toString(),
 			"image": mongoose.Types.ObjectId().toString(),
@@ -410,7 +462,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -418,6 +470,7 @@ describe("未登入權限測試", function() {
 	it("set annotation allOff", function(done){ 
 		agent.post("/dataset/set-annotation")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOff._id.toString(),
 			"image": mongoose.Types.ObjectId().toString(),
@@ -427,7 +480,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -435,6 +488,7 @@ describe("未登入權限測試", function() {
 	it("add verification allOn", function(done){ 
 		agent.post("/dataset/add-verification")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOn._id.toString(),
 			"image": mongoose.Types.ObjectId().toString(),
@@ -444,7 +498,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -452,6 +506,7 @@ describe("未登入權限測試", function() {
 	it("add verification allOff", function(done){ 
 		agent.post("/dataset/add-verification")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			"dataset": dataset.allOff._id.toString(),
 			"image": mongoose.Types.ObjectId().toString(),
@@ -461,7 +516,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -480,6 +535,7 @@ describe("未登入權限測試", function() {
 	it("batch download allOn", function(done){ 
 		agent.post("/dataset/batch-download")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			dataset:dataset.allOn._id.toString(),
 			filter: "all",
@@ -489,7 +545,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});
@@ -497,6 +553,7 @@ describe("未登入權限測試", function() {
 	it("batch download allOff", function(done){ 
 		agent.post("/dataset/batch-download")
 		.set("x-requested-with","XMLHttpRequest")
+		.set("csrf-token",csrfToken)
 		.send({
 			dataset:dataset.allOff._id.toString(),
 			filter: "all",
@@ -506,7 +563,7 @@ describe("未登入權限測試", function() {
 			expect(res.statusCode).to.equal(200);
 			var result = JSON.parse(res.text);
 			expect(result.status).to.equal("fail");
-			expect(result.message).to.equal("please login");
+			expect(result.message).to.equal("permission denied");
 			done(); 
 		}); 
 	});

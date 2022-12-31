@@ -30,13 +30,6 @@ describe("View Route 測試", function() {
 			done(); 
 		}); 
 	});
-	it("get /view", function(done){ 
-		agent.get("/view")
-		.end(function(err,res){
-			expect(res.status).to.equal(200); 
-			done(); 
-		}); 
-	});
 	it("get /statistic", function(done){ 
 		agent.get("/statistic")
 		.end(function(err,res){

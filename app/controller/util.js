@@ -101,6 +101,7 @@ util.CheckImageEdit = function (req, res, next) {
 						return PermissionDenied(req, res);
 					}
 					if(!image) return PermissionDenied(req, res);
+					if(!image.uploader) return PermissionDenied(req, res);
 					if(req.user._id.toString() == image.uploader.toString()){
 						return next();
 					}

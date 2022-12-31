@@ -15,7 +15,7 @@ services:
         build:
             context: ./
             dockerfile: Dockerfile
-            target: test
+            target: prod
         volumes:
             - ./config.json:/CommuTag/config.json
             - ./log:/CommuTag/log

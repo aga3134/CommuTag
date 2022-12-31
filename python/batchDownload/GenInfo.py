@@ -76,10 +76,15 @@ class GenInfo:
 		userArr = self.db["user"].find({},{"name": 1})
 		nameHash = {}
 		for user in userArr:
-			nameHash[str(user["_id"])] = user["name"]
+			if "name" in user:
+				nameHash[str(user["_id"])] = user["name"]
+			else:
+				nameHash[str(user["_id"])] = ""
 
 		#輸出貢獻者
 		for image in imageArr:
+			if "uploader" not in image:
+				continue
 			userID = str(image["uploader"])
 			if userID not in nameHash:
 				continue
@@ -132,7 +137,10 @@ class GenInfo:
 		def GenPlacemark(doc,image,fieldArr,formArr):
 			marker = etree.SubElement(doc,"Placemark")
 			markerName = etree.SubElement(marker,"name")
-			markerName.text = image["imageName"]
+			if "imageName" in image:
+				markerName.text = image["imageName"]
+			else:
+				markerName.text = ""
 			
 			"""markerDesc = etree.SubElement(marker,"description")
 			content = "<img style='max-width:360px;' src='"+markerName.text+"'><br><br>"
