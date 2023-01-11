@@ -2,9 +2,6 @@
 config.json
 *.log
 node_modules/
-imageSrc/
-python/data/
-__pycache__/
 log/
 static/file/
 static/upload/

@@ -53,8 +53,10 @@ router.post('/reset-password', auth.ResetPassword);
 router.post('/change-password', auth.ChangePassword);
 
 router.get('/logout', function(req, res) {
-    req.logout();
-    res.redirect('/');
+	req.logout(function(err) {
+		if (err) { return console.log(err); }
+		res.redirect('/');
+	});
 });
 
 module.exports = router;
