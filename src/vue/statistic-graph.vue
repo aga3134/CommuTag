@@ -226,7 +226,7 @@ export default {
 			var data = {};
 			var format = "";
 			var axisX = {
-				fixedrange: true,
+				fixedrange: false,
 			};
 			switch(filter.type){
 				case "time":
@@ -370,7 +370,7 @@ export default {
 				hovermode:"closest",
 				xaxis: axisX,
 				yaxis:{
-					fixedrange: true,
+					fixedrange: false,
 					title:"標籤數",
 				},
 				paper_bgcolor: 'rgba(250,250,250,1)',
@@ -378,7 +378,7 @@ export default {
 				margin: {l:60, r:40, b:60, t:40},
 			};
 
-			Plotly.newPlot(this.$refs.timeline,traceArr,layout,{displayModeBar: false});
+			Plotly.newPlot(this.$refs.timeline,traceArr,layout,{displayModeBar: true});
 		},
 		UpdateGraphAgreeRate: function(){
 			var data = [];

@@ -1,4 +1,5 @@
-FROM python:3.6 as base
+#改成pythun 3.7才不用花很多時間build opencv
+FROM python:3.7 as base
 WORKDIR /CommuTag
 #先copy裝dependency相關的檔案，安裝完後再copy原始碼，才不用每次改原始碼重build image都要再裝一次dependency
 COPY package.json package-lock.json requirements.txt ./

@@ -4,6 +4,7 @@ var webpack = require("webpack");
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 var Config = require("./config.json");
+const { FALSE } = require("node-sass");
 
 module.exports = {
 	mode: Config.mode, // "production" | "development" | "none"
@@ -51,5 +52,5 @@ module.exports = {
 			chunkFilename: "css/[id].css"
 		})
 	],
-	devtool: Config.mode=="development"?"source-map":"none"
+	devtool: Config.mode=="development"?"source-map":false
 };

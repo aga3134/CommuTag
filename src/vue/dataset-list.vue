@@ -71,7 +71,7 @@ export default {
 	data: function () {
 		return {
 			searchKey:"",
-			sortKey: "createdAt",
+			sortKey: "picNum",
 			sortOption: [
 				{label: "建立時間",value:"createdAt"},
 				{label: "更新時間",value:"updatedAt"},
